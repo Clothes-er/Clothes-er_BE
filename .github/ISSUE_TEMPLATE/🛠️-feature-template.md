@@ -2,7 +2,7 @@
 name: "\U0001F6E0️ Feature Template"
 about: 기능 개발 이슈 템플릿
 title: ''
-labels: feat
+labels: ''
 assignees: ilu25
 
 ---

@@ -2,7 +2,7 @@
 name: "\U0001F527 Fix Template"
 about: 버그 해결 이슈 템플릿
 title: ''
-labels: fix
+labels: ''
 assignees: ilu25
 
 ---
