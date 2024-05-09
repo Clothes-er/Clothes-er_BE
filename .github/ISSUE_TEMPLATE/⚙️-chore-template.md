@@ -7,14 +7,6 @@ assignees: ilu25
 
 ---
 
----
-name: ⚙Chore Template
-about: 환경 세팅 이슈 템플릿
-title: ""
-labels: chore
-assignees: ""
----
-
 ## 목적
 > 추가하려는 세팅 등에 대해 간결하게 설명해주세요.
 

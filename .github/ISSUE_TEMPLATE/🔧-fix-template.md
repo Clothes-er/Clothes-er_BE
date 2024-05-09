@@ -7,14 +7,6 @@ assignees: ilu25
 
 ---
 
----
-name: 🔧Fix Template
-about: 버그 해결 이슈 템플릿
-title: ""
-labels: fix
-assignees: ''"
----
-
 ## 📢 버그 설명
 > 수정하려는 버그 등에 대해 간결하게 설명해주세요.
 
