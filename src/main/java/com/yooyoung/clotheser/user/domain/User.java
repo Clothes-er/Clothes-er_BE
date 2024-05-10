@@ -39,7 +39,7 @@ public class User {
 
     private String profileUrl;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String phoneNumber;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -63,9 +63,9 @@ public class User {
     private int rentalCount;
 
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")     // DB 기본값 설정
+    @ColumnDefault("true")     // DB 기본값 설정
     @Builder.Default            // 객체 생성 시 기본값 설정
-    private Boolean isFirstLogin = false;
+    private Boolean isFirstLogin = true;
 
     // 관리자 계정은 DB에서 직접 변경
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
