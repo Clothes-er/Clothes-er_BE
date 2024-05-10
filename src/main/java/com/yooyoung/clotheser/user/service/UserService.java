@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.user.service;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.dto.SignUpRequestDto;
 import com.yooyoung.clotheser.user.dto.SignUpResponseDto;
@@ -49,4 +50,12 @@ public class UserService {
         return new SignUpResponseDto(userRepository.save(user));
     }
 
+
+    // 닉네임 중복 확인
+    public BaseResponseStatus checkNickname(String nickname) throws BaseException {
+        if (userRepository.existsByNicknameAndDeletedAtNull(nickname)) {
+            throw new BaseException(NICKNAME_EXISTS, CONFLICT);
+        }
+        return SUCCESS;
+    }
 }
