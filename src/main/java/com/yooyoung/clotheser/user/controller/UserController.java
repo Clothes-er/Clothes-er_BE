@@ -51,6 +51,17 @@ public class UserController {
         }
     }
 
+    // 닉네임 중복 확인
+    @GetMapping("/check-nickname/{nickname}")
+    public ResponseEntity<BaseResponse<?>> checkNickname(@PathVariable String nickname) {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(userService.checkNickname(nickname)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
     // 최초 로그인
 
     // 이후 로그인
