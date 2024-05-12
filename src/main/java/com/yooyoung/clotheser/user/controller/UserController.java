@@ -2,8 +2,11 @@ package com.yooyoung.clotheser.user.controller;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
-import com.yooyoung.clotheser.user.dto.SignUpRequestDto;
-import com.yooyoung.clotheser.user.dto.SignUpResponseDto;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
+import com.yooyoung.clotheser.user.dto.FirstLoginResponse;
+import com.yooyoung.clotheser.user.dto.SignUpRequest;
+import com.yooyoung.clotheser.user.dto.SignUpResponse;
 import com.yooyoung.clotheser.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -28,8 +31,8 @@ public class UserController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<BaseResponse<SignUpResponseDto>> signUp(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
-                                                                  BindingResult bindingResult) {
+    public ResponseEntity<BaseResponse<SignUpResponse>> signUp(@Valid @RequestBody SignUpRequest signUpRequest,
+                                                               BindingResult bindingResult) {
         try {
             // 입력 유효성 검사
             if (bindingResult.hasErrors()) {
@@ -40,11 +43,11 @@ public class UserController {
             }
 
             // 비밀번호 재입력 일치 확인
-            if (!signUpRequestDto.getPassword().equals(signUpRequestDto.getConfirmedPassword())) {
+            if (!signUpRequest.getPassword().equals(signUpRequest.getConfirmedPassword())) {
                 throw new BaseException(PASSWORD_CONFIRMATION_MISMATCH, BAD_REQUEST);
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(userService.signUp(signUpRequestDto)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(userService.signUp(signUpRequest)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
@@ -53,7 +56,7 @@ public class UserController {
 
     // 닉네임 중복 확인
     @GetMapping("/check-nickname/{nickname}")
-    public ResponseEntity<BaseResponse<?>> checkNickname(@PathVariable String nickname) {
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> checkNickname(@PathVariable String nickname) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(userService.checkNickname(nickname)), OK);
         }
@@ -62,9 +65,28 @@ public class UserController {
         }
     }
 
+    // TODO: 토큰 적용
     // 최초 로그인
+    @PostMapping("/first-login")
+    public ResponseEntity<BaseResponse<FirstLoginResponse>> firstLogin(@Valid @RequestBody FirstLoginRequest firstLoginRequest,
+                                                                       BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
 
-    // 이후 로그인
+            return new ResponseEntity<>(new BaseResponse<>(userService.firstLogin(firstLoginRequest)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    // 로그인
 
     // 로그아웃
 

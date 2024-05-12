@@ -24,11 +24,16 @@ public enum BaseResponseStatus {
     EMPTY_JWT_CLAIMS(false, 2006, "JWT 토큰이 잘못되었습니다."),
 
     // 2. User (2100 ~ 2199)
+    NOT_FOUND_USER(false, 2100, "회원을 찾을 수 없습니다."),
+
     // 회원가입
-    PASSWORD_CONFIRMATION_MISMATCH(false, 2100, "비밀번호가 일치하지 않습니다."),
-    NICKNAME_EXISTS(false, 2101, "중복된 닉네임입니다."),
-    EMAIL_EXISTS(false, 2102, "중복된 이메일입니다."),
-    PHONE_NUMBER_EXISTS(false, 2103, "중복된 전화번호입니다."),
+    PASSWORD_CONFIRMATION_MISMATCH(false, 2200, "비밀번호가 일치하지 않습니다."),
+    NICKNAME_EXISTS(false, 2201, "중복된 닉네임입니다."),
+    EMAIL_EXISTS(false, 2202, "중복된 이메일입니다."),
+    PHONE_NUMBER_EXISTS(false, 2203, "중복된 전화번호입니다."),
+
+    // 최초 로그인
+    IS_NOT_FIRST_LOGIN(false, 2300, "최초 로그인이 아닙니다."),
 
 
     /*
