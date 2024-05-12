@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Getter
 @Builder
-public class SignUpRequestDto {
+public class SignUpRequest {
 
     @NotBlank(message = "이름을 입력해주세요.")
     @Size(min = 2, max = 10, message = "이름은 2 ~ 10자로 입력해주세요.")
