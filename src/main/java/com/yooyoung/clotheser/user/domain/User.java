@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.user.domain;
 
+import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -46,15 +47,16 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthday;
 
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
 
     @Column(columnDefinition = "TINYINT(1)")
-    private Boolean gender;
+    private Gender gender;
 
-    private int height;
-    private int weight;
-    private int shoeSize;
+    // null = 사용자가 추가 안 함
+    private Integer height;
+    private Integer weight;
+    private Integer shoeSize;
 
     @ColumnDefault("0")
     private int level;
@@ -85,5 +87,21 @@ public class User {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime deletedAt;
+
+    // 최초 로그인 시 회원 정보 수정
+    public User firstLogin(FirstLoginRequest firstLoginRequest) {
+        this.isFirstLogin = false;
+        this.updatedAt = LocalDateTime.now();
+
+        this.latitude = firstLoginRequest.getLatitude();
+        this.longitude = firstLoginRequest.getLongitude();
+
+        this.gender = firstLoginRequest.getGender();
+        this.height = firstLoginRequest.getHeight();
+        this.weight = firstLoginRequest.getWeight();
+        this.shoeSize = firstLoginRequest.getShoeSize();
+
+        return this;
+    }
 
 }
