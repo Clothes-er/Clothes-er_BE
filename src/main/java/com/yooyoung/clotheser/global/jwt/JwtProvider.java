@@ -1,11 +1,10 @@
 package com.yooyoung.clotheser.global.jwt;
 
+import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
 import com.yooyoung.clotheser.user.dto.TokenResponse;
 import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +22,10 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
+
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.EXPIRED_JWT_TOKEN;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.INVALID_JWT_TOKEN;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RequiredArgsConstructor
 @Component
@@ -99,25 +102,30 @@ public class JwtProvider {
     }
 
     // 토큰 검증
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) throws BaseException {
         // Bearer 검증
         if (token == null || !token.startsWith("Bearer ")) {
             return false;
         }
-        else {
-            token = token.substring(7); // "Bearer " 제거
-        }
-        Jws<Claims> claims = Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token);
 
-        // 토큰이 만료되어 있으면 false
-        return !claims.getPayload().getExpiration().before(new Date());
+        token = token.substring(7); // "Bearer " 제거
+        try {
+            Jws<Claims> claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            // 토큰 유효 시 true 반환
+            return true;
+        }
+        // 토큰 만료 시 예외 처리
+        catch (JwtException | IllegalArgumentException e) {
+            throw new BaseException(EXPIRED_JWT_TOKEN, BAD_REQUEST);
+        }
+
     }
 
     // Refresh Token 검증
-    public boolean validateRefreshToken(String token) {
+    public boolean validateRefreshToken(String token) throws BaseException {
         if (!validateToken(token)) {
             return false;
         }

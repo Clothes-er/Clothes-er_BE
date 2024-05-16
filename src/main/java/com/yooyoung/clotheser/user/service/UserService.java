@@ -9,7 +9,6 @@ import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +95,22 @@ public class UserService {
 
         return new LoginResponse(user.getEmail(), user.getIsFirstLogin(), tokenResponse);
     }
+
+    // TODO: 액세스 토큰 재발급
+    /*public TokenResponse refreshToken(String refreshToken) throws BaseException {
+
+        // refresh token이 만료되었거나 없는 경우
+        if (!jwtProvider.validateRefreshToken(refreshToken)) {
+            throw new BaseException(INVALID_JWT_TOKEN, NOT_FOUND);
+        }
+
+        // DB에서 refresh token 가져오기
+        RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new BaseException(INVALID_JWT_TOKEN, NOT_FOUND));
+
+        Long userId = rt.getUserId();
+        return jwtProvider.createToken(userId);
+    }*/
 
     // 최초 로그인
     public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest) throws BaseException {

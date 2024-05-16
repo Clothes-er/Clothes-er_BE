@@ -5,6 +5,7 @@ import com.yooyoung.clotheser.global.entity.*;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
 import com.yooyoung.clotheser.user.dto.TokenResponse;
 import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -61,14 +62,11 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                         throw new BaseException(EXPIRED_JWT_TOKEN, BAD_REQUEST);
                     }
                 }
-                // 4. Access 만료된 경우
-                else {
-                    throw new BaseException(EXPIRED_JWT_TOKEN, BAD_REQUEST);
-                }
             }
         }
         catch (BaseException e) {
             jwtExceptionHandler((HttpServletResponse) response, e.getStatus(), e.getHttpStatus());
+            return; // 예외가 발생하면 필터 체인을 중단
         }
         chain.doFilter(request, response);
     }
@@ -77,6 +75,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     public void jwtExceptionHandler(HttpServletResponse response, BaseResponseStatus status, HttpStatus httpStatus) {
         response.setStatus(httpStatus.value());
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
         try {
             String json = new ObjectMapper().writeValueAsString(new BaseResponse<>(status));
             response.getWriter().write(json);
