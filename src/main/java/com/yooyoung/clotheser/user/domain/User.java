@@ -29,10 +29,10 @@ public class User {
     @Column(nullable = false, length = 20)
     private String name;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 20)
     private String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class User {
 
     private String profileUrl;
 
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, length = 20)
     private String phoneNumber;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
