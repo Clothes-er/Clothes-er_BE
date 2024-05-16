@@ -1,38 +1,110 @@
 package com.yooyoung.clotheser.global.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yooyoung.clotheser.global.entity.BaseResponse;
+import com.yooyoung.clotheser.global.jwt.JwtAuthenticationFilter;
+import com.yooyoung.clotheser.global.jwt.JwtProvider;
+import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
-@EnableWebSecurity  // 스프링 시큐리티를 활성화하는 어노테이션
+import java.io.PrintWriter;
+import java.util.List;
+
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
+
 @Configuration      // 스프링의 기본 설정 정보들의 환경 세팅을 돕는 어노테이션
-// @EnableGlobalMethodSecurity(prePostEnabled = true)  // Controller에서 특정 페이지에 권한이 있는 유저만 접근을 허용할 경우
+@EnableWebSecurity  // 스프링 시큐리티를 활성화하는 어노테이션
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+
+    // 특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity             // SecurityFilterChain에서 요청에 접근할 수 있어서 인증, 인가 서비스에 사용
                 .httpBasic(HttpBasicConfigurer::disable)    // http basic auth 기반으로 로그인 인증창이 뜨는데, 기본 인증을 이용하지 않으려면 .disable() 추가
-                .csrf(AbstractHttpConfigurer::disable)  // csrf, api server 이용 시 .disable (html tag를 통한 공격)
-                .cors(Customizer.withDefaults())	 //  다른 도메인의 리소스에 대해 접근이 허용되는지 체크
-                .authorizeHttpRequests((authorize) -> authorize
+                .csrf(AbstractHttpConfigurer::disable)  // api server 이용 시 세션 기반 인증 disable (html tag를 통한 공격 방지)
+                .formLogin(AbstractHttpConfigurer::disable) //
+                .cors(c -> {        //  다른 도메인의 리소스에 대해 접근이 허용되는지 체크
+                    CorsConfigurationSource source = request -> {
+                        // Cors 허용 패턴
+                        CorsConfiguration config = new CorsConfiguration();
+                        config.setAllowedOrigins(
+                                List.of("*")
+                        );
+                        config.setAllowedMethods(
+                                List.of("*")
+                        );
+                        return config;
+                    };
+                    c.configurationSource(source);
+                })
+                .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
                         .requestMatchers("/api/v1/users/signup").permitAll()    // 작성된 경로의 api 요청은 인증 없이 모두 허용
-                        .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
+                        //.requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
-                        .requestMatchers("/api/v1/users/first-login").permitAll()
-                        .anyRequest().authenticated()   // 각 경로 path별 권한 처리
+                        //.requestMatchers("/api/v1/users/first-login").permitAll()
+                        .anyRequest().authenticated()   // 지정된 URL 이외의 요청은 인증 필요
                 )
-                .sessionManagement((session) -> session     // 세션 관리 기능 작동 - .maximunSessions(숫자)로 최대 허용 가능 세션 수를 정할 수 있음 (-1로 하면 무제한 허용)
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt 사용하는 경우 씀 (STATELESS는 인증 정보를 서버에 담지 않음))
+                .sessionManagement((session) -> session     // 세션 생성 및 사용 여부에 대한 정책 설정
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt 사용하는 경우 (STATELESS는 인증 정보를 서버에 담지 않음)
                 )
-                //   .addFilterBefore(new JwtTokenFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class)
-                //UserNamePasswordAuthenticationFilter 적용하기 전에 JWTTokenFilter를 적용하라는 뜻
+                // UserNamePasswordAuthenticationFilter 적용하기 전에 JWTTokenFilter를 적용하라는 뜻
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class)
+                // 에러 핸들링
+                .exceptionHandling(exception -> exception
+                        // 인증 예외 처리 (토큰이 없는 경우)
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            BaseResponse<Object> br = new BaseResponse<>(EMPTY_JWT);
+                            ObjectMapper objectMapper = new ObjectMapper();
+
+                            response.setStatus(UNAUTHORIZED.value());
+                            String json = objectMapper.writeValueAsString(br);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("utf-8");
+                            PrintWriter writer = response.getWriter();
+                            writer.write(json);
+                            writer.flush();
+                        })
+                        // 인가 예외 처리 (권한이 없는 경우)
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            BaseResponse<Object> br = new BaseResponse<>(INVALID_USER_JWT);
+                            ObjectMapper objectMapper = new ObjectMapper();
+
+                            response.setStatus(FORBIDDEN.value());
+                            String json = objectMapper.writeValueAsString(br);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("utf-8");
+                            PrintWriter writer = response.getWriter();
+                            writer.write(json);
+                            writer.flush();
+                        })
+                )
                 .build();
+    }
+
+    // 비밀번호 암호화 (bcrypt 강력 해싱 알고리즘 사용)
+    @Bean
+    public static PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }

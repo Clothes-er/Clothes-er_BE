@@ -16,12 +16,12 @@ public enum BaseResponseStatus {
     */
     // 1. Common (2000 ~ 2099)
     REQUEST_ERROR(false, 2000, "입력값을 확인해주세요."),
-    EMPTY_JWT(false, 2001, "JWT 토큰을 입력해주세요."),
+    EMPTY_JWT(false, 2001, "JWT를 입력해주세요."),
     INVALID_USER_JWT(false, 2002, "권한이 없는 유저의 접근입니다."),
-    INVALID_JWT_TOKEN(false, 2003, "유효하지 않은 JWT 토큰입니다."),
-    EXPIRED_JWT_TOKEN(false, 2004, "만료된 JWT 토큰입니다."),
-    UNSUPPORTED_JWT_TOKEN(false, 2005, "지원하지 않는 JWT 토큰입니다."),
-    EMPTY_JWT_CLAIMS(false, 2006, "JWT 토큰이 잘못되었습니다."),
+    INVALID_JWT_TOKEN(false, 2003, "유효하지 않은 JWT입니다."),
+    EXPIRED_JWT_TOKEN(false, 2004, "만료된 JWT입니다."),
+    UNSUPPORTED_JWT_TOKEN(false, 2005, "지원하지 않는 JWT입니다."),
+    EMPTY_JWT_CLAIMS(false, 2006, "JWT가 잘못되었습니다."),
 
     // 2. User (2100 ~ 2199)
     NOT_FOUND_USER(false, 2100, "회원을 찾을 수 없습니다."),
@@ -34,6 +34,9 @@ public enum BaseResponseStatus {
 
     // 최초 로그인
     IS_NOT_FIRST_LOGIN(false, 2300, "최초 로그인이 아닙니다."),
+
+    // 로그인
+    LOGIN_MISMATCH(false, 2400, "이메일과 비밀번호가 일치하지 않습니다."),
 
 
     /*
