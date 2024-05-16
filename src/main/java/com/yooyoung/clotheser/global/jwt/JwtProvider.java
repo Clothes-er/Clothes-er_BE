@@ -23,9 +23,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Optional;
 
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.EXPIRED_JWT_TOKEN;
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.INVALID_JWT_TOKEN;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
 
 @RequiredArgsConstructor
 @Component
