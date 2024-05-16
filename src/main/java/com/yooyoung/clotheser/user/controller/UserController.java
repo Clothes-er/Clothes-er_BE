@@ -3,16 +3,14 @@ package com.yooyoung.clotheser.user.controller;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
-import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
-import com.yooyoung.clotheser.user.dto.FirstLoginResponse;
-import com.yooyoung.clotheser.user.dto.SignUpRequest;
-import com.yooyoung.clotheser.user.dto.SignUpResponse;
+import com.yooyoung.clotheser.user.dto.*;
 import com.yooyoung.clotheser.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -65,6 +63,26 @@ public class UserController {
         }
     }
 
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<BaseResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest,
+                                                             BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(userService.login(loginRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
     // TODO: 토큰 적용
     // 최초 로그인
     @PostMapping("/first-login")
@@ -85,8 +103,6 @@ public class UserController {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
-
-    // 로그인
 
     // 로그아웃
 

@@ -35,6 +35,9 @@ public enum BaseResponseStatus {
     // 최초 로그인
     IS_NOT_FIRST_LOGIN(false, 2300, "최초 로그인이 아닙니다."),
 
+    // 로그인
+    LOGIN_MISMATCH(false, 2400, "이메일과 비밀번호가 일치하지 않습니다."),
+
 
     /*
         3000 : Response 오류

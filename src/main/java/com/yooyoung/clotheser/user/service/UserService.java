@@ -2,21 +2,15 @@ package com.yooyoung.clotheser.user.service;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
-import com.yooyoung.clotheser.user.domain.BodyShape;
-import com.yooyoung.clotheser.user.domain.FavClothes;
-import com.yooyoung.clotheser.user.domain.FavStyle;
-import com.yooyoung.clotheser.user.domain.User;
-import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
-import com.yooyoung.clotheser.user.dto.FirstLoginResponse;
-import com.yooyoung.clotheser.user.dto.SignUpRequest;
-import com.yooyoung.clotheser.user.dto.SignUpResponse;
-import com.yooyoung.clotheser.user.repository.BodyShapeRepository;
-import com.yooyoung.clotheser.user.repository.FavClothesRepository;
-import com.yooyoung.clotheser.user.repository.FavStyleRepository;
-import com.yooyoung.clotheser.user.repository.UserRepository;
+import com.yooyoung.clotheser.global.jwt.JwtProvider;
+import com.yooyoung.clotheser.user.domain.*;
+import com.yooyoung.clotheser.user.dto.*;
+import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,21 +18,19 @@ import java.util.List;
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    /*
-        내가 설정한 EncrypterConfig 파일을 호출하여 사용해도 되지만,
-        Spring에서는 기존 BCryptPasswordEncoder 클래스를 DI 하겠다고 선언하면
-        알아서 해당 설정 Bean파일인 EncrypterConfig와 매칭시켜서 사용할 수 있게 해줌
-    */
-    private final BCryptPasswordEncoder encoder;
 
     private final UserRepository userRepository;
     private final BodyShapeRepository bodyShapeRepository;
     private final FavClothesRepository favClothesRepository;
     private final FavStyleRepository favStyleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     // 회원가입
     public SignUpResponse signUp(SignUpRequest signUpRequest) throws BaseException {
@@ -58,7 +50,7 @@ public class UserService {
         }
 
         // 비밀번호 암호화
-        String encodedPassword = encoder.encode(signUpRequest.getPassword());
+        String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
         User user = signUpRequest.toEntity(encodedPassword);
 
         return new SignUpResponse(userRepository.save(user));
@@ -70,6 +62,39 @@ public class UserService {
             throw new BaseException(NICKNAME_EXISTS, CONFLICT);
         }
         return SUCCESS;
+    }
+
+    // 로그인
+    public LoginResponse login(LoginRequest loginRequest) throws BaseException {
+
+        // 먼저 이메일로 회원 존재 확인
+        User user = userRepository.findByEmailAndDeletedAtNull(loginRequest.getEmail())
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new BaseException(LOGIN_MISMATCH, BAD_REQUEST);
+        }
+
+        // 토큰 생성
+        TokenResponse tokenResponse = jwtProvider.createToken(user.getId());
+
+        // DB에 Refresh Token 있는지 확인
+        RefreshToken preRefreshToken = refreshTokenRepository.findByUserId(user.getId());
+
+        // - 있으면 업데이트
+        if (preRefreshToken != null) {
+            refreshTokenRepository.save(preRefreshToken.updateRefreshToken(tokenResponse.getRefreshToken()));
+        }
+        // - 없으면 새로 저장
+        else {
+            RefreshToken newToken = RefreshToken.builder()
+                    .userId(user.getId())
+                    .token(tokenResponse.getRefreshToken())
+                    .build();
+            refreshTokenRepository.save(newToken);
+        }
+
+        return new LoginResponse(user.getEmail(), user.getIsFirstLogin(), tokenResponse);
     }
 
     // 최초 로그인
