@@ -11,9 +11,6 @@ import java.util.List;
 @Builder
 public class FirstLoginRequest {
 
-    // TODO: 토큰 적용하면 없애기
-    private Long userId;
-
     @NotNull(message = "위도를 입력해주세요.")
     private Double latitude;
 

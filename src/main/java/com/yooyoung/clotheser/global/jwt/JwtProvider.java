@@ -86,7 +86,7 @@ public class JwtProvider {
     }
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼냄 (권한 확인)
-    public Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token) throws BaseException {
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(token).toString());
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }

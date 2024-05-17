@@ -3,13 +3,17 @@ package com.yooyoung.clotheser.user.controller;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.user.domain.CustomUserDetails;
+import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.dto.*;
 import com.yooyoung.clotheser.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +23,7 @@ import java.util.List;
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
@@ -94,12 +99,14 @@ public class UserController {
         }
     }*/
 
-    // TODO: 토큰 적용
     // 최초 로그인
     @PostMapping("/first-login")
     public ResponseEntity<BaseResponse<FirstLoginResponse>> firstLogin(@Valid @RequestBody FirstLoginRequest firstLoginRequest,
-                                                                       BindingResult bindingResult) {
+                                                                       BindingResult bindingResult,
+                                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
+            User user = userDetails.user;
+
             // 입력 유효성 검사
             if (bindingResult.hasErrors()) {
                 List<FieldError> list = bindingResult.getFieldErrors();
@@ -108,7 +115,7 @@ public class UserController {
                 }
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(userService.firstLogin(firstLoginRequest)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(userService.firstLogin(firstLoginRequest, user)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

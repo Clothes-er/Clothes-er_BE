@@ -60,9 +60,8 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
                         .requestMatchers("/api/v1/users/signup").permitAll()    // 작성된 경로의 api 요청은 인증 없이 모두 허용
-                        //.requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
+                        .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
-                        //.requestMatchers("/api/v1/users/first-login").permitAll()
                         .anyRequest().authenticated()   // 지정된 URL 이외의 요청은 인증 필요
                 )
                 .sessionManagement((session) -> session     // 세션 생성 및 사용 여부에 대한 정책 설정

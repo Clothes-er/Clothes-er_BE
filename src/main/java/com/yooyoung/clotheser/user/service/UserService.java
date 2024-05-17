@@ -113,12 +113,7 @@ public class UserService {
     }*/
 
     // 최초 로그인
-    public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest) throws BaseException {
-
-        // TODO: SpringSecurity 적용해서 유저 받아오기
-        // 회원가입한 유저 존재 확인
-        User user = userRepository.findByIdAndDeletedAtNull(firstLoginRequest.getUserId())
-                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+    public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest, User user) throws BaseException {
 
         // 최초 로그인이 맞는지 확인
         if (!user.getIsFirstLogin()) {
