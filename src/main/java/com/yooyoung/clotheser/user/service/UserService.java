@@ -12,7 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -158,5 +160,32 @@ public class UserService {
 
         return new FirstLoginResponse(updatedUser, bodyShapes, categories, styles);
 
+    }
+
+    // 로그아웃
+
+    // 회원 프로필 조회
+    public UserProfileResponse getProfile(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 체형, 카테고리, 스타일 추가
+        List<String> bodyShapes = bodyShapeRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(BodyShape::getShape)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<String> categories = favClothesRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(FavClothes::getCategory)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<String> styles = favStyleRepository.findAllByUserId(user.getId())
+                .stream()
+                .map(FavStyle::getStyle)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 }

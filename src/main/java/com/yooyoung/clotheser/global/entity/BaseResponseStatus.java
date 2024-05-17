@@ -22,6 +22,7 @@ public enum BaseResponseStatus {
     EXPIRED_JWT_TOKEN(false, 2004, "만료된 JWT입니다."),
     UNSUPPORTED_JWT_TOKEN(false, 2005, "지원하지 않는 JWT입니다."),
     EMPTY_JWT_CLAIMS(false, 2006, "JWT가 잘못되었습니다."),
+    REQUEST_FIRST_LOGIN(false, 2007, "최초 로그인이 필요합니다."),
 
     // 2. User (2100 ~ 2199)
     NOT_FOUND_USER(false, 2100, "회원을 찾을 수 없습니다."),
