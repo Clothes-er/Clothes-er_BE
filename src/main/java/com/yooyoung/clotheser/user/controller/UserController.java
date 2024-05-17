@@ -125,6 +125,16 @@ public class UserController {
     // 로그아웃
 
     // 회원 프로필 조회
+    @GetMapping("/profile")
+    public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.getProfile(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     // 회원 정보 조회
 }
