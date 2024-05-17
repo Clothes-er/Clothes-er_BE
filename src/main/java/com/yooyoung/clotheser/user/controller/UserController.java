@@ -137,4 +137,15 @@ public class UserController {
     }
 
     // 회원 정보 조회
+    @GetMapping("/info")
+    public ResponseEntity<BaseResponse<UserInfoResponse>> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.getUserInfo(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
 }
