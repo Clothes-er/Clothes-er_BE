@@ -188,4 +188,16 @@ public class UserService {
 
         return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
+
+    // 회원 정보 조회
+    public UserInfoResponse getUserInfo(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        return new UserInfoResponse(user);
+    }
+
 }
