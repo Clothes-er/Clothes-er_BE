@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.rental.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
@@ -37,7 +38,10 @@ public class RentalResponse {
     private String size;
     private String fit;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
     public RentalResponse(User user, Rental rental, List<RentalPriceDto> prices) {
