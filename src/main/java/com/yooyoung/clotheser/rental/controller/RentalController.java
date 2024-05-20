@@ -7,6 +7,7 @@ import com.yooyoung.clotheser.rental.dto.RentalResponse;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 
+import com.yooyoung.clotheser.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -49,4 +50,16 @@ public class RentalController {
         }
     }
 
+    // 대여글 조회
+    @GetMapping("/{rentalId}")
+    public ResponseEntity<BaseResponse<RentalResponse>> getRental(@PathVariable Long rentalId,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRental(rentalId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 }

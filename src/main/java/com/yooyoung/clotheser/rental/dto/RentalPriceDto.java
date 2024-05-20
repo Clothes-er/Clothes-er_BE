@@ -16,4 +16,9 @@ public class RentalPriceDto {
     @PositiveOrZero(message = "가격은 0 또는 자연수여야 합니다.")
     private Integer price;
 
+    public RentalPriceDto(Integer days, Integer price) {
+        this.days = days;
+        this.price = price;
+    }
+
 }
