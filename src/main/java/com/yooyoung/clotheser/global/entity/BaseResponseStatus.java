@@ -26,7 +26,6 @@ public enum BaseResponseStatus {
 
 
     // 2. User (2100 ~ 2199)
-    NOT_FOUND_USER(false, 2100, "회원을 찾을 수 없습니다."),
 
     // 회원가입
     PASSWORD_CONFIRMATION_MISMATCH(false, 2110, "비밀번호가 일치하지 않습니다."),
@@ -48,9 +47,14 @@ public enum BaseResponseStatus {
     /*
         3000 : Response 오류
     */
-    // Common
+    // 1. Common
     RESPONSE_ERROR(false, 3000, "값을 불러오는데 실패하였습니다."),
 
+    // 2. User
+    NOT_FOUND_USER(false, 3100, "회원을 찾을 수 없습니다."),
+
+    // 3. Rental
+    NOT_FOUND_RENTAL(false, 3200, "대여글을 찾을 수 없습니다."),
 
     /*
         4000 : Database, Server 오류

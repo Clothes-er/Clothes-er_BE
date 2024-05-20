@@ -15,9 +15,12 @@ import java.util.List;
 @Setter(AccessLevel.NONE)
 public class RentalResponse {
 
+    private Long id;
+
     // 회원 정보
     private String profileUrl;
     private String nickname;
+    private Boolean isWriter;
 
     // TODO: 팔로우 기능
     private int followers = 0;
@@ -45,8 +48,11 @@ public class RentalResponse {
     private LocalDateTime updatedAt;
 
     public RentalResponse(User user, Rental rental, List<RentalPriceDto> prices) {
-        this.profileUrl = user.getProfileUrl();
-        this.nickname = user.getNickname();
+        this.id = rental.getId();
+
+        this.profileUrl = rental.getUser().getProfileUrl();
+        this.nickname = rental.getUser().getNickname();
+        this.isWriter = rental.getUser().getId().equals(user.getId());
 
         // TODO: 팔로우 기능
         this.followers = 8;
