@@ -22,9 +22,9 @@ public class RentalPrice {
     private Rental rental;
 
     @Column(nullable = false)
-    private int price;
+    private int days;
 
     @Column(nullable = false)
-    private int days;
+    private int price;
 
 }
