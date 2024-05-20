@@ -42,9 +42,9 @@ public class RentalController {
         }
 
         // 가격 입력 확인
-        if (postRentalRequest.getPrices() == null || postRentalRequest.getPrices().isEmpty()) {
+        /*if (postRentalRequest.getPrices() == null || postRentalRequest.getPrices().isEmpty()) {
             return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, "가격을 입력해주세요."), BAD_REQUEST);
-        }
+        }*/
 
         return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(postRentalRequest, clothesId, userDetails.user)), CREATED);
     }

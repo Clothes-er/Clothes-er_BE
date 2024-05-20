@@ -4,7 +4,9 @@ import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +31,8 @@ public class PostRentalRequest {
     private String category;
     private String style;
 
+    @Valid
+    @NotEmpty(message = "가격 정보를 입력해주세요.")
     private List<RentalPriceDto> prices;
 
     private String brand;
