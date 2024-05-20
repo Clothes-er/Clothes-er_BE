@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.rental.service;
 
+import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalPrice;
 import com.yooyoung.clotheser.rental.dto.PostRentalRequest;
@@ -10,6 +11,9 @@ import com.yooyoung.clotheser.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
+
 @Service
 @RequiredArgsConstructor
 public class RentalService {
@@ -18,7 +22,12 @@ public class RentalService {
     private final RentalPriceRepository rentalPriceRepository;
 
     // 대여글 생성
-    public RentalResponse createRentalPost(PostRentalRequest postRentalRequest, Long clothesId, User user) {
+    public RentalResponse createRentalPost(PostRentalRequest postRentalRequest, Long clothesId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
 
         // TODO: 보유 옷으로부터 대여글 생성하는지 확인
 

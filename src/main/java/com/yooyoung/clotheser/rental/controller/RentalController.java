@@ -33,20 +33,20 @@ public class RentalController {
                                                                          BindingResult bindingResult,
                                                                          @PathVariable Long clothesId,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        // 입력 유효성 검사
-        if (bindingResult.hasErrors()) {
-            List<FieldError> list = bindingResult.getFieldErrors();
-            for(FieldError error : list) {
-                return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
             }
+
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(postRentalRequest, clothesId, userDetails.user)), CREATED);
         }
-
-        // 가격 입력 확인
-        /*if (postRentalRequest.getPrices() == null || postRentalRequest.getPrices().isEmpty()) {
-            return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, "가격을 입력해주세요."), BAD_REQUEST);
-        }*/
-
-        return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(postRentalRequest, clothesId, userDetails.user)), CREATED);
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
     }
 
 }
