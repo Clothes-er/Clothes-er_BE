@@ -48,7 +48,7 @@ public class RentalInfo {
     private LocalDate endDate;
 
     @Column(nullable = false)
-    @ColumnDefault("'RENTED'")
+    @ColumnDefault("0")
     @Builder.Default
     private RentalState state = RentalState.RENTED;
 
