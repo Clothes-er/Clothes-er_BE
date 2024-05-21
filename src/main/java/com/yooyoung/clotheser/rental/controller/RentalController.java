@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.rental.controller;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.rental.dto.PostRentalRequest;
+import com.yooyoung.clotheser.rental.dto.RentalListReponse;
 import com.yooyoung.clotheser.rental.dto.RentalResponse;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
@@ -57,6 +58,19 @@ public class RentalController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.getRental(rentalId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    // TODO: 무한 스크롤을 위한 페이지네이션
+    // 대여글 목록 조회 (회원의 주소 기반 반경 2km 이내)
+    @GetMapping("")
+    public ResponseEntity<BaseResponse<List<RentalListReponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
