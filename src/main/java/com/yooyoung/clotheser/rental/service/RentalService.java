@@ -2,10 +2,13 @@ package com.yooyoung.clotheser.rental.service;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.Rental;
+import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalPrice;
 import com.yooyoung.clotheser.rental.dto.PostRentalRequest;
+import com.yooyoung.clotheser.rental.dto.RentalListReponse;
 import com.yooyoung.clotheser.rental.dto.RentalPriceDto;
 import com.yooyoung.clotheser.rental.dto.RentalResponse;
+import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -24,6 +28,7 @@ public class RentalService {
 
     private final RentalRepository rentalRepository;
     private final RentalPriceRepository rentalPriceRepository;
+    private final RentalImgRepository rentalImgRepository;
 
     // 대여글 생성
     public RentalResponse createRentalPost(PostRentalRequest postRentalRequest, Long clothesId, User user) throws BaseException {
@@ -76,5 +81,32 @@ public class RentalService {
         }
 
         return new RentalResponse(user, rental, prices);
+    }
+
+    // 대여글 목록 조회
+    public List<RentalListReponse> getRentalList(User user) throws BaseException {
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        double latitude = user.getLatitude();
+        double longitude = user.getLongitude();
+
+        List<Rental> rentaList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
+        List<RentalListReponse> responses = new ArrayList<>();
+        for (Rental rental : rentaList) {
+            // 첫 번째 이미지 불러오기
+            Optional<RentalImg> optionalImg = rentalImgRepository.findOneByRentalId(rental.getId());
+            String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
+
+            // 가격 정보 중에 제일 싼 가격 불러오기
+            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
+            int minPrice = optionalPrice.orElse(0);
+
+            responses.add(new RentalListReponse(rental, imgUrl, minPrice));
+        }
+
+        return responses;
     }
 }
