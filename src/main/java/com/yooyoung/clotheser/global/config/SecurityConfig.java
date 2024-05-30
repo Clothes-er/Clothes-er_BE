@@ -35,6 +35,7 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CorsConfig corsConfig;
 
 
     // 특정 HTTP 요청에 대한 웹 기반 보안 구성
@@ -44,24 +45,12 @@ public class SecurityConfig {
                 .httpBasic(HttpBasicConfigurer::disable)    // http basic auth 기반으로 로그인 인증창이 뜨는데, 기본 인증을 이용하지 않으려면 .disable() 추가
                 .csrf(AbstractHttpConfigurer::disable)  // api server 이용 시 세션 기반 인증 disable (html tag를 통한 공격 방지)
                 .formLogin(AbstractHttpConfigurer::disable) //
-                .cors(c -> {        //  다른 도메인의 리소스에 대해 접근이 허용되는지 체크
-                    CorsConfigurationSource source = request -> {
-                        // Cors 허용 패턴
-                        CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(
-                                List.of("*")
-                        );
-                        config.setAllowedMethods(
-                                List.of("*")
-                        );
-                        return config;
-                    };
-                    c.configurationSource(source);
-                })
+                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
                         .requestMatchers("/api/v1/users/signup").permitAll()    // 작성된 경로의 api 요청은 인증 없이 모두 허용
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
+                        .requestMatchers("/ws/**").permitAll()  // 웹소켓 엔드포인트 허용
                         .anyRequest().authenticated()   // 지정된 URL 이외의 요청은 인증 필요
                 )
                 .sessionManagement((session) -> session     // 세션 생성 및 사용 여부에 대한 정책 설정
@@ -106,4 +95,5 @@ public class SecurityConfig {
     public static PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
 }
