@@ -8,9 +8,9 @@ import com.yooyoung.clotheser.user.dto.*;
 import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,8 +19,8 @@ import java.util.stream.Collectors;
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
-@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
