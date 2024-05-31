@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.chat.controller;
 
+import com.yooyoung.clotheser.chat.dto.ChatRoomListResponse;
 import com.yooyoung.clotheser.chat.dto.ChatRoomResponse;
 import com.yooyoung.clotheser.chat.service.ChatService;
 import com.yooyoung.clotheser.global.entity.BaseException;
@@ -10,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.CREATED;
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +35,15 @@ public class ChatController {
     }
 
     // 채팅방 목록 조회
+    @GetMapping("/rooms")
+    public ResponseEntity<BaseResponse<List<ChatRoomListResponse>>> getChatRoomList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(chatService.getChatRoomList(userDetails.user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     // 채팅방 조회 (채팅 내역)
 
