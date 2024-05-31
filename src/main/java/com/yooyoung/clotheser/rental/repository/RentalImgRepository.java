@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface RentalImgRepository extends JpaRepository<RentalImg, Long> {
 
-    Optional<RentalImg> findOneByRentalId(Long rentalId);
+    Optional<RentalImg> findFirstByRentalId(Long rentalId);
 
 }

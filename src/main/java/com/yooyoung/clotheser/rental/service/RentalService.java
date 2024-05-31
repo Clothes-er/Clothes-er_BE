@@ -14,6 +14,7 @@ import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class RentalService {
 
@@ -97,7 +99,7 @@ public class RentalService {
         List<RentalListReponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
             // 첫 번째 이미지 불러오기
-            Optional<RentalImg> optionalImg = rentalImgRepository.findOneByRentalId(rental.getId());
+            Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
             // 가격 정보 중에 제일 싼 가격 불러오기
