@@ -43,6 +43,10 @@ public enum BaseResponseStatus {
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
 
+    // 4. Chat (2300 ~ 2399)
+    FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
+    CHAT_ROOM_EXISTS(false, 2301, "해당 대여글의 채팅방이 이미 존재합니다."),
+
 
     /*
         3000 : Response 오류
