@@ -17,7 +17,7 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/chat")
+@RequestMapping("/api/v1/chats")
 public class ChatController {
 
     private final ChatService chatService;
