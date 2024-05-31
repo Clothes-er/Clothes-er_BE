@@ -93,9 +93,9 @@ public class RentalService {
         double latitude = user.getLatitude();
         double longitude = user.getLongitude();
 
-        List<Rental> rentaList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
+        List<Rental> rentalList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
         List<RentalListReponse> responses = new ArrayList<>();
-        for (Rental rental : rentaList) {
+        for (Rental rental : rentalList) {
             // 첫 번째 이미지 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findOneByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
