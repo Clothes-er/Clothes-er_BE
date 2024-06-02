@@ -2,18 +2,22 @@ package com.yooyoung.clotheser.chat.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatMessage;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
+import com.yooyoung.clotheser.chat.dto.ChatMessageRequest;
+import com.yooyoung.clotheser.chat.dto.ChatMessageResponse;
 import com.yooyoung.clotheser.chat.dto.ChatRoomListResponse;
 import com.yooyoung.clotheser.chat.dto.ChatRoomResponse;
 import com.yooyoung.clotheser.chat.repository.ChatMessageRepository;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
+
 import com.yooyoung.clotheser.global.entity.BaseException;
+
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
-import com.yooyoung.clotheser.rental.dto.RentalListReponse;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
+import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,7 @@ public class ChatService {
     private final RentalRepository rentalRepository;
     private final RentalImgRepository rentalImgRepository;
     private final RentalPriceRepository rentalPriceRepository;
+    private final UserRepository userRepository;
 
     // 채팅방 생성
     public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException {
@@ -113,9 +118,23 @@ public class ChatService {
         return chatRoomResponseList;
     }
 
-    // 채팅 메시지 저장
-    public ChatMessage saveMessage(ChatMessage chatMessage) {
-        return chatMessageRepository.save(chatMessage);
+    // 채팅 메시지 생성 후 DB에 저장
+    public ChatMessageResponse createChatMessage(ChatMessageRequest chatMessageRequest, Long roomId, User user) throws BaseException {
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 채팅방 유저인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
+        }
+
+        ChatMessage chatMessage = chatMessageRequest.toEntity(user, chatRoom);
+        // 채팅방 최근 활성화된 시간 변경
+        chatRoomRepository.save(chatRoom.updateRecentMessageTime());
+        // 채팅 메시지 저장
+        return new ChatMessageResponse(chatMessageRepository.save(chatMessage));
     }
 
 }

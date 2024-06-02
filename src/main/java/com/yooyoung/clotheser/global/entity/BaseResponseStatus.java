@@ -46,6 +46,7 @@ public enum BaseResponseStatus {
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
     CHAT_ROOM_EXISTS(false, 2301, "해당 대여글의 채팅방이 이미 존재합니다."),
+    FORBIDDEN_ENTER_CHAT_ROOM(false, 2302, "채팅방 참여자가 아닙니다."),
 
 
     /*
@@ -59,6 +60,9 @@ public enum BaseResponseStatus {
 
     // 3. Rental
     NOT_FOUND_RENTAL(false, 3200, "대여글을 찾을 수 없습니다."),
+
+    // 4. Chat
+    NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),
 
     /*
         4000 : Database, Server 오류

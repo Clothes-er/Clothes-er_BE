@@ -1,5 +1,8 @@
 package com.yooyoung.clotheser.chat.dto;
 
+import com.yooyoung.clotheser.chat.domain.ChatMessage;
+import com.yooyoung.clotheser.chat.domain.ChatRoom;
+import com.yooyoung.clotheser.user.domain.User;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -8,7 +11,14 @@ import lombok.Setter;
 @Setter(AccessLevel.NONE)
 public class ChatMessageRequest {
 
-    private Long userId;
     private String message;
+
+    public ChatMessage toEntity(User user, ChatRoom chatRoom) {
+        return ChatMessage.builder()
+                .message(message)
+                .user(user)
+                .room(chatRoom)
+                .build();
+    }
 
 }

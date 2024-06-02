@@ -49,4 +49,9 @@ public class ChatRoom {
     @ColumnDefault("null")
     private LocalDateTime updatedAt;
 
+    public ChatRoom updateRecentMessageTime () {
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
+
 }
