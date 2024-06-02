@@ -47,6 +47,7 @@ public enum BaseResponseStatus {
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
     CHAT_ROOM_EXISTS(false, 2301, "해당 대여글의 채팅방이 이미 존재합니다."),
     FORBIDDEN_ENTER_CHAT_ROOM(false, 2302, "채팅방 참여자가 아닙니다."),
+    REQUEST_EMPTY_MESSAGE(false, 2303, "메시지를 입력해주세요."),
 
 
     /*

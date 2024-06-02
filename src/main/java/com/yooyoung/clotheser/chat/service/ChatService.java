@@ -120,6 +120,11 @@ public class ChatService {
     // 채팅 메시지 생성 후 DB에 저장
     public ChatMessageResponse createChatMessage(ChatMessageRequest chatMessageRequest, Long roomId, User user) throws BaseException {
 
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
