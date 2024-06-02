@@ -84,7 +84,6 @@ public class ChatService {
 
     }
 
-    // TODO: 채팅 메시지 저장 로직 개발 후, 최근 메시지순으로 보여주는지 테스트 필요
     // 채팅방 목록 조회
     public List<ChatRoomListResponse> getChatRoomList(User user) throws BaseException {
         // 최초 로그인이 아닌지 확인
