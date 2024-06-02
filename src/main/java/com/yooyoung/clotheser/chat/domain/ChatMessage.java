@@ -27,7 +27,7 @@ public class ChatMessage {
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private User sender;
+    private User user;
 
     @ManyToOne
     @JoinColumn(nullable = false)
