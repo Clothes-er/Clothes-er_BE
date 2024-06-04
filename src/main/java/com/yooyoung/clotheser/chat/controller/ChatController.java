@@ -22,7 +22,7 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    // 채팅방 생성
+    /* 채팅방 생성 */
     @PostMapping("/rooms/{rentalId}")
     public ResponseEntity<BaseResponse<ChatRoomResponse>> createChatRoom(@PathVariable("rentalId") Long rentalId,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -34,7 +34,7 @@ public class ChatController {
         }
     }
 
-    // 채팅방 목록 조회
+    /* 채팅방 목록 조회 */
     @GetMapping("/rooms")
     public ResponseEntity<BaseResponse<List<ChatRoomListResponse>>> getChatRoomList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -45,7 +45,17 @@ public class ChatController {
         }
     }
 
-    // 채팅방 조회 (채팅 내역)
+    /* 채팅방 조회 (채팅 메시지 목록 포함) */
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<BaseResponse<ChatRoomResponse>> getChatMessageList(@PathVariable("roomId") Long roomId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(chatService.getChatRoom(roomId, userDetails.user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     // 옷 상태 체크하기
 

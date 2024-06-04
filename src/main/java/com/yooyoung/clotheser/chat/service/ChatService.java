@@ -13,11 +13,14 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
+import com.yooyoung.clotheser.rental.domain.RentalInfo;
+import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
+import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
-import com.yooyoung.clotheser.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,9 +43,9 @@ public class ChatService {
     private final RentalRepository rentalRepository;
     private final RentalImgRepository rentalImgRepository;
     private final RentalPriceRepository rentalPriceRepository;
-    private final UserRepository userRepository;
+    private final RentalInfoRepository rentalInfoRepository;
 
-    // 채팅방 생성
+    /* 채팅방 생성 */
     public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -77,15 +80,15 @@ public class ChatService {
         String rentalImgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
         // 가격 정보 중에 제일 싼 가격 불러오기
-        Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-        int minPrice = optionalPrice.orElse(0);
+        Integer minPrice = rentalPriceRepository.findMinPrice(rental).orElse(null);
 
         return new ChatRoomResponse(chatRoom, chatRoom.getLender().getNickname(), rental, rentalImgUrl, minPrice);
 
     }
 
-    // 채팅방 목록 조회
+    /* 채팅방 목록 조회 */
     public List<ChatRoomListResponse> getChatRoomList(User user) throws BaseException {
+
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
@@ -117,7 +120,7 @@ public class ChatService {
         return chatRoomResponseList;
     }
 
-    // 채팅 메시지 생성 후 DB에 저장
+    /* 채팅 메시지 생성 후 DB에 저장 */
     public ChatMessageResponse createChatMessage(ChatMessageRequest chatMessageRequest, Long roomId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -129,7 +132,7 @@ public class ChatService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
 
-        // 채팅방 유저인지 확인
+        // 채팅방 참여자인지 확인
         if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
             throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
         }
@@ -141,4 +144,56 @@ public class ChatService {
         return new ChatMessageResponse(chatMessageRepository.save(chatMessage));
     }
 
+    /* 채팅방 조회 (채팅 메시지 목록 포함) */
+    public ChatRoomResponse getChatRoom(Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 채팅방 참여자인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
+        }
+
+        // 대화 내역 불러오기
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByRoomId(roomId);
+        List<ChatMessageResponse> chatMessageResponseList = new ArrayList<>();
+        for (ChatMessage chatMessage : chatMessageList) {
+            chatMessageResponseList.add(new ChatMessageResponse(chatMessage));
+        }
+
+        // 로그인한 회원이 대여자인지 판매자인지 구분
+        User opponent;
+        if (chatRoom.getBuyer().getId().equals(user.getId())) {
+            opponent = chatRoom.getLender();
+        }
+        else {
+            opponent = chatRoom.getBuyer();
+        }
+
+        // 유저 기반 채팅방인지 확인
+        if (chatRoom.getRental() == null) {
+            return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, null, null, null);
+        }
+
+        // 첫 번째 이미지 불러오기
+        Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
+        String rentalImgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
+
+        // 가격 정보 중에 제일 싼 가격 불러오기
+        Integer minPrice = rentalPriceRepository.findMinPrice(chatRoom.getRental()).orElse(null);
+
+        // 대여 상태 불러오기
+        RentalInfo rentalInfo = rentalInfoRepository.findByRentalId(chatRoom.getRental().getId()).orElse(null);
+        RentalState rentalState = rentalInfo == null ? null : rentalInfo.getState();
+
+        return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, rentalImgUrl, minPrice, rentalState);
+
+    }
 }
