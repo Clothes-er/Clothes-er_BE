@@ -15,7 +15,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class PostRentalRequest {
+public class RentalRequest {
 
     private List<String> imgUrls;
 

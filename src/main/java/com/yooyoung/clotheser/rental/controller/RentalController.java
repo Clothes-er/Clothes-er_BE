@@ -2,9 +2,7 @@ package com.yooyoung.clotheser.rental.controller;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
-import com.yooyoung.clotheser.rental.dto.PostRentalRequest;
-import com.yooyoung.clotheser.rental.dto.RentalListReponse;
-import com.yooyoung.clotheser.rental.dto.RentalResponse;
+import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 
@@ -31,7 +29,7 @@ public class RentalController {
 
     // 대여글 생성
     @PostMapping("/{clothesId}")
-    public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestBody PostRentalRequest postRentalRequest,
+    public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestBody RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
                                                                          @PathVariable Long clothesId,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -44,7 +42,7 @@ public class RentalController {
                 }
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(postRentalRequest, clothesId, userDetails.user)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(rentalRequest, clothesId, userDetails.user)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
@@ -76,4 +74,29 @@ public class RentalController {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
+
+    // 옷 상태 체크하기
+
+    /* 대여하기 */
+    @PostMapping("/{roomId}/rental")
+    public ResponseEntity<BaseResponse<RentalInfoResponse>> createRentalInfo(@Valid @RequestBody RentalInfoRequest rentalInfoRequest,
+                                                                             BindingResult bindingResult,
+                                                                             @PathVariable("roomId") Long roomId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalInfo(rentalInfoRequest, roomId, userDetails.user)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
 }
