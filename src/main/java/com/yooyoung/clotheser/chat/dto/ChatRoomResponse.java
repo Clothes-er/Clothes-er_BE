@@ -16,8 +16,6 @@ import java.util.List;
 public class ChatRoomResponse {
 
     private Long id;
-    private Long buyerId;
-    private Long lenderId;
 
     private String opponentNickname;
 
@@ -36,8 +34,6 @@ public class ChatRoomResponse {
     public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname,
                             Rental rental, String rentalImgUrl, Integer minPrice) {
         this.id = chatRoom.getId();
-        this.buyerId = chatRoom.getBuyer().getId();
-        this.lenderId = chatRoom.getLender().getId();
 
         this.opponentNickname = opponentNickname;
 
@@ -51,8 +47,6 @@ public class ChatRoomResponse {
     public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname, List<ChatMessageResponse> messages,
                             String rentalImgUrl, Integer minPrice, RentalState rentalState) {
         this.id = chatRoom.getId();
-        this.buyerId = chatRoom.getBuyer().getId();
-        this.lenderId = chatRoom.getLender().getId();
 
         this.opponentNickname = opponentNickname;
 
