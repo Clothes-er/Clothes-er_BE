@@ -162,7 +162,7 @@ public class ChatService {
         }
 
         // 대화 내역 불러오기
-        List<ChatMessage> chatMessageList = chatMessageRepository.findByRoomId(roomId);
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByRoomId(roomId);
         List<ChatMessageResponse> chatMessageResponseList = new ArrayList<>();
         for (ChatMessage chatMessage : chatMessageList) {
             chatMessageResponseList.add(new ChatMessageResponse(chatMessage));
