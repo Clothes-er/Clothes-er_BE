@@ -16,7 +16,8 @@ import java.util.List;
 public class ChatRoomResponse {
 
     private Long id;
-
+    private String buyerNickname;
+    private String lenderNickname;
     private String opponentNickname;
 
     // 대여글 정보
@@ -34,7 +35,8 @@ public class ChatRoomResponse {
     public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname,
                             Rental rental, String rentalImgUrl, Integer minPrice) {
         this.id = chatRoom.getId();
-
+        this.buyerNickname = chatRoom.getBuyer().getNickname();
+        this.lenderNickname = chatRoom.getLender().getNickname();
         this.opponentNickname = opponentNickname;
 
         this.rentalId = rental.getId();
@@ -47,7 +49,8 @@ public class ChatRoomResponse {
     public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname, List<ChatMessageResponse> messages,
                             String rentalImgUrl, Integer minPrice, RentalState rentalState) {
         this.id = chatRoom.getId();
-
+        this.buyerNickname = chatRoom.getBuyer().getNickname();
+        this.lenderNickname = chatRoom.getLender().getNickname();
         this.opponentNickname = opponentNickname;
 
         this.rentalId = chatRoom.getRental().getId();
