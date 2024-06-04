@@ -45,7 +45,6 @@ public class ChatController {
         }
     }
 
-    // TODO: 채팅방 조회 시 buyer, lender 닉네임 보여주기
     /* 채팅방 조회 (채팅 메시지 목록 포함) */
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<BaseResponse<ChatRoomResponse>> getChatMessageList(@PathVariable("roomId") Long roomId,
