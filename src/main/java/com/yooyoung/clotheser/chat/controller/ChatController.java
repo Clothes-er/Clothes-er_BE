@@ -45,7 +45,7 @@ public class ChatController {
         }
     }
 
-    /* 채팅방 조회 (채팅방 대화 내역) */
+    /* 채팅방 조회 (채팅 메시지 목록 포함) */
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<BaseResponse<ChatRoomResponse>> getChatMessageList(@PathVariable("roomId") Long roomId,
                                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {

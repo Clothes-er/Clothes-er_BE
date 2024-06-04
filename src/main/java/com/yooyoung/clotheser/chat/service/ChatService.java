@@ -144,7 +144,7 @@ public class ChatService {
         return new ChatMessageResponse(chatMessageRepository.save(chatMessage));
     }
 
-    /* 채팅 메시지 목록 조회 (채팅방 대화 내역) */
+    /* 채팅방 조회 (채팅 메시지 목록 포함) */
     public ChatRoomResponse getChatRoom(Long roomId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
