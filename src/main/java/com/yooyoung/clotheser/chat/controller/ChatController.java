@@ -57,6 +57,4 @@ public class ChatController {
         }
     }
 
-    // 옷 상태 체크하기
-
 }

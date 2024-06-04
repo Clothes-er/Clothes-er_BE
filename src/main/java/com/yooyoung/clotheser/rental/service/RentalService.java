@@ -1,14 +1,15 @@
 package com.yooyoung.clotheser.rental.service;
 
+import com.yooyoung.clotheser.chat.domain.ChatRoom;
+import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
+import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalPrice;
-import com.yooyoung.clotheser.rental.dto.PostRentalRequest;
-import com.yooyoung.clotheser.rental.dto.RentalListReponse;
-import com.yooyoung.clotheser.rental.dto.RentalPriceDto;
-import com.yooyoung.clotheser.rental.dto.RentalResponse;
+import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
+import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
@@ -31,9 +32,12 @@ public class RentalService {
     private final RentalRepository rentalRepository;
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalImgRepository rentalImgRepository;
+    private final RentalInfoRepository rentalInfoRepository;
 
-    // 대여글 생성
-    public RentalResponse createRentalPost(PostRentalRequest postRentalRequest, Long clothesId, User user) throws BaseException {
+    private final ChatRoomRepository chatRoomRepository;
+
+    /* 대여글 생성 */
+    public RentalResponse createRentalPost(RentalRequest rentalRequest, Long clothesId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -44,26 +48,26 @@ public class RentalService {
 
         // TODO: 보유 옷 회원과 대여글 작성하려는 회원 일치 확인
 
-        Rental rental = postRentalRequest.toEntity(user, clothesId);
+        Rental rental = rentalRequest.toEntity(user, clothesId);
         rentalRepository.save(rental);
 
         // TODO: 대여글 이미지 생성
 
         // 대여글 가격표 생성
-        for (int i = 0; i < postRentalRequest.getPrices().size(); i++) {
+        for (int i = 0; i < rentalRequest.getPrices().size(); i++) {
             RentalPrice rentalPrice = RentalPrice.builder()
                     .rental(rental)
-                    .price(postRentalRequest.getPrices().get(i).getPrice())
-                    .days(postRentalRequest.getPrices().get(i).getDays())
+                    .price(rentalRequest.getPrices().get(i).getPrice())
+                    .days(rentalRequest.getPrices().get(i).getDays())
                     .build();
             rentalPriceRepository.save(rentalPrice);
         }
 
-        return new RentalResponse(user, rental, postRentalRequest.getPrices());
+        return new RentalResponse(user, rental, rentalRequest.getPrices());
 
     }
 
-    // 대여글 조회
+    /* 대여글 조회 */
     public RentalResponse getRental(Long rentalId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -85,8 +89,9 @@ public class RentalService {
         return new RentalResponse(user, rental, prices);
     }
 
-    // 대여글 목록 조회
+    /* 대여글 목록 조회 */
     public List<RentalListReponse> getRentalList(User user) throws BaseException {
+
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
@@ -111,4 +116,29 @@ public class RentalService {
 
         return responses;
     }
+
+    /* 대여하기 */
+    public RentalInfoResponse createRentalInfo(RentalInfoRequest rentalInfoRequest, Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 판매자인지 확인
+        if (!chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_CREATE_RENTAL_INFO, FORBIDDEN);
+        }
+
+        // 대여 정보 생성
+        RentalInfo rentalInfo = rentalInfoRequest.toEntity(chatRoom);
+        rentalInfoRepository.save(rentalInfo);
+
+        return new RentalInfoResponse(rentalInfo);
+    }
+
 }
