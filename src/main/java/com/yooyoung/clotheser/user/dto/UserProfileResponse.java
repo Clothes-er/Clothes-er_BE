@@ -49,5 +49,4 @@ public class UserProfileResponse {
         this.styles = styles;
     }
 
-
 }
