@@ -33,7 +33,7 @@ public class UserProfileResponse {
         this.nickname = user.getNickname();
         this.profileUrl = user.getProfileUrl();
 
-        this.level = user.getLevel();
+        this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
 
         // TODO: 팔로우 기능 추가
@@ -48,4 +48,5 @@ public class UserProfileResponse {
         this.categories = categories;
         this.styles = styles;
     }
+
 }

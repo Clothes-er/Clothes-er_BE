@@ -189,8 +189,11 @@ public class ChatService {
         // 가격 정보 중에 제일 싼 가격 불러오기
         Integer minPrice = rentalPriceRepository.findMinPrice(chatRoom.getRental()).orElse(null);
 
-        // 대여 상태 불러오기
-        RentalInfo rentalInfo = rentalInfoRepository.findByRentalId(chatRoom.getRental().getId()).orElse(null);
+        // 최근 대여 정보에서 대여 상태 불러오기
+        RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
+                chatRoom.getBuyer().getId(),
+                chatRoom.getLender().getId(),
+                chatRoom.getRental().getId()).orElse(null);
         RentalState rentalState = rentalInfo == null ? null : rentalInfo.getState();
 
         return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, rentalImgUrl, minPrice, rentalState);

@@ -43,6 +43,7 @@ public enum BaseResponseStatus {
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
     FORBIDDEN_CREATE_RENTAL_INFO(false, 2201, "판매자만 대여 정보를 입력할 수 있습니다."),
+    FORBIDDEN_UPDATE_RENTAL_INFO(false, 2202, "판매자만 대여 정보를 수정할 수 있습니다."),
 
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
@@ -62,6 +63,7 @@ public enum BaseResponseStatus {
 
     // 3. Rental
     NOT_FOUND_RENTAL(false, 3200, "대여글을 찾을 수 없습니다."),
+    NOT_FOUND_RENTAL_INFO(false, 3201, "대여 정보를 찾을 수 없습니다."),
 
     // 4. Chat
     NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),
