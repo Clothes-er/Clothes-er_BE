@@ -33,8 +33,7 @@ public class UserProfileResponse {
         this.nickname = user.getNickname();
         this.profileUrl = user.getProfileUrl();
 
-        // TODO: 대여 횟수에 따라 레벨 보여주기
-        this.level = 1;
+        this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
 
         // TODO: 팔로우 기능 추가
@@ -49,4 +48,6 @@ public class UserProfileResponse {
         this.categories = categories;
         this.styles = styles;
     }
+
+
 }

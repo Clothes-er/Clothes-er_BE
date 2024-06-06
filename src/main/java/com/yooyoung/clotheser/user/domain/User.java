@@ -104,6 +104,30 @@ public class User {
         return this;
     }
 
+    // 회원의 레벨 조회
+    public int getUserLevel() {
+        int rentalCount = this.getRentalCount();
+        int level = 0;
+
+        if (rentalCount >= 1 && rentalCount <= 3) {
+            level = 1;
+        }
+        else if (rentalCount >= 4 && rentalCount <= 6) {
+            level = 2;
+        }
+        else if (rentalCount >= 7 && rentalCount <= 10) {
+            level = 3;
+        }
+        else if (rentalCount >= 11 && rentalCount <= 14) {
+            level = 4;
+        }
+        else if (rentalCount >= 15) {
+            level = 5;
+        }
+
+        return level;
+    }
+
     // 대여 횟수 증가
     public User increaseRentalCount() {
         this.rentalCount++;
