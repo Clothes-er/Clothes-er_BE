@@ -62,9 +62,6 @@ public class User {
     private Integer shoeSize;
 
     @ColumnDefault("0")
-    private int level;
-
-    @ColumnDefault("0")
     private int rentalCount;
 
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
@@ -104,6 +101,12 @@ public class User {
         this.weight = firstLoginRequest.getWeight();
         this.shoeSize = firstLoginRequest.getShoeSize();
 
+        return this;
+    }
+
+    // 대여 횟수 증가
+    public User increaseRentalCount() {
+        this.rentalCount++;
         return this;
     }
 

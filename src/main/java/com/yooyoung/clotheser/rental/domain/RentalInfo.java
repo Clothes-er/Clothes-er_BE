@@ -1,6 +1,5 @@
 package com.yooyoung.clotheser.rental.domain;
 
-import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,8 +57,13 @@ public class RentalInfo {
     private LocalDateTime rentalTime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(updatable = false)
     @ColumnDefault("null")
     private LocalDateTime returnTime;
+
+    public RentalInfo updateRentalState() {
+        this.state = RentalState.RETURNED;
+        this.returnTime = LocalDateTime.now();
+        return this;
+    }
 
 }

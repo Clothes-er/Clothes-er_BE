@@ -99,4 +99,16 @@ public class RentalController {
         }
     }
 
+    /* 반납하기 */
+    @PatchMapping("/{roomId}/return")
+    public ResponseEntity<BaseResponse<RentalInfoResponse>> updateRentalInfo(@PathVariable("roomId") Long roomId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRentalInfo(roomId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 }

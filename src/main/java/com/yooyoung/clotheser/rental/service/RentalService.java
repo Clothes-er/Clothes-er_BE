@@ -3,16 +3,14 @@ package com.yooyoung.clotheser.rental.service;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
-import com.yooyoung.clotheser.rental.domain.Rental;
-import com.yooyoung.clotheser.rental.domain.RentalImg;
-import com.yooyoung.clotheser.rental.domain.RentalInfo;
-import com.yooyoung.clotheser.rental.domain.RentalPrice;
+import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
+import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +33,7 @@ public class RentalService {
     private final RentalInfoRepository rentalInfoRepository;
 
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
 
     /* 대여글 생성 */
     public RentalResponse createRentalPost(RentalRequest rentalRequest, Long clothesId, User user) throws BaseException {
@@ -141,4 +140,37 @@ public class RentalService {
         return new RentalInfoResponse(rentalInfo);
     }
 
+    /* 반납하기 */
+    public RentalInfoResponse updateRentalInfo(Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 판매자인지 확인
+        if (!chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_UPDATE_RENTAL_INFO, FORBIDDEN);
+        }
+
+        // 대여 상태인 대여 정보 불러오기
+        RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdAndState(
+                chatRoom.getBuyer().getId(),
+                chatRoom.getLender().getId(),
+                chatRoom.getRental().getId(),
+                RentalState.RENTED
+        ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_INFO, NOT_FOUND));
+
+        // 대여 상태 반납으로 변경
+        rentalInfoRepository.save(rentalInfo.updateRentalState());
+
+        // 대여자 대여 횟수 증가
+        userRepository.save(rentalInfo.getBuyer().increaseRentalCount());
+
+        return new RentalInfoResponse(rentalInfo);
+    }
 }
