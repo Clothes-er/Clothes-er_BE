@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,10 +29,10 @@ public class RentalController {
     private final RentalService rentalService;
 
     // 대여글 생성
-    @PostMapping("/{clothesId}")
-    public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestBody RentalRequest rentalRequest,
+    @PostMapping("")
+    public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
-                                                                         @PathVariable Long clothesId,
+                                                                         @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             // 입력 유효성 검사
@@ -42,7 +43,12 @@ public class RentalController {
                 }
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(rentalRequest, clothesId, userDetails.user)), CREATED);
+            // 대여글 이미지 최대 3장
+            if (images.length > 3) {
+                throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(rentalRequest, images, userDetails.user)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

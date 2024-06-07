@@ -12,8 +12,10 @@ import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class RentalService {
 
+    private final S3Service s3Service;
+
     private final RentalRepository rentalRepository;
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalImgRepository rentalImgRepository;
@@ -36,7 +40,7 @@ public class RentalService {
     private final UserRepository userRepository;
 
     /* 대여글 생성 */
-    public RentalResponse createRentalPost(RentalRequest rentalRequest, Long clothesId, User user) throws BaseException {
+    public RentalResponse createRentalPost(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -47,10 +51,11 @@ public class RentalService {
 
         // TODO: 보유 옷 회원과 대여글 작성하려는 회원 일치 확인
 
-        Rental rental = rentalRequest.toEntity(user, clothesId);
+        Rental rental = rentalRequest.toEntity(user);
         rentalRepository.save(rental);
 
-        // TODO: 대여글 이미지 생성
+        // 대여글 이미지들 저장
+        List<String> imgUrls = s3Service.uploadImages(images, rental);
 
         // 대여글 가격표 생성
         for (int i = 0; i < rentalRequest.getPrices().size(); i++) {
@@ -62,7 +67,7 @@ public class RentalService {
             rentalPriceRepository.save(rentalPrice);
         }
 
-        return new RentalResponse(user, rental, rentalRequest.getPrices());
+        return new RentalResponse(user, rental, imgUrls, rentalRequest.getPrices());
 
     }
 
@@ -78,6 +83,14 @@ public class RentalService {
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
+        // 대여글 이미지들 url 불러오기
+        List<String> imgUrls = new ArrayList<>();
+        List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
+
+        for (RentalImg rentalImg : rentalImgs) {
+            imgUrls.add(rentalImg.getImgUrl());
+        }
+
         // 가격 정보 불러오기
         List<RentalPriceDto> prices = new ArrayList<>();
         List<RentalPrice> rentalPrices = rentalPriceRepository.findAllByRentalId(rentalId);
@@ -85,7 +98,7 @@ public class RentalService {
             prices.add(new RentalPriceDto(rentalPrice.getDays(), rentalPrice.getPrice()));
         }
 
-        return new RentalResponse(user, rental, prices);
+        return new RentalResponse(user, rental, imgUrls, prices);
     }
 
     /* 대여글 목록 조회 */
@@ -123,6 +136,8 @@ public class RentalService {
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
+
+        // TODO: 옷 상태 체크했는지 확인, 대여 정보 테이블에 메모 추가
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)

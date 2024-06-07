@@ -23,6 +23,7 @@ public enum BaseResponseStatus {
     UNSUPPORTED_JWT_TOKEN(false, 2005, "지원하지 않는 JWT입니다."),
     EMPTY_JWT_CLAIMS(false, 2006, "JWT가 잘못되었습니다."),
     REQUEST_FIRST_LOGIN(false, 2007, "최초 로그인이 필요합니다."),
+    FILE_TOO_LARGE(false, 2008, "업로드 할 수 있는 최대 총 파일의 크기는 50MB입니다."),
 
 
     // 2. User (2100 ~ 2199)
@@ -44,6 +45,7 @@ public enum BaseResponseStatus {
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
     FORBIDDEN_CREATE_RENTAL_INFO(false, 2201, "판매자만 대여 정보를 입력할 수 있습니다."),
     FORBIDDEN_UPDATE_RENTAL_INFO(false, 2202, "판매자만 대여 정보를 수정할 수 있습니다."),
+    TOO_MANY_IMAGES(false, 2203, "대여글 이미지는 최대 3장까지 첨부할 수 있습니다."),
 
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
@@ -73,7 +75,8 @@ public enum BaseResponseStatus {
     */
     // Common
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
-    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다.");
+    SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
+    S3_UPLOAD_ERROR(false, 4002, "S3 이미지 업로드에 실패하였습니다.");
 
 
     private final boolean isSuccess;

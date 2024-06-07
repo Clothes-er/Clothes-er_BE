@@ -17,8 +17,6 @@ import java.util.List;
 @Builder
 public class RentalRequest {
 
-    private List<String> imgUrls;
-
     @NotBlank(message = "제목을 입력해주세요.")
     @Size(max = 20, message = "제목은 20자 이내로 입력해주세요.")
     private String title;
@@ -39,10 +37,9 @@ public class RentalRequest {
     private String size;
     private String fit;
 
-    public Rental toEntity(User user, Long clothesId) {
+    public Rental toEntity(User user) {
         return Rental.builder()
                 .user(user)
-                .clothesId(clothesId)
                 .title(title)
                 .description(description)
                 .gender(gender)
