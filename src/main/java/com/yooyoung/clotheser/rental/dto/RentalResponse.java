@@ -47,7 +47,7 @@ public class RentalResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public RentalResponse(User user, Rental rental, List<RentalPriceDto> prices) {
+    public RentalResponse(User user, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
         this.id = rental.getId();
 
         this.profileUrl = rental.getUser().getProfileUrl();
@@ -57,6 +57,8 @@ public class RentalResponse {
         // TODO: 팔로우 기능
         this.followers = 8;
         this.followees = 5;
+
+        this.imgUrls = imgUrls;
 
         this.title = rental.getTitle();
         this.description = rental.getDescription();
