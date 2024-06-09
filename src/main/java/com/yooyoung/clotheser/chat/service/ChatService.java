@@ -112,7 +112,6 @@ public class ChatService {
                     chatRoom.getBuyer().getId(),
                     chatRoom.getLender().getId(),
                     chatRoom.getRental().getId()).orElse(null);
-            RentalState rentalState = rentalInfo == null ? null : rentalInfo.getState();
 
             // 채팅방의 최근 메시지 불러오기
             Optional<ChatMessage> optionalMessage = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
@@ -122,7 +121,7 @@ public class ChatService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, rentalState, recentMessage, imgUrl, opponent));
+            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, rentalInfo, recentMessage, imgUrl, opponent));
         }
         return chatRoomResponseList;
     }
