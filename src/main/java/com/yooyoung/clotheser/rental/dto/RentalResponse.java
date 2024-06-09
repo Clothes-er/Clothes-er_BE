@@ -23,8 +23,6 @@ public class RentalResponse {
     private Boolean isWriter;
 
     // TODO: 팔로우 기능
-    private int followers = 0;
-    private int followees = 0;
 
     private List<String> imgUrls;
 
@@ -53,10 +51,6 @@ public class RentalResponse {
         this.profileUrl = rental.getUser().getProfileUrl();
         this.nickname = rental.getUser().getNickname();
         this.isWriter = rental.getUser().getId().equals(user.getId());
-
-        // TODO: 팔로우 기능
-        this.followers = 8;
-        this.followees = 5;
 
         this.imgUrls = imgUrls;
 

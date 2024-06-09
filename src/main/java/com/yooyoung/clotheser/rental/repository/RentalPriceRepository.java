@@ -12,7 +12,8 @@ import java.util.Optional;
 @Repository
 public interface RentalPriceRepository extends JpaRepository<RentalPrice, Long> {
 
-    List<RentalPrice> findAllByRentalId(Long rentalId);
+    // 기간 적은 순으로 가격 정보 불러오기
+    List<RentalPrice> findAllByRentalIdOrderByDays(Long rentalId);
 
     @Query("select min(rp.price) from RentalPrice rp where rp.rental = :rental")
     Optional<Integer> findMinPrice(Rental rental);

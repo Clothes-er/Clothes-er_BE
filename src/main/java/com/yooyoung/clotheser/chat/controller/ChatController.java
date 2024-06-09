@@ -5,6 +5,7 @@ import com.yooyoung.clotheser.chat.dto.ChatRoomResponse;
 import com.yooyoung.clotheser.chat.service.ChatService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
+import com.yooyoung.clotheser.global.entity.ChatRoomException;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,10 @@ public class ChatController {
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(chatService.createChatRoom(rentalId, userDetails.user)), CREATED);
+        }
+        catch (ChatRoomException exception) {
+            // 채팅방 이미 존재 시 응답값에 기존 채팅방 id 포함
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus(), exception.getRoomId()), exception.getHttpStatus());
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

@@ -11,6 +11,7 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 
+import com.yooyoung.clotheser.global.entity.ChatRoomException;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
@@ -46,7 +47,7 @@ public class ChatService {
     private final RentalInfoRepository rentalInfoRepository;
 
     /* 채팅방 생성 */
-    public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException {
+    public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException, ChatRoomException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -62,9 +63,11 @@ public class ChatService {
             throw new BaseException(FORBIDDEN_CREATE_CHAT_ROOM, FORBIDDEN);
         }
 
-        // 채팅방이 이미 존재하는지 확인 (대여자가 동일한 대여글에서 채팅방 하나만 가능)
-        if (chatRoomRepository.existsChatRoomByBuyerIdAndRentalId(user.getId(), rentalId)) {
-            throw new BaseException(CHAT_ROOM_EXISTS, CONFLICT);
+        // 채팅방이 이미 존재하는지 확인 (대여자가 동일한 대여글에서 채팅방 하나만 가능) -> roomId 리턴
+        Optional<ChatRoom> existedChatRoom = chatRoomRepository.findOneByBuyerIdAndRentalId(user.getId(), rentalId);
+        if (existedChatRoom.isPresent()) {
+            throw new ChatRoomException(CHAT_ROOM_EXISTS, CONFLICT, existedChatRoom.get().getId());
+
         }
 
         // 채팅방 생성
@@ -112,7 +115,6 @@ public class ChatService {
                     chatRoom.getBuyer().getId(),
                     chatRoom.getLender().getId(),
                     chatRoom.getRental().getId()).orElse(null);
-            RentalState rentalState = rentalInfo == null ? null : rentalInfo.getState();
 
             // 채팅방의 최근 메시지 불러오기
             Optional<ChatMessage> optionalMessage = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
@@ -122,7 +124,7 @@ public class ChatService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, rentalState, recentMessage, imgUrl, opponent));
+            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, rentalInfo, recentMessage, imgUrl, opponent));
         }
         return chatRoomResponseList;
     }
