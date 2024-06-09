@@ -91,9 +91,9 @@ public class RentalService {
             imgUrls.add(rentalImg.getImgUrl());
         }
 
-        // 가격 정보 불러오기
+        // 기간이 적은 순으로 가격 정보 불러오기
         List<RentalPriceDto> prices = new ArrayList<>();
-        List<RentalPrice> rentalPrices = rentalPriceRepository.findAllByRentalId(rentalId);
+        List<RentalPrice> rentalPrices = rentalPriceRepository.findAllByRentalIdOrderByDays(rentalId);
         for (RentalPrice rentalPrice : rentalPrices) {
             prices.add(new RentalPriceDto(rentalPrice.getDays(), rentalPrice.getPrice()));
         }
