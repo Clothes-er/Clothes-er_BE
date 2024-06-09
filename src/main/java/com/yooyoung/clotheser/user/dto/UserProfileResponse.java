@@ -18,8 +18,7 @@ public class UserProfileResponse {
     private int level;
     private int rentalCount;
 
-    private int followers = 0;
-    private int followees = 0;
+    // TODO: 팔로우 기능 추가
 
     private Integer height;
     private Integer weight;
@@ -35,10 +34,6 @@ public class UserProfileResponse {
 
         this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
-
-        // TODO: 팔로우 기능 추가
-        this.followers = 8;
-        this.followees = 5;
 
         this.height = user.getHeight();
         this.weight = user.getWeight();
