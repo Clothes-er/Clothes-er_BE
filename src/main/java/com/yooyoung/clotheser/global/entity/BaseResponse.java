@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.HashMap;
+
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.SUCCESS;
 
 @Getter
@@ -43,5 +45,16 @@ public class BaseResponse<T> {
         this.isSuccess = status.isSuccess();
         this.message = message;
         this.code = status.getCode();       // 2000 고정
+    }
+
+    @SuppressWarnings("unchecked")
+    // 채팅방 생성 시 이미 존재하는 경우
+    public BaseResponse(BaseResponseStatus status, Long roomId) {
+        this.isSuccess = status.isSuccess();
+        this.message = status.getMessage();
+        this.code = status.getCode();
+        this.result = (T) new HashMap<String, Long>() {{
+            put("roomId", roomId);
+        }};
     }
 }
