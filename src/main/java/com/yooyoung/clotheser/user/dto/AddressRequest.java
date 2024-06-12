@@ -9,8 +9,8 @@ import lombok.Getter;
 public class AddressRequest {
 
     @NotNull(message = "위도를 입력해주세요.")
-    private double latitude;
+    private Double latitude;
 
     @NotNull(message = "경도를 입력해주세요.")
-    private double longitude;
+    private Double longitude;
 }

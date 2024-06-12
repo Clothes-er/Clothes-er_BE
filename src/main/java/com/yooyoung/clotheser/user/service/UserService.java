@@ -213,4 +213,20 @@ public class UserService {
 
     }
 
+    // 주소 수정
+    public AddressResponse updateAddress(User user, AddressRequest addressRequest) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 수정한 주소로 DB에 저장
+        User updatedUser = user.updateAddress(addressRequest.getLatitude(), addressRequest.getLongitude());
+        userRepository.save(updatedUser);
+
+        return new AddressResponse(updatedUser);
+
+    }
+
 }

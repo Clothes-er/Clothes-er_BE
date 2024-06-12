@@ -161,7 +161,7 @@ public class UserController {
     }
 
     // 주소 변경
-    /*@PatchMapping("/address")
+    @PatchMapping("/address")
     public ResponseEntity<BaseResponse<AddressResponse>> updateAddress(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                        @Valid @RequestBody AddressRequest addressRequest,
                                                                        BindingResult bindingResult) {
@@ -181,6 +181,6 @@ public class UserController {
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
-    }*/
+    }
 
 }
