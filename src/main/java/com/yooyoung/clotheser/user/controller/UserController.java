@@ -148,4 +148,39 @@ public class UserController {
         }
     }
 
+    // 주소 조회
+    @GetMapping("/address")
+    public ResponseEntity<BaseResponse<AddressResponse>> getAddress(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.getAddress(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    // 주소 변경
+    /*@PatchMapping("/address")
+    public ResponseEntity<BaseResponse<AddressResponse>> updateAddress(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                       @Valid @RequestBody AddressRequest addressRequest,
+                                                                       BindingResult bindingResult) {
+        try {
+            User user = userDetails.user;
+
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(userService.updateAddress(user, addressRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }*/
+
 }
