@@ -134,4 +134,11 @@ public class User {
         return this;
     }
 
+    // 주소 수정
+    public User updateAddress(double latitude, double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        return this;
+    }
+
 }
