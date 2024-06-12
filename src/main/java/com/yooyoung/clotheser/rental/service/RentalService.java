@@ -113,7 +113,7 @@ public class RentalService {
         double longitude = user.getLongitude();
 
         // 검색 여부 확인
-        List<Rental> rentalList = new ArrayList<>();
+        List<Rental> rentalList;
         if (search != null && !search.isEmpty()) {
             rentalList = rentalRepository.searchRentalsWithinDistance(search, latitude, longitude);
         }
