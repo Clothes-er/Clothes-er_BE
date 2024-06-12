@@ -68,13 +68,13 @@ public class RentalController {
         }
     }
 
-    // TODO: 무한 스크롤을 위한 페이지네이션
     // 대여글 목록 조회 (회원의 주소 기반 반경 2km 이내)
     @GetMapping("")
-    public ResponseEntity<BaseResponse<List<RentalListReponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BaseResponse<List<RentalListReponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                               @RequestParam(value = "search", required = false) String search) {
         try {
             User user = userDetails.user;
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user)), OK);
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user, search)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

@@ -102,7 +102,7 @@ public class RentalService {
     }
 
     /* 대여글 목록 조회 */
-    public List<RentalListReponse> getRentalList(User user) throws BaseException {
+    public List<RentalListReponse> getRentalList(User user, String search) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -112,7 +112,16 @@ public class RentalService {
         double latitude = user.getLatitude();
         double longitude = user.getLongitude();
 
-        List<Rental> rentalList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
+        // 검색 여부 확인
+        List<Rental> rentalList;
+        if (search != null && !search.isEmpty()) {
+            rentalList = rentalRepository.searchRentalsWithinDistance(search, latitude, longitude);
+        }
+        else {
+            // 전체 조회
+            rentalList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
+        }
+
         List<RentalListReponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
             // 첫 번째 이미지 불러오기
