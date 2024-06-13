@@ -16,7 +16,7 @@ public class RentalCheckResponse {
 
     public RentalCheckResponse(Long roomId, List<String> checkList) {
         this.roomId = roomId;
-        this.isChecked = true;
+        this.isChecked = !(checkList == null || checkList.isEmpty());
         this.checkList = checkList;
     }
 

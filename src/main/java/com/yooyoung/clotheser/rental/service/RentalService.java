@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -170,6 +171,30 @@ public class RentalService {
 
         return new RentalCheckResponse(roomId, checkList);
 
+    }
+
+    /* 옷 상태 체크 내역 조회 */
+    public RentalCheckResponse getRentalCheck(Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 채팅방 참여자인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
+        }
+
+        // 체크리스트 가져오기
+        List<RentalCheck> rentalChecks = rentalCheckRepository.findAllByRoomId(roomId);
+        List<String> checkList = rentalChecks.stream().map(RentalCheck::getClothesCheck).collect(Collectors.toCollection(ArrayList::new));
+
+        return new RentalCheckResponse(roomId, checkList);
     }
 
     /* 대여하기 */

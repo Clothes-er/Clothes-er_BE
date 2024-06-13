@@ -103,6 +103,19 @@ public class RentalController {
         }
     }
 
+    /* 옷 상태 체크 내역 조회 */
+    @GetMapping("/{roomId}/check")
+    public ResponseEntity<BaseResponse<RentalCheckResponse>> getRentalCheck(@PathVariable("roomId") Long roomId,
+                                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalCheck(roomId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
     /* 대여하기 */
     @PostMapping("/{roomId}/rental")
     public ResponseEntity<BaseResponse<RentalInfoResponse>> createRentalInfo(@Valid @RequestBody RentalInfoRequest rentalInfoRequest,
