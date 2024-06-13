@@ -5,10 +5,7 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.dto.*;
-import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
-import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
-import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
-import com.yooyoung.clotheser.rental.repository.RentalRepository;
+import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -38,6 +36,7 @@ public class RentalService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final RentalCheckRepository rentalCheckRepository;
 
     /* 대여글 생성 */
     public RentalResponse createRentalPost(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
@@ -138,6 +137,66 @@ public class RentalService {
         return responses;
     }
 
+    /* 옷 상태 체크하기 */
+    public RentalCheckResponse createRentalCheck(RentalCheckRequest rentalCheckRequest, Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 기존에 체크 내역이 있는지 확인
+        if (rentalCheckRepository.existsByRoomId(roomId)) {
+            throw new BaseException(RENTAL_CHECK_EXISTS, CONFLICT);
+        }
+
+        // 대여자인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_CREATE_RENTAL_CHECK, FORBIDDEN);
+        }
+
+        // 옷 상태 기록 저장
+        List<String> checkList = rentalCheckRequest.getCheckList();
+        for (String check : checkList) {
+            RentalCheck rentalCheck = RentalCheck.builder()
+                    .clothesCheck(check)
+                    .room(chatRoom)
+                    .build();
+            rentalCheckRepository.save(rentalCheck);
+        }
+
+        return new RentalCheckResponse(roomId, checkList);
+
+    }
+
+    /* 옷 상태 체크 내역 조회 */
+    public RentalCheckResponse getRentalCheck(Long roomId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 채팅방 존재 확인
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+
+        // 채팅방 참여자인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
+        }
+
+        // 체크리스트 가져오기
+        List<RentalCheck> rentalChecks = rentalCheckRepository.findAllByRoomId(roomId);
+        List<String> checkList = rentalChecks.stream().map(RentalCheck::getClothesCheck).collect(Collectors.toCollection(ArrayList::new));
+
+        return new RentalCheckResponse(roomId, checkList);
+    }
+
     /* 대여하기 */
     public RentalInfoResponse createRentalInfo(RentalInfoRequest rentalInfoRequest, Long roomId, User user) throws BaseException {
 
@@ -146,7 +205,10 @@ public class RentalService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
-        // TODO: 옷 상태 체크했는지 확인, 대여 정보 테이블에 메모 추가
+        // 옷 상태 체크했는지 확인
+        if (!rentalCheckRepository.existsByRoomId(roomId)) {
+            throw new BaseException(REQUEST_RENTAL_CHECK, UNAUTHORIZED);
+        }
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)

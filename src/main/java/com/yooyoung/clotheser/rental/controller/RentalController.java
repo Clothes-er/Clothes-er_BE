@@ -81,7 +81,40 @@ public class RentalController {
         }
     }
 
-    // 옷 상태 체크하기
+    /* 옷 상태 체크하기 (대여자만) */
+    @PostMapping("/{roomId}/check")
+    public ResponseEntity<BaseResponse<RentalCheckResponse>> createRentalCheck(@Valid @RequestBody RentalCheckRequest rentalCheckRequest,
+                                                                               BindingResult bindingResult,
+                                                                               @PathVariable("roomId") Long roomId,
+                                                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalCheck(rentalCheckRequest, roomId, userDetails.user)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 옷 상태 체크 내역 조회 */
+    @GetMapping("/{roomId}/check")
+    public ResponseEntity<BaseResponse<RentalCheckResponse>> getRentalCheck(@PathVariable("roomId") Long roomId,
+                                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalCheck(roomId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     /* 대여하기 */
     @PostMapping("/{roomId}/rental")
