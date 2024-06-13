@@ -26,6 +26,9 @@ public class ChatRoomResponse {
     private String title;
     private Integer minPrice;
 
+    // 옷 상태 체크 여부
+    private Boolean isChecked;
+    // 대여 상태
     private RentalState rentalState;
 
     // 채팅 메시지 목록
@@ -47,7 +50,7 @@ public class ChatRoomResponse {
 
     /* 채팅방 조회 시 쓰는 생성자 */
     public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname, List<ChatMessageResponse> messages,
-                            String rentalImgUrl, Integer minPrice, RentalState rentalState) {
+                            String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
@@ -58,6 +61,7 @@ public class ChatRoomResponse {
         this.title = chatRoom.getRental().getTitle();
         this.minPrice = minPrice;
 
+        this.isChecked = isChecked;
         this.rentalState = rentalState;
         this.messages = messages;
     }

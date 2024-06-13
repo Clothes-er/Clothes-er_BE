@@ -12,14 +12,8 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 
 import com.yooyoung.clotheser.global.entity.ChatRoomException;
-import com.yooyoung.clotheser.rental.domain.Rental;
-import com.yooyoung.clotheser.rental.domain.RentalImg;
-import com.yooyoung.clotheser.rental.domain.RentalInfo;
-import com.yooyoung.clotheser.rental.domain.RentalState;
-import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
-import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
-import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
-import com.yooyoung.clotheser.rental.repository.RentalRepository;
+import com.yooyoung.clotheser.rental.domain.*;
+import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +39,7 @@ public class ChatService {
     private final RentalImgRepository rentalImgRepository;
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalInfoRepository rentalInfoRepository;
+    private final RentalCheckRepository rentalCheckRepository;
 
     /* 채팅방 생성 */
     public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException, ChatRoomException {
@@ -188,7 +183,7 @@ public class ChatService {
 
         // 유저 기반 채팅방인지 확인
         if (chatRoom.getRental() == null) {
-            return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, null, null, null);
+            return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, null, null, null, null);
         }
 
         // 첫 번째 이미지 불러오기
@@ -198,14 +193,24 @@ public class ChatService {
         // 가격 정보 중에 제일 싼 가격 불러오기
         Integer minPrice = rentalPriceRepository.findMinPrice(chatRoom.getRental()).orElse(null);
 
-        // 최근 대여 정보에서 대여 상태 불러오기
-        RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
-                chatRoom.getBuyer().getId(),
-                chatRoom.getLender().getId(),
-                chatRoom.getRental().getId()).orElse(null);
-        RentalState rentalState = rentalInfo == null ? null : rentalInfo.getState();
+        // 옷 상태 체크 여부 불러오기
+        boolean isChecked = rentalCheckRepository.existsByRoomId(roomId);
 
-        return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, rentalImgUrl, minPrice, rentalState);
+        // 최근 대여 정보에서 대여 상태 불러오기
+        RentalState rentalState;
+        if (isChecked) {
+            // 옷 상태 체크해야만 대여 정보 생성 가능
+            RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
+                    chatRoom.getBuyer().getId(),
+                    chatRoom.getLender().getId(),
+                    chatRoom.getRental().getId()).orElse(null);
+            rentalState = rentalInfo == null ? null : rentalInfo.getState();
+        }
+        else {
+            rentalState = null;
+        }
+
+        return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, rentalImgUrl, minPrice, isChecked, rentalState);
 
     }
 }
