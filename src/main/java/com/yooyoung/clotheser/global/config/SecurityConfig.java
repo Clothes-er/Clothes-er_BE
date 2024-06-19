@@ -47,7 +47,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) //
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
-                        .requestMatchers("/api/v1/users/signup").permitAll()    // 작성된 경로의 api 요청은 인증 없이 모두 허용
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger/**").permitAll()  // swagger 엔드포인트
+                        .requestMatchers("/api/v1/users/signup").permitAll()
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
                         .requestMatchers("/ws/**").permitAll()  // 웹소켓 엔드포인트 허용
