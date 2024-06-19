@@ -8,6 +8,9 @@ import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.dto.*;
 import com.yooyoung.clotheser.user.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -27,11 +30,12 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
+@Tag(name = "User", description = "회원 API")
 public class UserController {
 
     private final UserService userService;
 
-    // 회원가입
+    @Operation(summary = "회원가입", description = "회원가입을 한다.")
     @PostMapping("/signup")
     public ResponseEntity<BaseResponse<SignUpResponse>> signUp(@Valid @RequestBody SignUpRequest signUpRequest,
                                                                BindingResult bindingResult) {
@@ -56,7 +60,8 @@ public class UserController {
         }
     }
 
-    // 닉네임 중복 확인
+    @Operation(summary = "닉네임 중복 확인", description = "닉네임 중복 여부를 확인한다.")
+    @Parameter(name = "nickname", description = "닉네임", example = "김눈송", required = true)
     @GetMapping("/check-nickname/{nickname}")
     public ResponseEntity<BaseResponse<BaseResponseStatus>> checkNickname(@PathVariable String nickname) {
         try {
@@ -67,7 +72,7 @@ public class UserController {
         }
     }
 
-    // 로그인
+    @Operation(summary = "로그인", description = "로그인을 하여 JWT를 얻는다.")
     @PostMapping("/login")
     public ResponseEntity<BaseResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest,
                                                              BindingResult bindingResult) {
@@ -99,7 +104,7 @@ public class UserController {
         }
     }*/
 
-    // 최초 로그인
+    @Operation(summary = "최초 로그인", description = "최초 로그인을 한다.")
     @PostMapping("/first-login")
     public ResponseEntity<BaseResponse<FirstLoginResponse>> firstLogin(@Valid @RequestBody FirstLoginRequest firstLoginRequest,
                                                                        BindingResult bindingResult,
@@ -122,9 +127,9 @@ public class UserController {
         }
     }
 
-    // 로그아웃
+    // TODO: 로그아웃
 
-    // 회원 프로필 조회
+    @Operation(summary = "회원 프로필 조회", description = "회원의 프로필을 조회한다.")
     @GetMapping("/profile")
     public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -136,7 +141,7 @@ public class UserController {
         }
     }
 
-    // 회원 정보 조회
+    @Operation(summary = "회원 개인정보 조회", description = "회원의 개인정보를 조회한다.")
     @GetMapping("/info")
     public ResponseEntity<BaseResponse<UserInfoResponse>> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -148,7 +153,7 @@ public class UserController {
         }
     }
 
-    // 주소 조회
+    @Operation(summary = "회원 주소 조회", description = "회원의 주소(위도, 경도)를 조회한다.")
     @GetMapping("/address")
     public ResponseEntity<BaseResponse<AddressResponse>> getAddress(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -160,7 +165,7 @@ public class UserController {
         }
     }
 
-    // 주소 변경
+    @Operation(summary = "회원 주소 수정", description = "회원의 주소(위도, 경도)를 수정한다.")
     @PatchMapping("/address")
     public ResponseEntity<BaseResponse<AddressResponse>> updateAddress(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                        @Valid @RequestBody AddressRequest addressRequest,
