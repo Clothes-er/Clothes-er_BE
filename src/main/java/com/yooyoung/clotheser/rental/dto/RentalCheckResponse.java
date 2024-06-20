@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.rental.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -10,8 +11,13 @@ import java.util.List;
 @Setter(AccessLevel.NONE)
 public class RentalCheckResponse {
 
+    @Schema(title = "채팅방 id", example = "1")
     private Long roomId;
+
+    @Schema(title = "옷 상태 체크 여부", example = "false")
     private Boolean isChecked;
+
+    @Schema(title = "옷 상태 체크리스트", example = "이염 있음")
     private List<String> checkList;
 
     public RentalCheckResponse(Long roomId, List<String> checkList) {
