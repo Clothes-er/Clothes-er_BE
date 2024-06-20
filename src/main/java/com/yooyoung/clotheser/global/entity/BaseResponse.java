@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -15,11 +16,15 @@ import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.SUCCESS;
 @AllArgsConstructor
 @JsonPropertyOrder({"isSuccess", "code", "message", "result"})
 public class BaseResponse<T> {
+
+    @Schema(title = "요청 성공 여부", example = "true")
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
 
+    @Schema(title = "요청에 대한 메시지", example = "요청에 성공하였습니다.")
     private final String message;
 
+    @Schema(title = "자체 서버 코드", example = "2000")
     private final int code;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
