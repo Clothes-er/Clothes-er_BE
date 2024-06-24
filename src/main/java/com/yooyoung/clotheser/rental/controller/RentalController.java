@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -33,7 +34,7 @@ public class RentalController {
     private final RentalService rentalService;
 
     @Operation(summary = "대여글 생성", description = "대여글을 생성한다.")
-    @PostMapping("")
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
                                                                          @RequestPart(value = "images", required = false) MultipartFile[] images,

@@ -22,7 +22,7 @@ import static org.springframework.http.HttpStatus.*;
 
 @Service
 @RequiredArgsConstructor
-public class S3Service {
+public class RentalImageService {
 
     private final AmazonS3 amazonS3;
 

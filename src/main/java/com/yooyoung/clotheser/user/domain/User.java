@@ -141,4 +141,10 @@ public class User {
         return this;
     }
 
+    // 프로필 이미지 수정
+    public User updateProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+        return this;
+    }
+
 }

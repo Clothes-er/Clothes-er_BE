@@ -1,5 +1,7 @@
 package com.yooyoung.clotheser.user.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
@@ -8,12 +10,16 @@ import com.yooyoung.clotheser.user.dto.*;
 import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
@@ -23,6 +29,11 @@ import static org.springframework.http.HttpStatus.*;
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
+
+    private final AmazonS3 amazonS3;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     private final UserRepository userRepository;
     private final BodyShapeRepository bodyShapeRepository;
@@ -227,6 +238,43 @@ public class UserService {
 
         return new AddressResponse(updatedUser);
 
+    }
+
+    // 프로필 사진 수정
+    public ProfileImageResponse updateProfileImage(User user, MultipartFile profileImage) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 기존 이미지가 있는 경우 S3에서 삭제
+        if (user.getProfileUrl() != null) {
+            // 객체 key 추출
+            String originalImageKey = user.getProfileUrl().substring(user.getProfileUrl().lastIndexOf("/") + 1);
+            amazonS3.deleteObject(bucket, "profiles/" + originalImageKey);
+        }
+
+        // S3에 새로운 이미지 업로드
+        String newProfileImage;
+        try {
+            String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(profileImage.getSize());
+            metadata.setContentType(profileImage.getContentType());
+
+            amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
+            newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
+        } catch (IOException e) {
+            throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
+        }
+
+        // DB에 새로운 S3 URL 저장
+        User updatedUser = user.updateProfileUrl(newProfileImage);
+        userRepository.save(updatedUser);
+
+        return new ProfileImageResponse(user.getNickname(), user.getEmail(), user.getProfileUrl());
     }
 
 }
