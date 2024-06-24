@@ -1,6 +1,5 @@
 package com.yooyoung.clotheser.user.dto;
 
-import com.yooyoung.clotheser.user.domain.BodyShape;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
