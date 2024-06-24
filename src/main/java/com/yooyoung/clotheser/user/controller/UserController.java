@@ -15,11 +15,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -129,7 +131,7 @@ public class UserController {
 
     // TODO: 로그아웃
 
-    @Operation(summary = "회원 프로필 조회", description = "회원의 프로필을 조회한다.")
+    @Operation(summary = "프로필 조회", description = "회원의 프로필을 조회한다.")
     @GetMapping("/profile")
     public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -141,7 +143,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "회원 개인정보 조회", description = "회원의 개인정보를 조회한다.")
+    @Operation(summary = "개인정보 조회", description = "회원의 개인정보를 조회한다.")
     @GetMapping("/info")
     public ResponseEntity<BaseResponse<UserInfoResponse>> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -153,7 +155,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "회원 주소 조회", description = "회원의 주소(위도, 경도)를 조회한다.")
+    @Operation(summary = "주소 조회", description = "회원의 주소(위도, 경도)를 조회한다.")
     @GetMapping("/address")
     public ResponseEntity<BaseResponse<AddressResponse>> getAddress(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -165,7 +167,7 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "회원 주소 수정", description = "회원의 주소(위도, 경도)를 수정한다.")
+    @Operation(summary = "주소 수정", description = "회원의 주소(위도, 경도)를 수정한다.")
     @PatchMapping("/address")
     public ResponseEntity<BaseResponse<AddressResponse>> updateAddress(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                                        @Valid @RequestBody AddressRequest addressRequest,
@@ -182,6 +184,19 @@ public class UserController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(userService.updateAddress(user, addressRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "프로필 사진 수정", description = "회원의 프로필 사진을 수정한다.")
+    @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<ProfileImageResponse>> updateProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                             @RequestPart("image") MultipartFile image) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.updateProfileImage(user, image)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

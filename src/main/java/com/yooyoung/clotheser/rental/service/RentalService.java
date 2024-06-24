@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class RentalService {
 
-    private final S3Service s3Service;
+    private final RentalImageService rentalImageService;
 
     private final RentalRepository rentalRepository;
     private final RentalPriceRepository rentalPriceRepository;
@@ -54,7 +54,7 @@ public class RentalService {
         rentalRepository.save(rental);
 
         // 대여글 이미지들 저장
-        List<String> imgUrls = s3Service.uploadImages(images, rental);
+        List<String> imgUrls = rentalImageService.uploadImages(images, rental);
 
         // 대여글 가격표 생성
         for (int i = 0; i < rentalRequest.getPrices().size(); i++) {

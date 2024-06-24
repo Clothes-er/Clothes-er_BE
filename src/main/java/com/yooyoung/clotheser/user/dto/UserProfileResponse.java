@@ -1,6 +1,5 @@
 package com.yooyoung.clotheser.user.dto;
 
-import com.yooyoung.clotheser.user.domain.BodyShape;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -23,8 +22,6 @@ public class UserProfileResponse {
     private int level;
     @Schema(title = "대여 횟수", example = "4")
     private int rentalCount;
-
-    // TODO: 팔로우 기능 추가
 
     @Schema(title = "키", example = "160")
     private Integer height;
