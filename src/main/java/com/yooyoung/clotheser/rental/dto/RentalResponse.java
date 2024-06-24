@@ -29,9 +29,8 @@ public class RentalResponse {
     @Schema(title = "작성자 여부", example = "false")
     private Boolean isWriter;
 
-    // TODO: 팔로우 기능
-
-    @Schema(title = "대여글 사진 URL 목록", description = "최대 3장", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/0fa7d4e0-de3d-4c87-a814-cc0ee8b8a8fe_black_ops%281%29.jpg")
+    @Schema(title = "대여글 사진 URL 목록", description = "최대 3장", type = "array",
+            example = "[\"https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/0fa7d4e0-de3d-4c87-a814-cc0ee8b8a8fe_black_ops%281%29.jpg\"]")
     private List<String> imgUrls;
 
     @Schema(title = "제목", example = "여름용 니트")

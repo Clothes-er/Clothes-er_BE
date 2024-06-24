@@ -36,11 +36,11 @@ public class FirstLoginRequest {
     @PositiveOrZero(message = "발 사이즈는 0 또는 자연수여야 합니다.")
     private Integer shoeSize;
 
-    @Schema(title = "체형 목록", description = "30자 이내", example = "골반이 넓다")
+    @Schema(title = "체형 목록", description = "30자 이내", type = "array", example = "[\"골반이 넓다\"]")
     private List<String> bodyShapes;
-    @Schema(title = "카테고리 목록", description = "10자 이내", example = "니트")
+    @Schema(title = "카테고리 목록", description = "10자 이내", type = "array", example = "[\"니트\", \"청바지\"]")
     private List<String> categories;
-    @Schema(title = "스타일 목록", description = "20자 이내", example = "키치")
+    @Schema(title = "스타일 목록", description = "20자 이내", type = "array", example = "[\"키치\"]")
     private List<String> styles;
 
 }

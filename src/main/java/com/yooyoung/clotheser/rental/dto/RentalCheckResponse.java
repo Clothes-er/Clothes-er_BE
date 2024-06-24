@@ -17,7 +17,7 @@ public class RentalCheckResponse {
     @Schema(title = "옷 상태 체크 여부", example = "false")
     private Boolean isChecked;
 
-    @Schema(title = "옷 상태 체크리스트", example = "이염 있음")
+    @Schema(title = "옷 상태 체크리스트", type = "array", example = "[\"오른쪽 소매에 오염 있음\", \"구김 있음\"]")
     private List<String> checkList;
 
     public RentalCheckResponse(Long roomId, List<String> checkList) {

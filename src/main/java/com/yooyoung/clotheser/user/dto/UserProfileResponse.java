@@ -33,11 +33,11 @@ public class UserProfileResponse {
     @Schema(title = "발 사이즈", example = "240")
     private Integer shoeSize;
 
-    @Schema(title = "체형 목록", example = "어깨가 넓다")
+    @Schema(title = "체형 목록", type = "array", example = "[\"어깨가 넓음\"]")
     private List<String> bodyShapes;
-    @Schema(title = "카테고리 목록", example = "셔츠")
+    @Schema(title = "카테고리 목록", type = "array", example = "[\"셔츠\", \"블라우스\"]")
     private List<String> categories;
-    @Schema(title = "스타일 목록", example = "하이틴")
+    @Schema(title = "스타일 목록", type = "array", example = "[\"하이틴\", \"캐주얼\", \"키치\"]")
     private List<String> styles;
 
     public UserProfileResponse(User user, List<String> bodyShapes, List<String> categories, List<String> styles) {
