@@ -24,8 +24,6 @@ public class UserProfileResponse {
     @Schema(title = "대여 횟수", example = "4")
     private int rentalCount;
 
-    // TODO: 팔로우 기능 추가
-
     @Schema(title = "키", example = "160")
     private Integer height;
     @Schema(title = "몸무게", example = "48")
