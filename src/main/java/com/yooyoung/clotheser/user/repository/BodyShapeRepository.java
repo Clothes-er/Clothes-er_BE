@@ -10,5 +10,6 @@ import java.util.List;
 public interface BodyShapeRepository extends JpaRepository<BodyShape, Long> {
 
     List<BodyShape> findAllByUserId(Long userId);
+    void deleteAllByUserId(Long userId);
 
 }

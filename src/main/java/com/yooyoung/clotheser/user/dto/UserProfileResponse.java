@@ -1,11 +1,14 @@
 package com.yooyoung.clotheser.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -23,6 +26,8 @@ public class UserProfileResponse {
     @Schema(title = "대여 횟수", example = "4")
     private int rentalCount;
 
+    @Schema(title = "성별", example = "FEMALE")
+    private Gender gender;
     @Schema(title = "키", example = "160")
     private Integer height;
     @Schema(title = "몸무게", example = "48")
@@ -37,6 +42,10 @@ public class UserProfileResponse {
     @Schema(title = "스타일 목록", type = "array", example = "[\"하이틴\", \"캐주얼\", \"키치\"]")
     private List<String> styles;
 
+    @Schema(title = "회원 정보 수정한 시간", example = "2024년 06월 20일 19:13:36")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime updatedAt;
+
     public UserProfileResponse(User user, List<String> bodyShapes, List<String> categories, List<String> styles) {
         this.nickname = user.getNickname();
         this.profileUrl = user.getProfileUrl();
@@ -44,6 +53,7 @@ public class UserProfileResponse {
         this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
 
+        this.gender = user.getGender();
         this.height = user.getHeight();
         this.weight = user.getWeight();
         this.shoeSize = user.getShoeSize();
@@ -51,6 +61,8 @@ public class UserProfileResponse {
         this.bodyShapes = bodyShapes;
         this.categories = categories;
         this.styles = styles;
+
+        this.updatedAt = user.getUpdatedAt();
     }
 
 }

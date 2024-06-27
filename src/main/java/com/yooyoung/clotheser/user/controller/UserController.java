@@ -203,4 +203,17 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "프로필 수정", description = "회원의 프로필(스펙 및 취향)을 수정한다.")
+    @PatchMapping("/profile")
+    public ResponseEntity<BaseResponse<UserProfileResponse>> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                           @RequestBody UserProfileRequest userProfileRequest) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.updateProfile(user, userProfileRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
 }

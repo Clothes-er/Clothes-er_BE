@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.user.domain;
 
 import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
+import com.yooyoung.clotheser.user.dto.UserProfileRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -82,6 +83,10 @@ public class User {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
+    private LocalDateTime lastLoginAt;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ColumnDefault("null")
     private LocalDateTime updatedAt;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -91,6 +96,7 @@ public class User {
     // 최초 로그인 시 회원 정보 수정
     public User firstLogin(FirstLoginRequest firstLoginRequest) {
         this.isFirstLogin = false;
+        this.lastLoginAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
 
         this.latitude = firstLoginRequest.getLatitude();
@@ -101,6 +107,12 @@ public class User {
         this.weight = firstLoginRequest.getWeight();
         this.shoeSize = firstLoginRequest.getShoeSize();
 
+        return this;
+    }
+
+    // 마지막으로 로그인한 시간 수정
+    public User updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now();
         return this;
     }
 
@@ -138,12 +150,24 @@ public class User {
     public User updateAddress(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+        this.updatedAt = LocalDateTime.now();
         return this;
     }
 
     // 프로필 이미지 수정
     public User updateProfileUrl(String profileUrl) {
         this.profileUrl = profileUrl;
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
+
+    // 스펙 수정
+    public User updateSpec(UserProfileRequest userProfileRequest) {
+        this.gender = userProfileRequest.getGender();
+        this.height = userProfileRequest.getHeight();
+        this.weight = userProfileRequest.getWeight();
+        this.shoeSize = userProfileRequest.getShoeSize();
+        this.updatedAt = LocalDateTime.now();
         return this;
     }
 
