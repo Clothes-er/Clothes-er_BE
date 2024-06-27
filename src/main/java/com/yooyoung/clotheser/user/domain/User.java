@@ -97,7 +97,7 @@ public class User {
     public User firstLogin(FirstLoginRequest firstLoginRequest) {
         this.isFirstLogin = false;
         this.lastLoginAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = this.lastLoginAt;
 
         this.latitude = firstLoginRequest.getLatitude();
         this.longitude = firstLoginRequest.getLongitude();

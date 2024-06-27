@@ -106,8 +106,10 @@ public class UserService {
             refreshTokenRepository.save(newToken);
         }
 
-        // 마지막으로 로그인한 시간 업데이트
-        userRepository.save(user.updateLastLoginAt());
+        // 최초 로그인이 아닐 경우, 마지막으로 로그인한 시간 업데이트
+        if (!user.getIsFirstLogin()) {
+            userRepository.save(user.updateLastLoginAt());
+        }
 
         return new LoginResponse(user, tokenResponse);
     }
