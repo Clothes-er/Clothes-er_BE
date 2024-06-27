@@ -206,9 +206,19 @@ public class UserController {
     @Operation(summary = "프로필 수정", description = "회원의 프로필(스펙 및 취향)을 수정한다.")
     @PatchMapping("/profile")
     public ResponseEntity<BaseResponse<UserProfileResponse>> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                           @RequestBody UserProfileRequest userProfileRequest) {
+                                                                           @Valid @RequestBody UserProfileRequest userProfileRequest,
+                                                                           BindingResult bindingResult) {
         try {
             User user = userDetails.user;
+
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
             return new ResponseEntity<>(new BaseResponse<>(userService.updateProfile(user, userProfileRequest)), OK);
         }
         catch (BaseException exception) {

@@ -265,22 +265,29 @@ public class UserService {
             amazonS3.deleteObject(bucket, "profiles/" + originalImageKey);
         }
 
-        // S3에 새로운 이미지 업로드
         String newProfileImage;
-        try {
-            String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(profileImage.getSize());
-            metadata.setContentType(profileImage.getContentType());
-
-            amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
-            newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
-        } catch (IOException e) {
-            throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
+        // - 변경할 이미지가 없는 경우
+        if (profileImage.isEmpty()) {
+            newProfileImage = null;
         }
 
-        // DB에 새로운 S3 URL 저장
+        // - S3에 새로운 이미지 업로드
+        else {
+            try {
+                String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(profileImage.getSize());
+                metadata.setContentType(profileImage.getContentType());
+
+                amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
+                newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
+            } catch (IOException e) {
+                throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        // DB에 변경된 S3 URL 저장
         User updatedUser = user.updateProfileUrl(newProfileImage);
         userRepository.save(updatedUser);
 
