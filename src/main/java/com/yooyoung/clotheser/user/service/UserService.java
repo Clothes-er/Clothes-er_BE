@@ -106,7 +106,12 @@ public class UserService {
             refreshTokenRepository.save(newToken);
         }
 
-        return new LoginResponse(user.getEmail(), user.getIsFirstLogin(), tokenResponse);
+        // 최초 로그인이 아닐 경우, 마지막으로 로그인한 시간 업데이트
+        if (!user.getIsFirstLogin()) {
+            userRepository.save(user.updateLastLoginAt());
+        }
+
+        return new LoginResponse(user, tokenResponse);
     }
 
     // TODO: 액세스 토큰 재발급
@@ -141,31 +146,38 @@ public class UserService {
         List<String> bodyShapes = firstLoginRequest.getBodyShapes();
         if (bodyShapes != null) {
             for (String shape : bodyShapes) {
-                BodyShape bodyShape = BodyShape.builder()
-                        .user(updatedUser)
-                        .shape(shape)
-                        .build();
-                bodyShapeRepository.save(bodyShape);
+                // 공백만 있는 경우는 저장 X
+                if (!shape.trim().isEmpty()) {
+                    BodyShape bodyShape = BodyShape.builder()
+                            .user(updatedUser)
+                            .shape(shape)
+                            .build();
+                    bodyShapeRepository.save(bodyShape);
+                }
             }
         }
         List<String> categories = firstLoginRequest.getCategories();
         if (categories != null) {
             for (String category : categories) {
-                FavClothes favClothes = FavClothes.builder()
-                        .user(updatedUser)
-                        .category(category)
-                        .build();
-                favClothesRepository.save(favClothes);
+                if (!category.trim().isEmpty()) {
+                    FavClothes favClothes = FavClothes.builder()
+                            .user(updatedUser)
+                            .category(category)
+                            .build();
+                    favClothesRepository.save(favClothes);
+                }
             }
         }
         List<String> styles = firstLoginRequest.getStyles();
         if (styles != null) {
             for (String style : styles) {
-                FavStyle favStyle = FavStyle.builder()
-                        .user(updatedUser)
-                        .style(style)
-                        .build();
-                favStyleRepository.save(favStyle);
+                if (!style.trim().isEmpty()) {
+                    FavStyle favStyle = FavStyle.builder()
+                            .user(updatedUser)
+                            .style(style)
+                            .build();
+                    favStyleRepository.save(favStyle);
+                }
             }
         }
 
@@ -255,26 +267,91 @@ public class UserService {
             amazonS3.deleteObject(bucket, "profiles/" + originalImageKey);
         }
 
-        // S3에 새로운 이미지 업로드
         String newProfileImage;
-        try {
-            String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(profileImage.getSize());
-            metadata.setContentType(profileImage.getContentType());
-
-            amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
-            newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
-        } catch (IOException e) {
-            throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
+        // - 변경할 이미지가 없는 경우
+        if (profileImage.isEmpty()) {
+            newProfileImage = null;
         }
 
-        // DB에 새로운 S3 URL 저장
+        // - S3에 새로운 이미지 업로드
+        else {
+            try {
+                String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+
+                ObjectMetadata metadata = new ObjectMetadata();
+                metadata.setContentLength(profileImage.getSize());
+                metadata.setContentType(profileImage.getContentType());
+
+                amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
+                newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
+            } catch (IOException e) {
+                throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        // DB에 변경된 S3 URL 저장
         User updatedUser = user.updateProfileUrl(newProfileImage);
         userRepository.save(updatedUser);
 
-        return new ProfileImageResponse(user.getNickname(), user.getEmail(), user.getProfileUrl());
+        return new ProfileImageResponse(user);
+    }
+
+    // 프로필(스펙 및 취향) 수정
+    public UserProfileResponse updateProfile(User user, UserProfileRequest userProfileRequest) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 새로운 스펙으로 수정
+        User updatedUser = user.updateSpec(userProfileRequest);
+        userRepository.save(updatedUser);
+
+        // 기존 취향 삭제 후 새로 저장
+        bodyShapeRepository.deleteAllByUserId(user.getId());
+        favClothesRepository.deleteAllByUserId(user.getId());
+        favStyleRepository.deleteAllByUserId(user.getId());
+
+        List<String> bodyShapes = userProfileRequest.getBodyShapes();
+        if (bodyShapes != null) {
+            for (String shape : bodyShapes) {
+                // 공백만 있는 경우는 저장 X
+                if (!shape.trim().isEmpty()) {
+                    BodyShape bodyShape = BodyShape.builder()
+                            .user(updatedUser)
+                            .shape(shape)
+                            .build();
+                    bodyShapeRepository.save(bodyShape);
+                }
+            }
+        }
+        List<String> categories = userProfileRequest.getCategories();
+        if (categories != null) {
+            for (String category : categories) {
+                if (!category.trim().isEmpty()) {
+                    FavClothes favClothes = FavClothes.builder()
+                            .user(updatedUser)
+                            .category(category)
+                            .build();
+                    favClothesRepository.save(favClothes);
+                }
+            }
+        }
+        List<String> styles = userProfileRequest.getStyles();
+        if (styles != null) {
+            for (String style : styles) {
+                if (!style.trim().isEmpty()) {
+                    FavStyle favStyle = FavStyle.builder()
+                            .user(updatedUser)
+                            .style(style)
+                            .build();
+                    favStyleRepository.save(favStyle);
+                }
+            }
+        }
+
+        return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 
 }

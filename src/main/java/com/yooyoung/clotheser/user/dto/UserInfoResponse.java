@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Setter(AccessLevel.NONE)
@@ -30,6 +32,10 @@ public class UserInfoResponse {
     @Schema(title = "생일", example = "1999-08-22")
     private LocalDate birthday;
 
+    @Schema(title = "회원 정보 수정한 시간", example = "2024년 06월 20일 19:13:36")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime updatedAt;
+
     public UserInfoResponse(User user) {
         this.profileUrl = user.getProfileUrl();
         this.name = user.getName();
@@ -37,6 +43,7 @@ public class UserInfoResponse {
         this.email = user.getEmail();
         this.phoneNumber = user.getPhoneNumber();
         this.birthday = user.getBirthday();
+        this.updatedAt = user.getUpdatedAt();
     }
 
 }
