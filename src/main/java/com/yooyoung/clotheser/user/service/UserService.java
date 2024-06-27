@@ -141,31 +141,38 @@ public class UserService {
         List<String> bodyShapes = firstLoginRequest.getBodyShapes();
         if (bodyShapes != null) {
             for (String shape : bodyShapes) {
-                BodyShape bodyShape = BodyShape.builder()
-                        .user(updatedUser)
-                        .shape(shape)
-                        .build();
-                bodyShapeRepository.save(bodyShape);
+                // 공백만 있는 경우는 저장 X
+                if (!shape.trim().isEmpty()) {
+                    BodyShape bodyShape = BodyShape.builder()
+                            .user(updatedUser)
+                            .shape(shape)
+                            .build();
+                    bodyShapeRepository.save(bodyShape);
+                }
             }
         }
         List<String> categories = firstLoginRequest.getCategories();
         if (categories != null) {
             for (String category : categories) {
-                FavClothes favClothes = FavClothes.builder()
-                        .user(updatedUser)
-                        .category(category)
-                        .build();
-                favClothesRepository.save(favClothes);
+                if (!category.trim().isEmpty()) {
+                    FavClothes favClothes = FavClothes.builder()
+                            .user(updatedUser)
+                            .category(category)
+                            .build();
+                    favClothesRepository.save(favClothes);
+                }
             }
         }
         List<String> styles = firstLoginRequest.getStyles();
         if (styles != null) {
             for (String style : styles) {
-                FavStyle favStyle = FavStyle.builder()
-                        .user(updatedUser)
-                        .style(style)
-                        .build();
-                favStyleRepository.save(favStyle);
+                if (!style.trim().isEmpty()) {
+                    FavStyle favStyle = FavStyle.builder()
+                            .user(updatedUser)
+                            .style(style)
+                            .build();
+                    favStyleRepository.save(favStyle);
+                }
             }
         }
 
