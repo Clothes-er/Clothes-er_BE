@@ -6,7 +6,8 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.user.domain.*;
-import com.yooyoung.clotheser.user.dto.*;
+import com.yooyoung.clotheser.user.dto.request.*;
+import com.yooyoung.clotheser.user.dto.response.*;
 import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
@@ -52,7 +53,7 @@ public class UserService {
         if (userRepository.existsByNicknameAndDeletedAtNull(signUpRequest.getNickname())) {
             throw new BaseException(NICKNAME_EXISTS, CONFLICT);
         }
-        // - 이메일 => TODO: 이메일 인중
+        // - 이메일
         if (userRepository.existsByEmailAndDeletedAtNull(signUpRequest.getEmail())) {
             throw new BaseException(EMAIL_EXISTS, CONFLICT);
         }

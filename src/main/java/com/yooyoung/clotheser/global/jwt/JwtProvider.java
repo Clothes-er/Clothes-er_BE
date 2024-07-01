@@ -2,7 +2,7 @@ package com.yooyoung.clotheser.global.jwt;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
-import com.yooyoung.clotheser.user.dto.TokenResponse;
+import com.yooyoung.clotheser.user.dto.response.TokenResponse;
 import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
