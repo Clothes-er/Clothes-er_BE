@@ -79,7 +79,8 @@ public enum BaseResponseStatus {
     // Common
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
-    S3_UPLOAD_ERROR(false, 4002, "S3 이미지 업로드에 실패하였습니다.");
+    S3_UPLOAD_ERROR(false, 4002, "S3 이미지 업로드에 실패하였습니다."),
+    EMAIL_SERVER_ERROR(false, 4003, "이메일 전송 시 오류가 발생하였습니다.");
 
 
     private final boolean isSuccess;

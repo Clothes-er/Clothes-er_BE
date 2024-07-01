@@ -5,7 +5,9 @@ import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
-import com.yooyoung.clotheser.user.dto.*;
+import com.yooyoung.clotheser.user.dto.request.*;
+import com.yooyoung.clotheser.user.dto.response.*;
+import com.yooyoung.clotheser.user.service.MailService;
 import com.yooyoung.clotheser.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,7 @@ import static org.springframework.http.HttpStatus.*;
 public class UserController {
 
     private final UserService userService;
+    private final MailService mailService;
 
     @Operation(summary = "회원가입", description = "회원가입을 한다.")
     @PostMapping("/signup")
@@ -68,6 +71,26 @@ public class UserController {
     public ResponseEntity<BaseResponse<BaseResponseStatus>> checkNickname(@PathVariable String nickname) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(userService.checkNickname(nickname)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "이메일 인증 번호 전송", description = "입력한 이메일에 인증 번호를 전송한다.")
+    @PostMapping("/check-email")
+    public ResponseEntity<BaseResponse<EmailResponse>> sendEmail(@Valid @RequestBody EmailRequest emailRequest,
+                                                                 BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(mailService.sendEmail(emailRequest)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
@@ -193,7 +216,7 @@ public class UserController {
     @Operation(summary = "프로필 사진 수정", description = "회원의 프로필 사진을 수정한다.")
     @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<ProfileImageResponse>> updateProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                             @RequestPart("image") MultipartFile image) {
+                                                                                 @RequestPart("image") MultipartFile image) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(userService.updateProfileImage(user, image)), OK);
