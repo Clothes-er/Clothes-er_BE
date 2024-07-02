@@ -1,6 +1,9 @@
 package com.yooyoung.clotheser.user.service;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.global.util.RedisUtil;
+import com.yooyoung.clotheser.user.dto.request.EmailCheckRequest;
 import com.yooyoung.clotheser.user.dto.request.EmailRequest;
 import com.yooyoung.clotheser.user.dto.response.EmailResponse;
 import com.yooyoung.clotheser.user.repository.UserRepository;
@@ -27,6 +30,9 @@ public class MailService {
 
     @Autowired
     private JavaMailSender javaMailSender;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Value("${spring.mail.username}" + "@naver.com")
     private String senderEmail;
@@ -87,7 +93,31 @@ public class MailService {
         MimeMessage message = createEmail(email);
         javaMailSender.send(message);
 
+        // 인증 번호 유효 시간 설정 (5분)
+        redisUtil.setDataExpire(Integer.toString(authCode),email, 60 * 5L);
+
         return new EmailResponse(authCode);
+    }
+
+    // 이메일 인증 번호 검증
+    public BaseResponseStatus checkEmail(EmailCheckRequest emailCheckRequest) throws BaseException {
+
+        String authCode = String.valueOf(emailCheckRequest.getAuthCode());
+        String email = emailCheckRequest.getEmail();
+
+        // Redis에 인증 번호가 없는 경우 (ex. 인증 번호를 발급 받지 않음, 유효 시간이 지남)
+        if (redisUtil.getData(authCode) == null) {
+            throw new BaseException(INVALID_AUTH_CODE, BAD_REQUEST);
+        }
+
+        // 이메일과 인증 번호가 일치하는지 확인
+        if (redisUtil.getData(authCode).equals(email)) {
+            return SUCCESS;
+        }
+        else {
+            throw new BaseException(FAILED_TO_CHECK_EMAIL, BAD_REQUEST);
+        }
+
     }
 
 }

@@ -38,7 +38,7 @@ public class BaseResponse<T> {
         this.result = result;
     }
 
-    // 요청에 실패한 경우
+    // 요청에 실패한 경우 or 성공 시 메시지만 보낼 경우
     public BaseResponse(BaseResponseStatus status) {
         this.isSuccess = status.isSuccess();
         this.message = status.getMessage();

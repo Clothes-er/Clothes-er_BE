@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger/**").permitAll()  // swagger 엔드포인트
                         .requestMatchers("/api/v1/users/signup").permitAll()
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
+                        .requestMatchers("/api/v1/users/send-email").permitAll()
                         .requestMatchers("/api/v1/users/check-email").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
                         .requestMatchers("/ws/**").permitAll()  // 웹소켓 엔드포인트 허용

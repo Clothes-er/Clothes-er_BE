@@ -78,7 +78,7 @@ public class UserController {
     }
 
     @Operation(summary = "이메일 인증 번호 전송", description = "입력한 이메일에 인증 번호를 전송한다.")
-    @PostMapping("/check-email")
+    @PostMapping("/send-email")
     public ResponseEntity<BaseResponse<EmailResponse>> sendEmail(@Valid @RequestBody EmailRequest emailRequest,
                                                                  BindingResult bindingResult) {
         try {
@@ -91,6 +91,26 @@ public class UserController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(mailService.sendEmail(emailRequest)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "이메일 인증 번호 검증", description = "입력한 인증 번호를 검증한다.")
+    @PostMapping("/check-email")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> checkEmail(@Valid @RequestBody EmailCheckRequest emailCheckRequest,
+                                                                       BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(mailService.checkEmail(emailCheckRequest)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
