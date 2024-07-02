@@ -40,6 +40,9 @@ public enum BaseResponseStatus {
     // 로그인
     LOGIN_MISMATCH(false, 2130, "이메일과 비밀번호가 일치하지 않습니다."),
 
+    // 이메일 인증
+    INVALID_AUTH_CODE(false, 2140, "유효한 인증 번호가 아닙니다."),
+    FAILED_TO_CHECK_EMAIL(false, 2141, "이메일 인증에 실패하였습니다."),
 
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
@@ -79,7 +82,8 @@ public enum BaseResponseStatus {
     // Common
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
-    S3_UPLOAD_ERROR(false, 4002, "S3 이미지 업로드에 실패하였습니다.");
+    S3_UPLOAD_ERROR(false, 4002, "S3 이미지 업로드에 실패하였습니다."),
+    EMAIL_SERVER_ERROR(false, 4003, "이메일 전송 시 오류가 발생하였습니다.");
 
 
     private final boolean isSuccess;

@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.user.dto;
+package com.yooyoung.clotheser.user.dto.request;
 
 import com.yooyoung.clotheser.user.domain.Gender;
 import io.swagger.v3.oas.annotations.media.Schema;

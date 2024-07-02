@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.user.dto;
+package com.yooyoung.clotheser.user.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.user.domain.User;

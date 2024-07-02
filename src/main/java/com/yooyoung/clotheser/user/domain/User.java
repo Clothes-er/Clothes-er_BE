@@ -1,7 +1,7 @@
 package com.yooyoung.clotheser.user.domain;
 
-import com.yooyoung.clotheser.user.dto.FirstLoginRequest;
-import com.yooyoung.clotheser.user.dto.UserProfileRequest;
+import com.yooyoung.clotheser.user.dto.request.FirstLoginRequest;
+import com.yooyoung.clotheser.user.dto.request.UserProfileRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

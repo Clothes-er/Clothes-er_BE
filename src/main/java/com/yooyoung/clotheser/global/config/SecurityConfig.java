@@ -19,11 +19,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -50,6 +47,8 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger/**").permitAll()  // swagger 엔드포인트
                         .requestMatchers("/api/v1/users/signup").permitAll()
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
+                        .requestMatchers("/api/v1/users/send-email").permitAll()
+                        .requestMatchers("/api/v1/users/check-email").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
                         .requestMatchers("/ws/**").permitAll()  // 웹소켓 엔드포인트 허용
                         .anyRequest().authenticated()   // 지정된 URL 이외의 요청은 인증 필요
