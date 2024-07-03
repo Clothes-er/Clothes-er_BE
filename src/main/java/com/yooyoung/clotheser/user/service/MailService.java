@@ -43,7 +43,8 @@ public class MailService {
 
     // 임의의 6자리 양수 반환
     public void createAuthCode() {
-        authCode = (int)(Math.random() * (90000)) + 100000; // random() * (최댓값 - 최소값 + 1) + 최소값
+        // 100000 ~ 999999
+        authCode = (int)(Math.random() * (900000)) + 100000;
     }
 
     // 이메일 작성
