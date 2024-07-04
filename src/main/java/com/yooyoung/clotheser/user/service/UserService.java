@@ -5,12 +5,15 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
+import com.yooyoung.clotheser.global.util.AESUtil;
+import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.user.domain.*;
 import com.yooyoung.clotheser.user.dto.request.*;
 import com.yooyoung.clotheser.user.dto.response.*;
 import com.yooyoung.clotheser.user.repository.*;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,11 @@ public class UserService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+    @Autowired
+    private AESUtil aesUtil;
+    @Value("${aes.key}")
+    private String AES_KEY;
 
     private final UserRepository userRepository;
     private final BodyShapeRepository bodyShapeRepository;
@@ -188,8 +196,8 @@ public class UserService {
 
     // 로그아웃
 
-    // 회원 프로필 조회
-    public UserProfileResponse getProfile(User user) throws BaseException {
+    // 내 프로필 조회
+    public UserProfileResponse getMyProfile(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -213,6 +221,42 @@ public class UserService {
         return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 
+    // 다른 회원의 프로필 조회
+    public UserProfileResponse getProfile(User user, String userSid) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 조회하려는 회원 불러오기
+        Long userId;
+        try {
+            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
+        }
+        User owner = userRepository.findByIdAndDeletedAtNull(userId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+
+        // 체형, 카테고리, 스타일 추가
+        List<String> bodyShapes = bodyShapeRepository.findAllByUserId(userId)
+                .stream()
+                .map(BodyShape::getShape)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<String> categories = favClothesRepository.findAllByUserId(userId)
+                .stream()
+                .map(FavClothes::getCategory)
+                .collect(Collectors.toCollection(ArrayList::new));
+        List<String> styles = favStyleRepository.findAllByUserId(userId)
+                .stream()
+                .map(FavStyle::getStyle)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        return new UserProfileResponse(owner, bodyShapes, categories, styles);
+    }
+
     // 회원 정보 조회
     public UserInfoResponse getUserInfo(User user) throws BaseException {
 
@@ -223,7 +267,6 @@ public class UserService {
 
         return new UserInfoResponse(user);
     }
-
 
     // 주소 조회
     public AddressResponse getAddress(User user) throws BaseException {

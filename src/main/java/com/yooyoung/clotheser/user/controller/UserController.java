@@ -174,12 +174,26 @@ public class UserController {
 
     // TODO: 로그아웃
 
-    @Operation(summary = "프로필 조회", description = "회원의 프로필을 조회한다.")
+    @Operation(summary = "내 프로필 조회", description = "나의 프로필을 조회한다.")
     @GetMapping("/profile")
-    public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BaseResponse<UserProfileResponse>> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
-            return new ResponseEntity<>(new BaseResponse<>(userService.getProfile(user)), OK);
+            return new ResponseEntity<>(new BaseResponse<>(userService.getMyProfile(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "다른 회원 프로필 조회", description = "다른 회원의 프로필을 조회한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @GetMapping("/profile/{userSid}")
+    public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                        @PathVariable String userSid) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.getProfile(user, userSid)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

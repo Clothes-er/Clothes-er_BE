@@ -25,6 +25,8 @@ public class UserProfileResponse {
     private int level;
     @Schema(title = "대여 횟수", example = "4")
     private int rentalCount;
+    @Schema(title = "옷장 점수", example = "10")
+    private int closetScore;
 
     @Schema(title = "성별", example = "FEMALE")
     private Gender gender;
@@ -52,6 +54,7 @@ public class UserProfileResponse {
 
         this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
+        this.closetScore = user.getClosetScore();
 
         this.gender = user.getGender();
         this.height = user.getHeight();
