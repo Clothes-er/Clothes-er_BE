@@ -3,6 +3,8 @@ package com.yooyoung.clotheser.rental.service;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.util.AESUtil;
+import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.repository.*;
@@ -10,6 +12,8 @@ import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +30,11 @@ import static org.springframework.http.HttpStatus.*;
 @Transactional
 @RequiredArgsConstructor
 public class RentalService {
+
+    @Autowired
+    private AESUtil aesUtil;
+    @Value("${aes.key}")
+    private String AES_KEY;
 
     private final RentalImageService rentalImageService;
 
@@ -66,7 +75,16 @@ public class RentalService {
             rentalPriceRepository.save(rentalPrice);
         }
 
-        return new RentalResponse(user, rental, imgUrls, rentalRequest.getPrices());
+        // 본인의 id 암호화하기
+        String userSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()), AES_KEY);
+            userSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        return new RentalResponse(user, userSid, rental, imgUrls, rentalRequest.getPrices());
 
     }
 
@@ -97,7 +115,16 @@ public class RentalService {
             prices.add(new RentalPriceDto(rentalPrice.getDays(), rentalPrice.getPrice()));
         }
 
-        return new RentalResponse(user, rental, imgUrls, prices);
+        // 대여글 작성자의 id 암호화하기
+        String userSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()), AES_KEY);
+            userSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        return new RentalResponse(user, userSid, rental, imgUrls, prices);
     }
 
     /* 대여글 목록 조회 */
@@ -123,6 +150,15 @@ public class RentalService {
 
         List<RentalListReponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
+            // userId 암호화하기
+            String userSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()), AES_KEY);
+                userSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
             // 첫 번째 이미지 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
@@ -131,7 +167,7 @@ public class RentalService {
             Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
             int minPrice = optionalPrice.orElse(0);
 
-            responses.add(new RentalListReponse(rental, imgUrl, minPrice));
+            responses.add(new RentalListReponse(rental, userSid, imgUrl, minPrice));
         }
 
         return responses;

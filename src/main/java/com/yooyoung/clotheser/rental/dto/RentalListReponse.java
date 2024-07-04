@@ -14,6 +14,9 @@ public class RentalListReponse {
     @Schema(title = "대여글 id", example = "3")
     private Long id;
 
+    @Schema(title = "암호화된 회원 id", example = "xfweriok12")
+    private String userSid;
+
     @Schema(title = "대여글 썸네일 (첫 번째 사진)", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/baddfbcb-bb3f-40cf-9cfb-af6276c118b9_short_neat_2.png")
     private String imgUrl;
 
@@ -29,8 +32,9 @@ public class RentalListReponse {
     @Schema(title = "대여글 생성 시간", example = "2시간 전")
     private String createdAt;
 
-    public RentalListReponse(Rental rental, String imgUrl, int minPrice) {
+    public RentalListReponse(Rental rental, String userSid, String imgUrl, int minPrice) {
         this.id = rental.getId();
+        this.userSid = userSid;
         this.imgUrl = imgUrl;
         this.nickname = rental.getUser().getNickname();
         this.title = rental.getTitle();
