@@ -12,11 +12,15 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 
 import com.yooyoung.clotheser.global.entity.ChatRoomException;
+import com.yooyoung.clotheser.global.util.AESUtil;
+import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +35,11 @@ import static org.springframework.http.HttpStatus.*;
 @Transactional
 @RequiredArgsConstructor
 public class ChatService {
+
+    @Autowired
+    private AESUtil aesUtil;
+    @Value("${aes.key}")
+    private String AES_KEY;
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -73,6 +82,15 @@ public class ChatService {
                 .build();
         chatRoomRepository.save(chatRoom);
 
+        // 판매자의 id 암호화하기
+        String lenderSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(chatRoom.getLender().getId()), AES_KEY);
+            lenderSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
         // 첫 번째 이미지 불러오기
         Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
         String rentalImgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
@@ -80,7 +98,7 @@ public class ChatService {
         // 가격 정보 중에 제일 싼 가격 불러오기
         Integer minPrice = rentalPriceRepository.findMinPrice(rental).orElse(null);
 
-        return new ChatRoomResponse(chatRoom, chatRoom.getLender().getNickname(), rental, rentalImgUrl, minPrice);
+        return new ChatRoomResponse(chatRoom, lenderSid, chatRoom.getLender().getNickname(), rental, rentalImgUrl, minPrice);
 
     }
 
@@ -105,6 +123,15 @@ public class ChatService {
                 opponent = chatRoom.getBuyer();
             }
 
+            // 상대방의 id 암호화하기
+            String opponentSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()), AES_KEY);
+                opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
             // 대여 상태 불러오기
             RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
                     chatRoom.getBuyer().getId(),
@@ -119,7 +146,7 @@ public class ChatService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, rentalInfo, recentMessage, imgUrl, opponent));
+            chatRoomResponseList.add(new ChatRoomListResponse(chatRoom, opponentSid, rentalInfo, recentMessage, imgUrl, opponent));
         }
         return chatRoomResponseList;
     }
@@ -181,9 +208,19 @@ public class ChatService {
             opponent = chatRoom.getBuyer();
         }
 
+        // 상대방의 id 암호화하기
+        String opponentSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()), AES_KEY);
+            opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
         // 유저 기반 채팅방인지 확인
         if (chatRoom.getRental() == null) {
-            return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, null, null, null, null);
+            return new ChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
+                    null, null, null, null);
         }
 
         // 첫 번째 이미지 불러오기
@@ -210,7 +247,8 @@ public class ChatService {
             rentalState = null;
         }
 
-        return new ChatRoomResponse(chatRoom, opponent.getNickname(), chatMessageResponseList, rentalImgUrl, minPrice, isChecked, rentalState);
+        return new ChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
+                rentalImgUrl, minPrice, isChecked, rentalState);
 
     }
 }

@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.rental.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
@@ -20,6 +21,9 @@ public class RentalResponse {
     private Long id;
 
     // 회원 정보
+    @Schema(title = "암호화된 회원 id", example = "xfweriok12")
+    private String userSid;
+
     @Schema(title = "작성자 프로필 사진 URL", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/profiles/noonsong.png")
     private String profileUrl;
 
@@ -62,9 +66,10 @@ public class RentalResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public RentalResponse(User user, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
+    public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
         this.id = rental.getId();
 
+        this.userSid = userSid;
         this.profileUrl = rental.getUser().getProfileUrl();
         this.nickname = rental.getUser().getNickname();
         this.isWriter = rental.getUser().getId().equals(user.getId());

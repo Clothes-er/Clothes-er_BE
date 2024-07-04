@@ -23,6 +23,9 @@ public class ChatRoomResponse {
     private String buyerNickname;
     @Schema(title = "판매자 닉네임", example = "황숙명")
     private String lenderNickname;
+
+    @Schema(title = "암호화된 상대방 id", example = "xfweriok12")
+    private String opponentSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String opponentNickname;
 
@@ -46,11 +49,13 @@ public class ChatRoomResponse {
     private List<ChatMessageResponse> messages;
 
     /* 채팅방 생성 시 쓰는 생성자 */
-    public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname,
+    public ChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname,
                             Rental rental, String rentalImgUrl, Integer minPrice) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
+
+        this.opponentSid = opponentSid;
         this.opponentNickname = opponentNickname;
 
         this.rentalId = rental.getId();
@@ -60,11 +65,13 @@ public class ChatRoomResponse {
     }
 
     /* 채팅방 조회 시 쓰는 생성자 */
-    public ChatRoomResponse(ChatRoom chatRoom, String opponentNickname, List<ChatMessageResponse> messages,
+    public ChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages,
                             String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
+
+        this.opponentSid = opponentSid;
         this.opponentNickname = opponentNickname;
 
         this.rentalId = chatRoom.getRental().getId();
