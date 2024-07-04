@@ -22,6 +22,8 @@ public class ChatRoomListResponse {
     private Long id;
 
     // 상대방 정보
+    @Schema(title = "상대방 id", example = "xfweriok12")
+    private String userSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String nickname;
     @Schema(title = "상대방 프로필 사진 URL", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/profiles/noonsong.png")
@@ -50,9 +52,11 @@ public class ChatRoomListResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private String recentMessageTime;
 
-    public ChatRoomListResponse(ChatRoom chatRoom, RentalInfo rentalInfo, String recentMessage, String rentalImgUrl, User opponent) {
+    public ChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalInfo rentalInfo,
+                                String recentMessage, String rentalImgUrl, User opponent) {
         this.id = chatRoom.getId();
 
+        this.userSid = userSid;
         this.nickname = opponent.getNickname();
         this.profileImgUrl = opponent.getProfileUrl();
 
@@ -67,7 +71,6 @@ public class ChatRoomListResponse {
 
         this.recentMessage = recentMessage;
         this.recentMessageTime = Time.calculateTime(chatRoom.getUpdatedAt());
-
 
     }
 
