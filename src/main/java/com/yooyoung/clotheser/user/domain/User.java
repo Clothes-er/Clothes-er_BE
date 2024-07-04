@@ -65,8 +65,12 @@ public class User {
     @ColumnDefault("0")
     private int rentalCount;
 
+    @ColumnDefault("10")
+    @Builder.Default
+    private int closetScore = 10;
+
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    @ColumnDefault("true")     // DB 기본값 설정
+    @ColumnDefault("true")      // DB 기본값 설정
     @Builder.Default            // 객체 생성 시 기본값 설정
     private Boolean isFirstLogin = true;
 
