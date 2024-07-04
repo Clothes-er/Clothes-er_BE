@@ -22,7 +22,7 @@ public class ChatRoomListResponse {
     private Long id;
 
     // 상대방 정보
-    @Schema(title = "상대방 id", example = "xfweriok12")
+    @Schema(title = "암호화된 상대방 id", example = "xfweriok12")
     private String userSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String nickname;
