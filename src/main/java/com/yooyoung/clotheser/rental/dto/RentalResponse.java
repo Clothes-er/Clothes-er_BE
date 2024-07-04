@@ -66,7 +66,7 @@ public class RentalResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) throws BaseException {
+    public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
         this.id = rental.getId();
 
         this.userSid = userSid;
