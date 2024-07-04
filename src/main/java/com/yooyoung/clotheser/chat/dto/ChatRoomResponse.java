@@ -45,7 +45,7 @@ public class ChatRoomResponse {
     @Schema(title = "대여 상태", example = "RETURNED")
     private RentalState rentalState;
 
-    @Schema(description = "채팅 메시지 목록", type = "array", example = "[\"대여 가능한가요?\", \"네 가능합니다.\"]")
+    @Schema(description = "채팅 메시지 목록", type = "array")
     private List<ChatMessageResponse> messages;
 
     /* 채팅방 생성 시 쓰는 생성자 */

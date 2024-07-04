@@ -1,7 +1,6 @@
 package com.yooyoung.clotheser.rental.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
