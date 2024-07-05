@@ -1,7 +1,7 @@
 package com.yooyoung.clotheser.user.domain;
 
 import com.yooyoung.clotheser.user.dto.request.FirstLoginRequest;
-import com.yooyoung.clotheser.user.dto.request.UserProfileRequest;
+import com.yooyoung.clotheser.user.dto.request.UserStyleRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -158,19 +158,19 @@ public class User {
         return this;
     }
 
-    // 프로필 이미지 수정
-    public User updateProfileUrl(String profileUrl) {
+    // 프로필 수정
+    public User updateProfile(String profileUrl, String nickname) {
         this.profileUrl = profileUrl;
+        this.nickname = nickname;
         this.updatedAt = LocalDateTime.now();
         return this;
     }
 
     // 스펙 수정
-    public User updateSpec(UserProfileRequest userProfileRequest) {
-        this.gender = userProfileRequest.getGender();
-        this.height = userProfileRequest.getHeight();
-        this.weight = userProfileRequest.getWeight();
-        this.shoeSize = userProfileRequest.getShoeSize();
+    public User updateSpec(UserStyleRequest userStyleRequest) {
+        this.height = userStyleRequest.getHeight();
+        this.weight = userStyleRequest.getWeight();
+        this.shoeSize = userStyleRequest.getShoeSize();
         this.updatedAt = LocalDateTime.now();
         return this;
     }

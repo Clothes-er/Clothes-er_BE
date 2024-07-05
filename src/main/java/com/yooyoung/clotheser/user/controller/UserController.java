@@ -247,23 +247,34 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "프로필 사진 수정", description = "회원의 프로필 사진을 수정한다.")
-    @PatchMapping(value = "/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<ProfileImageResponse>> updateProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                                 @RequestPart("image") MultipartFile image) {
+    @Operation(summary = "프로필 수정", description = "회원의 프로필 사진과 닉네임을 수정한다.")
+    @PatchMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<PatchUserProfileReponse>> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                            @RequestPart(value = "image", required = false) MultipartFile image,
+                                                                            @Valid @RequestPart("nickname") UserProfileRequest userProfileRequest,
+                                                                            BindingResult bindingResult) {
         try {
             User user = userDetails.user;
-            return new ResponseEntity<>(new BaseResponse<>(userService.updateProfileImage(user, image)), OK);
+
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(userService.updateProfile(user, image, userProfileRequest.getNickname())), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
 
-    @Operation(summary = "프로필 수정", description = "회원의 프로필(스펙 및 취향)을 수정한다.")
-    @PatchMapping("/profile")
-    public ResponseEntity<BaseResponse<UserProfileResponse>> updateProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                           @Valid @RequestBody UserProfileRequest userProfileRequest,
+    @Operation(summary = "스펙 및 취향 수정", description = "회원의 스펙과 취향을 수정한다.")
+    @PatchMapping("/style")
+    public ResponseEntity<BaseResponse<UserProfileResponse>> updateStyle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                           @Valid @RequestBody UserStyleRequest userStyleRequest,
                                                                            BindingResult bindingResult) {
         try {
             User user = userDetails.user;
@@ -276,7 +287,7 @@ public class UserController {
                 }
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(userService.updateProfile(user, userProfileRequest)), OK);
+            return new ResponseEntity<>(new BaseResponse<>(userService.updateStyle(user, userStyleRequest)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

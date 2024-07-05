@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -296,28 +298,31 @@ public class UserService {
 
     }
 
-    // 프로필 사진 수정
-    public ProfileImageResponse updateProfileImage(User user, MultipartFile profileImage) throws BaseException {
+    // 프로필 수정 (프로필 사진 + 닉네임)
+    public PatchUserProfileReponse updateProfile(User user, MultipartFile profileImage, String nickname) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
-        // 기존 이미지가 있는 경우 S3에서 삭제
+        // 1. 프로필 사진 수정
+        // 기존 이미지 S3에서 삭제
         if (user.getProfileUrl() != null) {
             // 객체 key 추출
             String originalImageKey = user.getProfileUrl().substring(user.getProfileUrl().lastIndexOf("/") + 1);
-            amazonS3.deleteObject(bucket, "profiles/" + originalImageKey);
+            String decodedImageKey = URLDecoder.decode(originalImageKey, StandardCharsets.UTF_8);
+            amazonS3.deleteObject(bucket, "profiles/" + decodedImageKey);
         }
 
+        // 새로운 이미지 업로드
         String newProfileImage;
-        // - 변경할 이미지가 없는 경우
-        if (profileImage.isEmpty()) {
+
+        // 변경할 이미지가 없는 경우
+        if (profileImage == null || profileImage.isEmpty()) {
             newProfileImage = null;
         }
-
-        // - S3에 새로운 이미지 업로드
+        // 있으면 S3에 업로드
         else {
             try {
                 String fileName = "profiles/" + UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
@@ -333,15 +338,19 @@ public class UserService {
             }
         }
 
-        // DB에 변경된 S3 URL 저장
-        User updatedUser = user.updateProfileUrl(newProfileImage);
-        userRepository.save(updatedUser);
+        // 2. 닉네임 수정
+        if (!user.getNickname().equals(nickname) && userRepository.existsByNicknameAndDeletedAtNull(nickname)) {
+            throw new BaseException(NICKNAME_EXISTS, CONFLICT);
+        }
 
-        return new ProfileImageResponse(user);
+        // DB에 변경된 정보 저장
+        User updatedUser = user.updateProfile(newProfileImage, nickname);
+        userRepository.save(updatedUser);
+        return new PatchUserProfileReponse(updatedUser);
     }
 
-    // 프로필(스펙 및 취향) 수정
-    public UserProfileResponse updateProfile(User user, UserProfileRequest userProfileRequest) throws BaseException {
+    // 스펙 및 취향 수정
+    public UserProfileResponse updateStyle(User user, UserStyleRequest userStyleRequest) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -349,7 +358,7 @@ public class UserService {
         }
 
         // 새로운 스펙으로 수정
-        User updatedUser = user.updateSpec(userProfileRequest);
+        User updatedUser = user.updateSpec(userStyleRequest);
         userRepository.save(updatedUser);
 
         // 기존 취향 삭제 후 새로 저장
@@ -357,7 +366,7 @@ public class UserService {
         favClothesRepository.deleteAllByUserId(user.getId());
         favStyleRepository.deleteAllByUserId(user.getId());
 
-        List<String> bodyShapes = userProfileRequest.getBodyShapes();
+        List<String> bodyShapes = userStyleRequest.getBodyShapes();
         if (bodyShapes != null) {
             for (String shape : bodyShapes) {
                 // 공백만 있는 경우는 저장 X
@@ -370,7 +379,7 @@ public class UserService {
                 }
             }
         }
-        List<String> categories = userProfileRequest.getCategories();
+        List<String> categories = userStyleRequest.getCategories();
         if (categories != null) {
             for (String category : categories) {
                 if (!category.trim().isEmpty()) {
@@ -382,7 +391,7 @@ public class UserService {
                 }
             }
         }
-        List<String> styles = userProfileRequest.getStyles();
+        List<String> styles = userStyleRequest.getStyles();
         if (styles != null) {
             for (String style : styles) {
                 if (!style.trim().isEmpty()) {
