@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -309,7 +311,8 @@ public class UserService {
         if (user.getProfileUrl() != null) {
             // 객체 key 추출
             String originalImageKey = user.getProfileUrl().substring(user.getProfileUrl().lastIndexOf("/") + 1);
-            amazonS3.deleteObject(bucket, "profiles/" + originalImageKey);
+            String decodedImageKey = URLDecoder.decode(originalImageKey, StandardCharsets.UTF_8);
+            amazonS3.deleteObject(bucket, "profiles/" + decodedImageKey);
         }
 
         // 새로운 이미지 업로드
