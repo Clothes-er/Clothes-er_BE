@@ -7,11 +7,13 @@ import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +35,20 @@ public class ClosetController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(closetService.getMyRentals(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "남의 대여글 목록 조회", description = "'보유 - 공유 등록' 탭에서 남의 대여글 목록 전체를 조회한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @GetMapping("/{userSid}/rentals")
+    public ResponseEntity<BaseResponse<List<UserRentalListResponse>>> getUserRentals(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                                     @PathVariable String userSid){
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(closetService.getUserRentals(user, userSid)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
