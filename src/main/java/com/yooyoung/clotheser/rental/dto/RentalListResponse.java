@@ -9,7 +9,7 @@ import lombok.Setter;
 
 @Data
 @Setter(AccessLevel.NONE)
-public class RentalListReponse {
+public class RentalListResponse {
 
     @Schema(title = "대여글 id", example = "3")
     private Long id;
@@ -32,7 +32,7 @@ public class RentalListReponse {
     @Schema(title = "대여글 생성 시간", example = "2시간 전")
     private String createdAt;
 
-    public RentalListReponse(Rental rental, String userSid, String imgUrl, int minPrice) {
+    public RentalListResponse(Rental rental, String userSid, String imgUrl, int minPrice) {
         this.id = rental.getId();
         this.userSid = userSid;
         this.imgUrl = imgUrl;

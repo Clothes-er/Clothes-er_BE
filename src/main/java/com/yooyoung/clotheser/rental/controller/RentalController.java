@@ -77,8 +77,8 @@ public class RentalController {
     @Operation(summary = "대여글 목록 조회", description = "회원의 주소를 기준으로 반경 2km 이내의 대여글 목록을 조회한다.")
     @Parameter(name = "search", description = "제목을 기준으로 검색한다.", example = "블라우스")
     @GetMapping("")
-    public ResponseEntity<BaseResponse<List<RentalListReponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                               @RequestParam(value = "search", required = false) String search) {
+    public ResponseEntity<BaseResponse<List<RentalListResponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                                @RequestParam(value = "search", required = false) String search) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user, search)), OK);
