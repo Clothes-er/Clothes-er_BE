@@ -30,4 +30,7 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
             "ORDER BY r.created_at DESC",
             nativeQuery = true)
     List<Rental> searchRentalsWithinDistance(String search, double latitude, double longitude);
+
+    // 나의 옷장
+    List<Rental> findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(Long userId);
 }
