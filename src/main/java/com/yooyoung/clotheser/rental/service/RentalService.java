@@ -128,7 +128,7 @@ public class RentalService {
     }
 
     /* 대여글 목록 조회 */
-    public List<RentalListReponse> getRentalList(User user, String search) throws BaseException {
+    public List<RentalListResponse> getRentalList(User user, String search) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -148,7 +148,7 @@ public class RentalService {
             rentalList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
         }
 
-        List<RentalListReponse> responses = new ArrayList<>();
+        List<RentalListResponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
             // userId 암호화하기
             String userSid;
@@ -167,7 +167,7 @@ public class RentalService {
             Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
             int minPrice = optionalPrice.orElse(0);
 
-            responses.add(new RentalListReponse(rental, userSid, imgUrl, minPrice));
+            responses.add(new RentalListResponse(rental, userSid, imgUrl, minPrice));
         }
 
         return responses;
