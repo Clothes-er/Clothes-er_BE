@@ -56,6 +56,18 @@ public class ClosetController {
         }
     }
 
+    @Operation(summary = "공유 내역 조회", description = "'거래 현황 - 공유' 탭에서 대여 중, 대여 완료한 나의 대여글 목록을 조회한다.")
+    @GetMapping("/share-history")
+    public ResponseEntity<BaseResponse<List<RentalHistoryResponse>>> getShareHistory(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(closetService.getShareHistory(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
     @Operation(summary = "대여 내역 조회", description = "'거래 현황 - 대여' 탭에서 대여 중, 대여 완료한 남의 대여글 목록을 조회한다.")
     @GetMapping("/rental-history")
     public ResponseEntity<BaseResponse<List<RentalHistoryResponse>>> getRentalHistory(@AuthenticationPrincipal CustomUserDetails userDetails) {

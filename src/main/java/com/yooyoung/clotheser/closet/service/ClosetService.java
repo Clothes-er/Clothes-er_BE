@@ -111,6 +111,49 @@ public class ClosetService {
 
     }
 
+    // 공유 내역 조회
+    public List<RentalHistoryResponse> getShareHistory(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 대여 중인 대여글 먼저 조회 후 대여 완료된 대여글 보여주기
+        List<RentalInfo> rentalInfoList = rentalInfoRepository.findAllByLenderIdOrderByStateAndRentalDate(user.getId());
+        List<RentalHistoryResponse> responses = new ArrayList<>();
+
+        for (RentalInfo rentalInfo : rentalInfoList) {
+            Rental rental = rentalInfo.getRental();
+
+            // userId 암호화하기
+            String userSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()), AES_KEY);
+                userSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
+            // 대여자 닉네임 구하기
+            String nickname = rentalInfo.getBuyer().getNickname();
+
+            // 첫 번째 이미지 URL 불러오기
+            Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
+            String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
+
+            // 최소 가격 불러오기
+            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
+            int minPrice = optionalPrice.orElse(0);
+
+            // RentalHistoryResponse 객체 생성 및 리스트에 추가
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, userSid, imgUrl, nickname, minPrice, rentalInfo);
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
     // 대여 내역 조회
     public List<RentalHistoryResponse> getRentalHistory(User user) throws BaseException {
 

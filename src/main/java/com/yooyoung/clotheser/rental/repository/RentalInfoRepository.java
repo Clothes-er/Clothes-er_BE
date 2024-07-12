@@ -17,6 +17,11 @@ public interface RentalInfoRepository extends JpaRepository<RentalInfo, Long> {
     // 반납: 대여 중인 대여 정보 찾기
     Optional<RentalInfo> findFirstByBuyerIdAndLenderIdAndRentalIdAndState(Long buyerId, Long lenderId, Long rentalId, RentalState state);
 
+    // 공유 내역 조회
+    @Query("SELECT r FROM RentalInfo r WHERE r.lender.id = :userId ORDER BY " +
+            "CASE WHEN r.state = com.yooyoung.clotheser.rental.domain.RentalState.RENTED THEN 0 ELSE 1 END, r.startDate DESC")
+    List<RentalInfo> findAllByLenderIdOrderByStateAndRentalDate(@Param("userId") Long userId);
+
     // 대여 내역 조회
     @Query("SELECT r FROM RentalInfo r WHERE r.buyer.id = :userId ORDER BY " +
             "CASE WHEN r.state = com.yooyoung.clotheser.rental.domain.RentalState.RENTED THEN 0 ELSE 1 END, r.startDate DESC")
