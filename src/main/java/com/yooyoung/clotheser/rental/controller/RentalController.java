@@ -189,7 +189,7 @@ public class RentalController {
                 throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRental(rentalRequest, images, userDetails.user, rentalId)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRental(rentalRequest, images, userDetails.user, rentalId)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
