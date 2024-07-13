@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.rental.domain;
 
+import com.yooyoung.clotheser.rental.dto.RentalRequest;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;
@@ -69,5 +70,19 @@ public class Rental {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime deletedAt;
+
+    public Rental updateRental(RentalRequest rentalRequest, User user) {
+        this.user = user;
+        this.title = rentalRequest.getTitle();
+        this.description = rentalRequest.getDescription();
+        this.gender = rentalRequest.getGender();
+        this.category = rentalRequest.getCategory();
+        this.style = rentalRequest.getStyle();
+        this.brand = rentalRequest.getBrand();
+        this.size = rentalRequest.getSize();
+        this.fit = rentalRequest.getFit();
+        this.updatedAt = LocalDateTime.now();
+        return this;
+    }
 
 }

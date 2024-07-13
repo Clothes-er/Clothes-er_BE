@@ -35,7 +35,7 @@ public class RentalController {
 
     @Operation(summary = "대여글 생성", description = "대여글을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<RentalResponse>> createRentalPost(@Valid @RequestPart("post") RentalRequest rentalRequest,
+    public ResponseEntity<BaseResponse<RentalResponse>> createRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
                                                                          @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -53,7 +53,7 @@ public class RentalController {
                 throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
             }
 
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalPost(rentalRequest, images, userDetails.user)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRental(rentalRequest, images, userDetails.user)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
@@ -160,6 +160,36 @@ public class RentalController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRentalInfo(roomId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 대여글 수정 */
+    @Operation(summary = "대여글 수정", description = "대여글을 수정한다.")
+    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
+    @PutMapping(value = "/{rentalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<RentalResponse>> updateRentalPost(@Valid @RequestPart("post") RentalRequest rentalRequest,
+                                                                         BindingResult bindingResult,
+                                                                         @RequestPart(value = "images", required = false) MultipartFile[] images,
+                                                                         @PathVariable Long rentalId,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            // 대여글 이미지 최대 3장
+            if (images.length > 3) {
+                throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRental(rentalRequest, images, userDetails.user, rentalId)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

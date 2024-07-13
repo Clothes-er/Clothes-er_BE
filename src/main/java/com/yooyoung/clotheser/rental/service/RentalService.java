@@ -48,7 +48,7 @@ public class RentalService {
     private final RentalCheckRepository rentalCheckRepository;
 
     /* 대여글 생성 */
-    public RentalResponse createRentalPost(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
+    public RentalResponse createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -295,4 +295,64 @@ public class RentalService {
 
         return new RentalInfoResponse(rentalInfo);
     }
+
+    /* 대여글 수정 */
+    public RentalResponse updateRental(RentalRequest rentalRequest, MultipartFile[] images, User user, Long rentalId) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 대여글 불러오기
+        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+        // 본인의 대여글인지 확인
+        if (!user.getId().equals(rental.getUser().getId())) {
+            throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
+        }
+
+        // TODO: 보유 옷으로부터 대여글 수정하는지 확인
+
+        // TODO: 보유 옷 회원과 대여글 수정하려는 회원 일치 확인
+
+        // 대여글 수정
+        Rental updatedRental = rental.updateRental(rentalRequest, user);
+        rentalRepository.save(updatedRental);
+
+        // 대여글 이미지들 삭제 후 저장
+        List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
+        rentalImageService.deleteImages(rentalImgs);
+        List<String> imgUrls = rentalImageService.uploadImages(images, updatedRental);
+
+        // 대여글 가격 삭제 후 저장
+        List<Long> rentalPriceIds = rentalPriceRepository.findAllByRentalIdOrderByDays(rentalId).stream()
+                .map(RentalPrice::getId)
+                .toList();
+        rentalPriceRepository.deleteAllByIdInBatch(rentalPriceIds);
+
+        // - 새로운 가격표 생성
+        for (int i = 0; i < rentalRequest.getPrices().size(); i++) {
+            RentalPrice rentalPrice = RentalPrice.builder()
+                    .rental(updatedRental)
+                    .price(rentalRequest.getPrices().get(i).getPrice())
+                    .days(rentalRequest.getPrices().get(i).getDays())
+                    .build();
+            rentalPriceRepository.save(rentalPrice);
+        }
+
+        // 본인의 id 암호화하기
+        String userSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()), AES_KEY);
+            userSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        return new RentalResponse(user, userSid, updatedRental, imgUrls, rentalRequest.getPrices());
+
+    }
+
 }
