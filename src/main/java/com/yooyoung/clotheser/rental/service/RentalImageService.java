@@ -13,9 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -31,6 +34,7 @@ public class RentalImageService {
 
     private final RentalImgRepository rentalImgRepository;
 
+    /* 대여글 이미지 저장 */
     public List<String> uploadImages(MultipartFile[] images, Rental rental) throws BaseException {
         List<String> imgUrls = new ArrayList<>();
 
@@ -65,6 +69,22 @@ public class RentalImageService {
         }
 
         return imgUrls;
+    }
+
+    /* 대여글 이미지 삭제 */
+    public void deleteImages(List<RentalImg> rentalImgs) {
+        // S3에서 삭제
+        for (RentalImg rentalImg : rentalImgs) {
+            String fileName = rentalImg.getImgUrl().substring(rentalImg.getImgUrl().lastIndexOf("/") + 1);
+            String decodedFileName= URLDecoder.decode(fileName, StandardCharsets.UTF_8);
+            amazonS3.deleteObject(bucket, "rentals/" + decodedFileName);
+        }
+
+        // DB에서 삭제
+        List<Long> rentalImgIds = rentalImgs.stream()
+                .map(RentalImg::getId)
+                .collect(Collectors.toList());
+        rentalImgRepository.deleteAllByIdInBatch(rentalImgIds);
     }
 }
 

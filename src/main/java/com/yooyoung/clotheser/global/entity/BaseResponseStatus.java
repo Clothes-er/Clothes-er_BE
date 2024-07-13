@@ -24,7 +24,7 @@ public enum BaseResponseStatus {
     EMPTY_JWT_CLAIMS(false, 2006, "JWT가 잘못되었습니다."),
     REQUEST_FIRST_LOGIN(false, 2007, "최초 로그인이 필요합니다."),
     FILE_TOO_LARGE(false, 2008, "업로드 할 수 있는 최대 총 파일의 크기는 50MB입니다."),
-
+    FORBIDDEN_USER(false, 2009, "작성자만 접근할 수 있습니다."),
 
     // 2. User (2100 ~ 2199)
 
