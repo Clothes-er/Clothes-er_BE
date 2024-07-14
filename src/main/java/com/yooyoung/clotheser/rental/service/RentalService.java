@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.rental.service;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
@@ -313,10 +314,6 @@ public class RentalService {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
-        // TODO: 보유 옷으로부터 대여글 수정하는지 확인
-
-        // TODO: 보유 옷 회원과 대여글 수정하려는 회원 일치 확인
-
         // 대여글 수정
         Rental updatedRental = rental.updateRental(rentalRequest, user);
         rentalRepository.save(updatedRental);
@@ -352,7 +349,45 @@ public class RentalService {
         }
 
         return new RentalResponse(user, userSid, updatedRental, imgUrls, rentalRequest.getPrices());
+    }
 
+    /* 대여글 삭제 */
+    public BaseResponseStatus deleteRental(Long rentalId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 대여글 불러오기
+        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+        // 본인의 대여글인지 확인
+        if (!user.getId().equals(rental.getUser().getId())) {
+            throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
+        }
+
+        // 대여중인지 확인
+        if (rentalInfoRepository.existsByRentalIdAndState(rentalId, RentalState.RENTED)) {
+            throw new BaseException(FORBIDEEN_DELETE_RENTAL, FORBIDDEN);
+        }
+
+        // 대여글 논리 삭제
+        Rental deletedRental = rental.deleteRental();
+        rentalRepository.save(deletedRental);
+
+        // 대여글 이미지들 물리 삭제
+        List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
+        rentalImageService.deleteImages(rentalImgs);
+
+        // 대여글 가격표 물리 삭제
+        List<Long> rentalPriceIds = rentalPriceRepository.findAllByRentalIdOrderByDays(rentalId).stream()
+                .map(RentalPrice::getId)
+                .toList();
+        rentalPriceRepository.deleteAllByIdInBatch(rentalPriceIds);
+
+        return SUCCESS;
     }
 
 }

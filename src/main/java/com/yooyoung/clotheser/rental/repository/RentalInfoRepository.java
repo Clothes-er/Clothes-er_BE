@@ -27,4 +27,7 @@ public interface RentalInfoRepository extends JpaRepository<RentalInfo, Long> {
             "CASE WHEN r.state = com.yooyoung.clotheser.rental.domain.RentalState.RENTED THEN 0 ELSE 1 END, r.startDate DESC")
     List<RentalInfo> findAllByBuyerIdOrderByStateAndRentalDate(@Param("userId") Long userId);
 
+    // 대여 중인지 확인
+    boolean existsByRentalIdAndState(Long rentalId, RentalState state);
+
 }

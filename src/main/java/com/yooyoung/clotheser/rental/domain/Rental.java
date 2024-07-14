@@ -85,4 +85,9 @@ public class Rental {
         return this;
     }
 
+    public Rental deleteRental() {
+        this.deletedAt = LocalDateTime.now();
+        return this;
+    }
+
 }
