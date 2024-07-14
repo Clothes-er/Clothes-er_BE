@@ -2,6 +2,7 @@ package com.yooyoung.clotheser.rental.controller;
 
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
@@ -170,7 +171,7 @@ public class RentalController {
     @Operation(summary = "대여글 수정", description = "대여글을 수정한다.")
     @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
     @PutMapping(value = "/{rentalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<RentalResponse>> updateRentalPost(@Valid @RequestPart("post") RentalRequest rentalRequest,
+    public ResponseEntity<BaseResponse<RentalResponse>> updateRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
                                                                          @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                          @PathVariable Long rentalId,
@@ -190,6 +191,21 @@ public class RentalController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRental(rentalRequest, images, userDetails.user, rentalId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 대여글 삭제 */
+    @Operation(summary = "대여글 삭제", description = "대여글을 삭제한다.")
+    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
+    @DeleteMapping("/{rentalId}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteRental(@PathVariable("rentalId") Long rentalId,
+                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.deleteRental(rentalId, user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
