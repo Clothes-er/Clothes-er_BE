@@ -38,6 +38,8 @@ public class ChatRoomResponse {
     private String title;
     @Schema(title = "대여글 최소 가격", example = "1000")
     private Integer minPrice;
+    @Schema(title = "대여글 삭제 여부", example = "false")
+    private Boolean isDeleted;
 
     @Schema(title = "옷 상태 체크 여부", example = "true")
     private Boolean isChecked;
@@ -62,6 +64,7 @@ public class ChatRoomResponse {
         this.rentalImgUrl = rentalImgUrl;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
+        this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
     }
 
     /* 채팅방 조회 시 쓰는 생성자 */
@@ -78,6 +81,7 @@ public class ChatRoomResponse {
         this.rentalImgUrl = rentalImgUrl;
         this.title = chatRoom.getRental().getTitle();
         this.minPrice = minPrice;
+        this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
 
         this.isChecked = isChecked;
         this.rentalState = rentalState;

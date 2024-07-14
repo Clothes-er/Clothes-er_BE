@@ -34,6 +34,8 @@ public class ChatRoomListResponse {
     private String title;
     @Schema(title = "대여글 썸네일 (첫 번째 사진)", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/7c8adc06-7705-4323-90f2-3e2571eebbca_summer_nasi_3.jpg")
     private String rentalImgUrl;
+    @Schema(title = "대여글 삭제 여부", example = "false")
+    private Boolean isDeleted;
 
     @Schema(title = "대여 상태", example = "RENTED")
     private RentalState rentalState;
@@ -62,6 +64,7 @@ public class ChatRoomListResponse {
 
         this.title = chatRoom.getRental().getTitle();
         this.rentalImgUrl = rentalImgUrl;
+        this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
 
         if (rentalInfo != null) {
             this.rentalState = rentalInfo.getState();
