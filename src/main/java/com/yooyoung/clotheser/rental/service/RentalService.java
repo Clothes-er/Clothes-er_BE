@@ -2,6 +2,7 @@ package com.yooyoung.clotheser.rental.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
+import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
@@ -9,6 +10,7 @@ import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.repository.*;
+import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +40,7 @@ public class RentalService {
     private String AES_KEY;
 
     private final RentalImageService rentalImageService;
+    private final RentalFilterService rentalFilterService;
 
     private final RentalRepository rentalRepository;
     private final RentalPriceRepository rentalPriceRepository;
@@ -47,6 +50,7 @@ public class RentalService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final RentalCheckRepository rentalCheckRepository;
+
 
     /* 대여글 생성 */
     public RentalResponse createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
@@ -129,25 +133,17 @@ public class RentalService {
     }
 
     /* 대여글 목록 조회 */
-    public List<RentalListResponse> getRentalList(User user, String search) throws BaseException {
+    public List<RentalListResponse> getRentalList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
+                                                  Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
-        double latitude = user.getLatitude();
-        double longitude = user.getLongitude();
-
-        // 검색 여부 확인
-        List<Rental> rentalList;
-        if (search != null && !search.isEmpty()) {
-            rentalList = rentalRepository.searchRentalsWithinDistance(search, latitude, longitude);
-        }
-        else {
-            // 전체 조회
-            rentalList = rentalRepository.findRentalsWithinDistance(latitude, longitude);
-        }
+        // 필터링된 대여글 목록 불러오기
+        List<Rental> rentalList = rentalFilterService.getFilteredRentals(user, search, sort, gender,
+                minHeight, maxHeight, age, category, style);
 
         List<RentalListResponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {

@@ -1,15 +1,15 @@
 package com.yooyoung.clotheser.rental.controller;
 
-import com.yooyoung.clotheser.global.entity.BaseException;
-import com.yooyoung.clotheser.global.entity.BaseResponse;
-import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.global.entity.*;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 
+import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -76,13 +76,32 @@ public class RentalController {
     }
 
     @Operation(summary = "대여글 목록 조회", description = "회원의 주소를 기준으로 반경 2km 이내의 대여글 목록을 조회한다.")
-    @Parameter(name = "search", description = "제목을 기준으로 검색한다.", example = "블라우스")
+    @Parameters({
+            @Parameter(name = "search", description = "제목을 기준으로 대소문자 구분 없이 검색한다.", example = "블라우스"),
+            @Parameter(name = "sort", description = "특정 기준으로 정렬한다.", example = "createdAt"),
+            @Parameter(name = "gender", description = "성별을 기준으로 필터링한다. (중복 가능)"),
+            @Parameter(name = "minHeight", description = "최소 키를 기준으로 필터링한다.", example = "158"),
+            @Parameter(name = "maxHeight", description = "최대 키를 기준으로 필터링한다.", example = "165"),
+            @Parameter(name = "age", description = "나이대를 기준으로 필터링한다. (중복 가능)"),
+            @Parameter(name = "category", description = "카테고리를 기준으로 필터링한다. (중복 가능)", example = "[\"셔츠\"]"),
+            @Parameter(name = "style", description = "스타일을 기준으로 필터링한다. (중복 가능)", example = "[\"러블리\"]")
+    })
     @GetMapping("")
-    public ResponseEntity<BaseResponse<List<RentalListResponse>>> getRentalList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                                @RequestParam(value = "search", required = false) String search) {
+    public ResponseEntity<BaseResponse<List<RentalListResponse>>> getRentalList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) List<Gender> gender,
+            @RequestParam(required = false) Integer minHeight,
+            @RequestParam(required = false) Integer maxHeight,
+            @RequestParam(required = false) List<AgeFilter> age,
+            @RequestParam(required = false) List<String> category,
+            @RequestParam(required = false) List<String> style
+    ) {
         try {
             User user = userDetails.user;
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user, search)), OK);
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user, search, sort, gender,
+                    minHeight, maxHeight, age, category, style)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
