@@ -79,7 +79,7 @@ public class UserController {
 
     @Operation(summary = "이메일 인증 번호 전송", description = "입력한 이메일에 인증 번호를 전송한다.")
     @PostMapping("/send-email")
-    public ResponseEntity<BaseResponse<EmailResponse>> sendEmail(@Valid @RequestBody EmailRequest emailRequest,
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> sendEmail(@Valid @RequestBody EmailRequest emailRequest,
                                                                  BindingResult bindingResult) {
         try {
             // 입력 유효성 검사

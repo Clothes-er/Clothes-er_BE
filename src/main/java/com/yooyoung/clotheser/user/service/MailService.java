@@ -5,7 +5,6 @@ import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.RedisUtil;
 import com.yooyoung.clotheser.user.dto.request.EmailCheckRequest;
 import com.yooyoung.clotheser.user.dto.request.EmailRequest;
-import com.yooyoung.clotheser.user.dto.response.EmailResponse;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 
 import jakarta.mail.MessagingException;
@@ -81,7 +80,7 @@ public class MailService {
     }
 
     // 이메일 인증 번호 전송
-    public EmailResponse sendEmail(EmailRequest emailRequest) throws BaseException {
+    public BaseResponseStatus sendEmail(EmailRequest emailRequest) throws BaseException {
 
         String email = emailRequest.getEmail();
 
@@ -97,7 +96,7 @@ public class MailService {
         // 인증 번호 유효 시간 설정 (5분)
         redisUtil.setDataExpire(Integer.toString(authCode),email, 60 * 5L);
 
-        return new EmailResponse(authCode);
+        return SUCCESS;
     }
 
     // 이메일 인증 번호 검증
