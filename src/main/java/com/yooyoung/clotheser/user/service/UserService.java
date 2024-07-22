@@ -92,7 +92,7 @@ public class UserService {
 
         // 먼저 이메일로 회원 존재 확인
         User user = userRepository.findByEmailAndDeletedAtNull(loginRequest.getEmail())
-                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER_BY_EMAIL, NOT_FOUND));
         // 비밀번호 확인
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new BaseException(LOGIN_MISMATCH, BAD_REQUEST);
