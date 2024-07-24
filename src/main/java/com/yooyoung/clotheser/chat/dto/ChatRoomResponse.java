@@ -47,6 +47,9 @@ public class ChatRoomResponse {
     @Schema(title = "대여 상태", example = "RETURNED")
     private RentalState rentalState;
 
+    @Schema(title = "후기 작성 여부", example = "true")
+    private Boolean isReviewed;
+
     @Schema(description = "채팅 메시지 목록", type = "array")
     private List<ChatMessageResponse> messages;
 
@@ -69,7 +72,7 @@ public class ChatRoomResponse {
 
     /* 채팅방 조회 시 쓰는 생성자 */
     public ChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages,
-                            String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState) {
+                            String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
@@ -85,6 +88,7 @@ public class ChatRoomResponse {
 
         this.isChecked = isChecked;
         this.rentalState = rentalState;
+        this.isReviewed = isReviewed;
         this.messages = messages;
     }
 

@@ -16,6 +16,7 @@ import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.repository.*;
+import com.yooyoung.clotheser.review.repository.ReviewRepository;
 import com.yooyoung.clotheser.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,8 @@ public class ChatService {
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalInfoRepository rentalInfoRepository;
     private final RentalCheckRepository rentalCheckRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     /* 채팅방 생성 */
     public ChatRoomResponse createChatRoom(Long rentalId, User user) throws BaseException, ChatRoomException {
@@ -220,7 +223,7 @@ public class ChatService {
         // 유저 기반 채팅방인지 확인
         if (chatRoom.getRental() == null) {
             return new ChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
-                    null, null, null, null);
+                    null, null, null, null, null);
         }
 
         // 첫 번째 이미지 불러오기
@@ -235,9 +238,10 @@ public class ChatService {
 
         // 최근 대여 정보에서 대여 상태 불러오기
         RentalState rentalState;
+        RentalInfo rentalInfo = null;
         if (isChecked) {
             // 옷 상태 체크해야만 대여 정보 생성 가능
-            RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
+            rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
                     chatRoom.getBuyer().getId(),
                     chatRoom.getLender().getId(),
                     chatRoom.getRental().getId()).orElse(null);
@@ -246,9 +250,17 @@ public class ChatService {
         else {
             rentalState = null;
         }
+        // 후기 작성 여부 불러오기
+        boolean isReviewed;
+        if (rentalInfo != null) {
+            isReviewed = reviewRepository.existsByRentalInfoIdAndReviewerId(rentalInfo.getId(), user.getId());
+        }
+        else {
+            isReviewed = false;
+        }
 
         return new ChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
-                rentalImgUrl, minPrice, isChecked, rentalState);
+                rentalImgUrl, minPrice, isChecked, rentalState, isReviewed);
 
     }
 }
