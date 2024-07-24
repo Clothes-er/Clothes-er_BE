@@ -34,7 +34,7 @@ public class Rental {
     // TODO: 필요 시 보유 옷 FK 걸기
     private Long clothesId;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 50)
     private String title;
 
     @Column(nullable = false, length = 500)
