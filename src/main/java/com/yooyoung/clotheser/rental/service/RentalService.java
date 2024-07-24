@@ -271,6 +271,11 @@ public class RentalService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
 
+        // 채팅방 참여자인지 확인
+        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+            throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
+        }
+
         // 대여 상태인 대여 정보 불러오기
         RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdAndState(
                 chatRoom.getBuyer().getId(),

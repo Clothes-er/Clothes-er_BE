@@ -8,6 +8,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class UserProfileResponse {
     @Schema(title = "대여 횟수", example = "4")
     private int rentalCount;
     @Schema(title = "옷장 점수", example = "10")
-    private int closetScore;
+    private double closetScore;
 
     @Schema(title = "성별", example = "FEMALE")
     private Gender gender;
@@ -54,7 +56,15 @@ public class UserProfileResponse {
 
         this.level = user.getUserLevel();
         this.rentalCount = user.getRentalCount();
-        this.closetScore = user.getClosetScore();
+
+        double closetScore = user.getClosetScore();
+        if (closetScore == (int) closetScore) {
+            this.closetScore = Double.parseDouble(String.format("%d", (int) closetScore));
+        }
+        else {
+            BigDecimal bd = new BigDecimal(closetScore).setScale(1, RoundingMode.DOWN);
+            this.closetScore = bd.doubleValue();
+        }
 
         this.gender = user.getGender();
         this.height = user.getHeight();

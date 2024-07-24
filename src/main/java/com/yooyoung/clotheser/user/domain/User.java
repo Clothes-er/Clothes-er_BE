@@ -67,7 +67,7 @@ public class User {
 
     @ColumnDefault("10")
     @Builder.Default
-    private int closetScore = 10;
+    private double closetScore = 10;
 
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     @ColumnDefault("true")      // DB 기본값 설정
@@ -173,6 +173,15 @@ public class User {
         this.shoeSize = userStyleRequest.getShoeSize();
         this.updatedAt = LocalDateTime.now();
         return this;
+    }
+
+    // 옷장 점수 수정
+    public void updateClosetScore(double difference) {
+        this.closetScore += difference;
+        if (this.closetScore > 20)
+            this.closetScore = 20;
+        else if (this.closetScore < 0)
+            this.closetScore = 0;
     }
 
 }
