@@ -50,8 +50,7 @@ public class ChatRoomListResponse {
 
     @Schema(title = "최근 메시지", example = "안녕하세요~")
     private String recentMessage;
-    @Schema(title = "마지막으로 메시지 보낸 시간", example = "2024년 06월 20일 17:31:29")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
+    @Schema(title = "마지막으로 메시지 보낸 시간", example = "3시간 전")
     private String recentMessageTime;
 
     public ChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalInfo rentalInfo,
