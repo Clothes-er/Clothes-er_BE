@@ -18,12 +18,12 @@ import java.util.List;
 @Setter(AccessLevel.NONE)
 public class ReviewRequest {
 
-    @Schema(title = "후기 키워드 리스트", type = "array", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "키워드 후기 리스트", type = "array", requiredMode = Schema.RequiredMode.REQUIRED)
     @Valid
     @NotEmpty(message = "키워드를 선택해주세요.")
     private List<Keyword> keywords;
 
-    @Schema(title = "후기 텍스트", description = "500자 이내", example = "옷 상태도 좋고 저렴한 가격으로 새로운 옷을 입어볼 수 있었어요! 감사합니다 :)")
+    @Schema(title = "텍스트 후기", description = "500자 이내", example = "옷 상태도 좋고 저렴한 가격으로 새로운 옷을 입어볼 수 있었어요! 감사합니다 :)")
     private String content;
 
     public Review toReviewEntity(RentalInfo rentalInfo, User reviewer, User reviewee) {
