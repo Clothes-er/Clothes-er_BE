@@ -55,12 +55,26 @@ public class ReviewController {
         }
     }
 
-    @Operation(summary = "나의 거래 후기 내역 조회", description = "거래 후 다른 사람들이 남긴 키워드 및 텍스트 후기들을 조회한다.")
+    @Operation(summary = "나의 거래 후기 내역 조회", description = "다른 사람들이 남긴 거래 후기들을 조회한다.")
     @GetMapping("")
     public ResponseEntity<BaseResponse<ReviewHistoryResponse>> getMyReviews(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(reviewService.getMyReviews(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "남의 거래 후기 내역 조회", description = "남의 프로필에서 거래 후기들을 조회한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @GetMapping("/{userSid}")
+    public ResponseEntity<BaseResponse<ReviewHistoryResponse>> getUserReviews(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                              @PathVariable String userSid) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(reviewService.getUserReviews(user, userSid)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

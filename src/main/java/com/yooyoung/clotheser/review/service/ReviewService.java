@@ -164,10 +164,69 @@ public class ReviewService {
             }
         }
 
-        // Keyword 개수에 따라 내림차순으로 정렬
+        // 키워드 개수에 따라 내림차순으로 정렬
         List<KeywordReviewResponse> keywordReviews = keywordCountMap.entrySet().stream()
                 .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())) // 개수에 따라 내림차순 정렬
                 .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue())) // KeywordReviewResponse로 변환
+                .collect(Collectors.toList());
+
+        return new ReviewHistoryResponse(keywordReviews, textReviews);
+
+    }
+
+    // 나의 거래 후기 내역 조회
+    public ReviewHistoryResponse getUserReviews(User user, String userSid) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 조회하려는 회원 불러오기
+        Long userId;
+        try {
+            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
+        }
+        User owner = userRepository.findByIdAndDeletedAtNull(userId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+
+        // 받은 후기 불러오기
+        List<Review> reviews = reviewRepository.findByRevieweeIdOrderByCreatedAtDesc(owner.getId());
+        List<TextReviewResponse> textReviews = new ArrayList<>();
+        Map<String, Integer> keywordCountMap = new HashMap<>();
+
+        for (Review review : reviews) {
+            // 받은 텍스트 후기
+            if (review.getContent() != null && !review.getContent().isBlank()) {
+
+                // 리뷰 작성자 id 암호화하기
+                String reviewerSid;
+                try {
+                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()), AES_KEY);
+                    reviewerSid = Base64UrlSafeUtil.encode(encodedUserId);
+                } catch (Exception e) {
+                    throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+                }
+
+                TextReviewResponse textReviewResponse = new TextReviewResponse(reviewerSid, review);
+                textReviews.add(textReviewResponse);
+            }
+
+            // 받은 키워드 후기
+            List<ReviewKeyword> keywords = reviewKeywordRepository.findAllByReviewId(review.getId());
+            for (ReviewKeyword reviewKeyword : keywords) {
+                String keywordDescription = reviewKeyword.getKeyword().getDescription();
+                keywordCountMap.put(keywordDescription, keywordCountMap.getOrDefault(keywordDescription, 0) + 1);
+            }
+        }
+
+        // 키워드 개수에 따라 내림차순으로 정렬
+        List<KeywordReviewResponse> keywordReviews = keywordCountMap.entrySet().stream()
+                .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()))
+                .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
 
         return new ReviewHistoryResponse(keywordReviews, textReviews);

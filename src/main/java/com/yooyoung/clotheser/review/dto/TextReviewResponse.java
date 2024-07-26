@@ -21,7 +21,7 @@ public class TextReviewResponse {
     private String profileUrl;
 
     @Schema(title = "텍스트 후기", example = "옷 상태도 좋고 너무 저렴하게 잘 이용했어요! 감사합니다 :)")
-    private String text;
+    private String content;
 
     @Schema(title = "후기 남긴 시간", example = "3시간 전")
     private String createdAt;
@@ -30,7 +30,7 @@ public class TextReviewResponse {
         this.userSid = userSid;
         this.nickname = review.getReviewer().getNickname();
         this.profileUrl = review.getReviewer().getProfileUrl();
-        this.text = review.getContent();
+        this.content = review.getContent();
         this.createdAt = Time.calculateTime(review.getCreatedAt());
     }
 
