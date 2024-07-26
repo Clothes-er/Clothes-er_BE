@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.NOT_FOUND_RENTAL_INFO;
@@ -163,14 +164,11 @@ public class ReviewService {
             }
         }
 
-        // Keyword enum 순서에 따라 정렬
-        List<KeywordReviewResponse> keywordReviews = new ArrayList<>();
-        for (Keyword keyword : Keyword.values()) {
-            String keywordDescription = keyword.getDescription();
-            if (keywordCountMap.containsKey(keywordDescription)) {
-                keywordReviews.add(new KeywordReviewResponse(keywordDescription, keywordCountMap.get(keywordDescription)));
-            }
-        }
+        // Keyword 개수에 따라 내림차순으로 정렬
+        List<KeywordReviewResponse> keywordReviews = keywordCountMap.entrySet().stream()
+                .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())) // 개수에 따라 내림차순 정렬
+                .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue())) // KeywordReviewResponse로 변환
+                .collect(Collectors.toList());
 
         return new ReviewHistoryResponse(keywordReviews, textReviews);
 
