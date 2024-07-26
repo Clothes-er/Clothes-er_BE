@@ -43,6 +43,7 @@ public enum Keyword {
     private final String userRole;
     @Getter
     private final int score;
+    @Getter
     private final String description;
 
     Keyword(boolean isPositive, String userRole , int score, String description) {

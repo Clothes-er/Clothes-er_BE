@@ -18,4 +18,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     // 최근 후기 3건 가져오기
     List<Review> findTop3ByRevieweeIdOrderByCreatedAtDesc(Long revieweeId);
 
+    // 받은 후기 모두 가져오기
+    List<Review> findByRevieweeIdOrderByCreatedAtDesc(Long revieweeId);
+
 }

@@ -2,8 +2,13 @@ package com.yooyoung.clotheser.review.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
+import com.yooyoung.clotheser.review.dto.KeywordReviewResponse;
+import com.yooyoung.clotheser.review.dto.ReviewHistoryResponse;
+import com.yooyoung.clotheser.review.dto.TextReviewResponse;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.global.util.AESUtil;
+import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
@@ -16,10 +21,16 @@ import com.yooyoung.clotheser.review.repository.ReviewRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.NOT_FOUND_RENTAL_INFO;
@@ -29,6 +40,11 @@ import static org.springframework.http.HttpStatus.*;
 @Transactional
 @RequiredArgsConstructor
 public class ReviewService {
+
+    @Autowired
+    private AESUtil aesUtil;
+    @Value("${aes.key}")
+    private String AES_KEY;
 
     private final ChatRoomRepository chatRoomRepository;
     private final RentalInfoRepository rentalInfoRepository;
@@ -108,6 +124,54 @@ public class ReviewService {
             difference = difference / 3 * 0.1;
             user.updateClosetScore(difference);
         }
+    }
+
+    // 나의 거래 후기 내역 조회
+    public ReviewHistoryResponse getMyReviews(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 받은 후기 불러오기
+        List<Review> reviews = reviewRepository.findByRevieweeIdOrderByCreatedAtDesc(user.getId());
+        List<TextReviewResponse> textReviews = new ArrayList<>();
+        Map<String, Integer> keywordCountMap = new HashMap<>();
+
+        for (Review review : reviews) {
+            // 받은 텍스트 후기
+            if (review.getContent() != null && !review.getContent().isBlank()) {
+
+                // 리뷰 작성자 id 암호화하기
+                String userSid;
+                try {
+                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()), AES_KEY);
+                    userSid = Base64UrlSafeUtil.encode(encodedUserId);
+                } catch (Exception e) {
+                    throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+                }
+
+                TextReviewResponse textReviewResponse = new TextReviewResponse(userSid, review);
+                textReviews.add(textReviewResponse);
+            }
+
+            // 받은 키워드 후기
+            List<ReviewKeyword> keywords = reviewKeywordRepository.findAllByReviewId(review.getId());
+            for (ReviewKeyword reviewKeyword : keywords) {
+                String keywordDescription = reviewKeyword.getKeyword().getDescription();
+                keywordCountMap.put(keywordDescription, keywordCountMap.getOrDefault(keywordDescription, 0) + 1);
+            }
+        }
+
+        // Keyword 개수에 따라 내림차순으로 정렬
+        List<KeywordReviewResponse> keywordReviews = keywordCountMap.entrySet().stream()
+                .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())) // 개수에 따라 내림차순 정렬
+                .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue())) // KeywordReviewResponse로 변환
+                .collect(Collectors.toList());
+
+        return new ReviewHistoryResponse(keywordReviews, textReviews);
+
     }
 
 }

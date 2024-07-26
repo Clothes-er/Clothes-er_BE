@@ -1,11 +1,13 @@
 package com.yooyoung.clotheser.review.controller;
 
+import com.yooyoung.clotheser.review.dto.ReviewHistoryResponse;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.review.dto.ReviewRequest;
 import com.yooyoung.clotheser.review.service.ReviewService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,8 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.REQUEST_ERROR;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -48,6 +49,18 @@ public class ReviewController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(reviewService.createReview(roomId, reviewRequest, userDetails.user)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "나의 거래 후기 내역 조회", description = "거래 후 다른 사람들이 남긴 키워드 및 텍스트 후기들을 조회한다.")
+    @GetMapping("")
+    public ResponseEntity<BaseResponse<ReviewHistoryResponse>> getMyReviews(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(reviewService.getMyReviews(user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
