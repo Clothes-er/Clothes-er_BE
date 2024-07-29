@@ -19,8 +19,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.PHONE_NUMBER_EXISTS;
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.SUCCESS;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
@@ -74,16 +74,18 @@ public class PhoneService {
     // 휴대폰 인증 번호 전송
     public BaseResponseStatus sendPhone(PhoneRequest phoneRequest) throws BaseException {
 
+        String phoneNumber = phoneRequest.getPhoneNumber();
+
         // 휴대폰 번호 중복 확인
-        if (userRepository.existsByPhoneNumberAndDeletedAtNull(phoneRequest.getPhoneNumber())) {
+        if (userRepository.existsByPhoneNumberAndDeletedAtNull(phoneNumber)) {
             throw new BaseException(PHONE_NUMBER_EXISTS, CONFLICT);
         }
 
         // 수신 번호 형태에 맞춰 '-' 제거
-        String phoneNumber = phoneRequest.getPhoneNumber().replaceAll("-", "");
+        String unslashedPhoneNumber = phoneRequest.getPhoneNumber().replaceAll("-", "");
 
         // 휴대폰 인증 번호 전송
-        sendPhoneMessage(phoneNumber);
+        sendPhoneMessage(unslashedPhoneNumber);
 
         // 인증 번호 유효 시간 설정 (3분)
         redisUtil.setDataExpire(PHONE + authCode, phoneNumber, 60 * 3L);
@@ -95,9 +97,21 @@ public class PhoneService {
     public BaseResponseStatus checkPhone(PhoneCheckRequest phoneCheckRequest) throws BaseException {
 
         String authCode = String.valueOf(phoneCheckRequest.getAuthCode());
+        String phoneNumber = phoneCheckRequest.getPhoneNumber();
 
+        // Redis에 인증 번호가 없는 경우 (ex. 인증 번호를 발급 받지 않음, 유효 시간이 지남)
+        String storedPhoneNumber = redisUtil.getData(PHONE + authCode);
+        if (storedPhoneNumber == null) {
+            throw new BaseException(INVALID_AUTH_CODE, BAD_REQUEST);
+        }
 
-        return SUCCESS;
+        // 이메일과 인증 번호가 일치하는지 확인
+        if (storedPhoneNumber.equals(phoneNumber)) {
+            return SUCCESS;
+        }
+        else {
+            throw new BaseException(FAILED_TO_CHECK_PHONE, BAD_REQUEST);
+        }
 
     }
 

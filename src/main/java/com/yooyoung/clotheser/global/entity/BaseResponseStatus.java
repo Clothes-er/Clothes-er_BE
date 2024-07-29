@@ -40,9 +40,10 @@ public enum BaseResponseStatus {
     // 로그인
     LOGIN_MISMATCH(false, 2130, "이메일과 비밀번호가 일치하지 않습니다."),
 
-    // 이메일 인증
+    // 인증
     INVALID_AUTH_CODE(false, 2140, "유효하지 않은 인증 번호입니다."),
     FAILED_TO_CHECK_EMAIL(false, 2141, "이메일 인증에 실패하였습니다."),
+    FAILED_TO_CHECK_PHONE(false, 2142, "휴대폰 인증에 실패하였습니다."),
 
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),

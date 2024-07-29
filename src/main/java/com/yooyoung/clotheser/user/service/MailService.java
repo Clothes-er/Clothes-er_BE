@@ -107,13 +107,13 @@ public class MailService {
         String email = emailCheckRequest.getEmail();
 
         // Redis에 인증 번호가 없는 경우 (ex. 인증 번호를 발급 받지 않음, 유효 시간이 지남)
-        String storedAuthCode = redisUtil.getData(EMAIL + authCode);
-        if (redisUtil.getData(storedAuthCode) == null) {
+        String storedEmail = redisUtil.getData(EMAIL + authCode);
+        if (storedEmail == null) {
             throw new BaseException(INVALID_AUTH_CODE, BAD_REQUEST);
         }
 
         // 이메일과 인증 번호가 일치하는지 확인
-        if (redisUtil.getData(authCode).equals(email)) {
+        if (storedEmail.equals(email)) {
             return SUCCESS;
         }
         else {
