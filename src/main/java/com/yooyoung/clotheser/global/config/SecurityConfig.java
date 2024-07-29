@@ -49,6 +49,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/send-email").permitAll()
                         .requestMatchers("/api/v1/users/check-email").permitAll()
+                        .requestMatchers("/api/v1/users/send-phone").permitAll()
+                        .requestMatchers("/api/v1/users/check-phone").permitAll()
                         .requestMatchers("/api/v1/users/login").permitAll()
                         .requestMatchers("/ws/**").permitAll()  // 웹소켓 엔드포인트 허용
                         .anyRequest().authenticated()   // 지정된 URL 이외의 요청은 인증 필요
