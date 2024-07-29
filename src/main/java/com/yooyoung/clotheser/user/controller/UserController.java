@@ -8,6 +8,7 @@ import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.dto.request.*;
 import com.yooyoung.clotheser.user.dto.response.*;
 import com.yooyoung.clotheser.user.service.MailService;
+import com.yooyoung.clotheser.user.service.PhoneService;
 import com.yooyoung.clotheser.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +40,7 @@ public class UserController {
 
     private final UserService userService;
     private final MailService mailService;
+    private final PhoneService phoneService;
 
     @Operation(summary = "회원가입", description = "회원가입을 한다.")
     @PostMapping("/signup")
@@ -111,6 +113,46 @@ public class UserController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(mailService.checkEmail(emailCheckRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "휴대폰 인증 번호 전송", description = "입력한 전화 번호에 인증 번호를 문자로 전송한다.")
+    @PostMapping("/send-phone")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> sendPhone(@Valid @RequestBody PhoneRequest phoneRequest,
+                                                                             BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(phoneService.sendPhone(phoneRequest)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "휴대폰 인증 번호 검증", description = "입력한 인증 번호를 검증한다.")
+    @PostMapping("/check-phone")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> checkPhone(@Valid @RequestBody PhoneCheckRequest phoneCheckRequest,
+                                                                       BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(phoneService.checkPhone(phoneCheckRequest)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

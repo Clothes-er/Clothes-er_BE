@@ -67,7 +67,7 @@ public class UserService {
         if (userRepository.existsByEmailAndDeletedAtNull(signUpRequest.getEmail())) {
             throw new BaseException(EMAIL_EXISTS, CONFLICT);
         }
-        // - 전화번호 => TODO: 전화번호 인증
+        // - 전화번호
         if (userRepository.existsByPhoneNumberAndDeletedAtNull(signUpRequest.getPhoneNumber())) {
             throw new BaseException(PHONE_NUMBER_EXISTS, CONFLICT);
         }

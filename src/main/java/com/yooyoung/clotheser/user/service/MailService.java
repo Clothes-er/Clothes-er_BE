@@ -39,6 +39,7 @@ public class MailService {
     private int authCode;
 
     private final UserRepository userRepository;
+    private final String EMAIL = "email: ";
 
     // 임의의 6자리 양수 반환
     public void createAuthCode() {
@@ -94,7 +95,7 @@ public class MailService {
         javaMailSender.send(message);
 
         // 인증 번호 유효 시간 설정 (5분)
-        redisUtil.setDataExpire(Integer.toString(authCode),email, 60 * 5L);
+        redisUtil.setDataExpire(EMAIL + authCode, email, 60 * 5L);
 
         return SUCCESS;
     }
@@ -106,7 +107,8 @@ public class MailService {
         String email = emailCheckRequest.getEmail();
 
         // Redis에 인증 번호가 없는 경우 (ex. 인증 번호를 발급 받지 않음, 유효 시간이 지남)
-        if (redisUtil.getData(authCode) == null) {
+        String storedAuthCode = redisUtil.getData(EMAIL + authCode);
+        if (redisUtil.getData(storedAuthCode) == null) {
             throw new BaseException(INVALID_AUTH_CODE, BAD_REQUEST);
         }
 
