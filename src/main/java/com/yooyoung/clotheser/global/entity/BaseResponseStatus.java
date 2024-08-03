@@ -48,7 +48,7 @@ public enum BaseResponseStatus {
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
     FORBIDDEN_CREATE_RENTAL_INFO(false, 2201, "판매자만 대여 정보를 입력할 수 있습니다."),
-    TOO_MANY_IMAGES(false, 2203, "대여글 이미지는 최대 3장까지 첨부할 수 있습니다."),
+    TOO_MANY_RENTAL_IMAGES(false, 2203, "대여글 이미지는 최대 3장까지 첨부할 수 있습니다."),
     RENTAL_CHECK_EXISTS(false, 2204, "옷 상태는 한 번만 체크할 수 있습니다."),
     FORBIDDEN_CREATE_RENTAL_CHECK(false, 2205, "대여자만 옷 상태를 체크할 수 있습니다."),
     REQUEST_RENTAL_CHECK(false, 2206, "대여자가 옷 상태를 먼저 체크해야 대여할 수 있습니다."),
@@ -61,6 +61,8 @@ public enum BaseResponseStatus {
     FORBIDDEN_ENTER_CHAT_ROOM(false, 2302, "채팅방 참여자가 아닙니다."),
     REQUEST_EMPTY_MESSAGE(false, 2303, "메시지를 입력해주세요."),
 
+    // 5. Clothes (2400 ~ 2499)
+    TOO_MANY_CLOTHES_IMAGES(false, 2400, "보유 옷 이미지는 최대 3장까지 첨부할 수 있습니다."),
 
     /*
         3000 : Response 오류

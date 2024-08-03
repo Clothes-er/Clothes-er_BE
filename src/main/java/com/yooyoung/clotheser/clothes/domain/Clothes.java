@@ -33,11 +33,17 @@ public class Clothes {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(nullable = false, length = 500)
+    private String description;
+
     @Column(columnDefinition = "TINYINT(1)")
     private Gender gender;
 
     @Column(length = 10)
     private String category;
+
+    @Column(length = 20)
+    private String style;
 
     private Integer price;
 
@@ -48,9 +54,6 @@ public class Clothes {
     private String size;
 
     private String shoppingUrl;
-
-    @Column(nullable = false, length = 500)
-    private String description;
 
     @Column(columnDefinition = "TINYINT(1)", nullable = false)
     @ColumnDefault("true")
