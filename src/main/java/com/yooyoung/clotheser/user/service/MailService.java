@@ -192,7 +192,7 @@ public class MailService {
                     "                      궁금하신 점은 클로저 고객센터를 통해 문의하시기\n" +
                     "                      바랍니다.<br /><br />\n" +
                     "                      Email: clotheser@naver.com<br /><br /><br />\n" +
-                    "                      © Clothes:er All rights reserved.clotheser.co.kr\n" +
+                    "                      © Clothes:er All rights reserved clotheser.co.kr\n" +
                     "                    </span>\n" +
                     "                  </td>\n" +
                     "                </tr>\n" +
