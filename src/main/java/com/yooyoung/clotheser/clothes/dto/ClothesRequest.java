@@ -14,6 +14,9 @@ import lombok.Setter;
 @Setter(AccessLevel.NONE)
 public class ClothesRequest {
 
+    @Schema(title = "대여글 id", description = "기존 대여글과 연결할 경우 입력", example = "1")
+    private Long rentalId;
+
     @Schema(title = "상품명", description = "50자 이내", example = "스퀘어 아이보리 블라우스", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "상품명을 입력해주세요.")
     @Size(max = 50, message = "상품명은 50자 이내로 입력해주세요.")

@@ -7,6 +7,8 @@ import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
+import com.yooyoung.clotheser.rental.domain.Rental;
+import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.FAIL_TO_ENCRYPT;
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.REQUEST_FIRST_LOGIN;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
 
 @Service
 @Transactional
@@ -34,6 +34,8 @@ public class ClothesService {
 
     private final ClothesRepository clothesRepository;
     private final ClothesImageService clothesImageService;
+
+    private final RentalRepository rentalRepository;
 
     /* 보유 옷 생성 */
     public ClothesResponse createClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user) throws BaseException {
@@ -57,6 +59,22 @@ public class ClothesService {
             userSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        // 기존 대여글과 연결할 경우
+        Long rentalId = clothesRequest.getRentalId();
+        if (rentalId != null && rentalId > 0) {
+            // 대여글 존재 확인
+            Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                    .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+            // 대여글 회원과 보유 옷 등록하려는 회원 일치 확인
+            if (!rental.getUser().getId().equals(user.getId())) {
+                throw new BaseException(FORBIDDEN_CREATE_CLOTHES, FORBIDDEN);
+            }
+
+            Rental updatedRental = rental.updateClothes(clothes.getId());
+            rentalRepository.save(updatedRental);
         }
 
         return new ClothesResponse(user, userSid, clothes, imgUrls);

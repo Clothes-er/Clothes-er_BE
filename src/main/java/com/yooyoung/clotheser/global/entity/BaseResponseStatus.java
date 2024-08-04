@@ -64,6 +64,7 @@ public enum BaseResponseStatus {
 
     // 5. Clothes (2400 ~ 2499)
     TOO_MANY_CLOTHES_IMAGES(false, 2400, "보유 옷 이미지는 최대 3장까지 첨부할 수 있습니다."),
+    FORBIDDEN_CREATE_CLOTHES(false, 2401, "대여글을 작성한 회원만 해당 보유 옷을 등록할 수 있습니다."),
 
     /*
         3000 : Response 오류

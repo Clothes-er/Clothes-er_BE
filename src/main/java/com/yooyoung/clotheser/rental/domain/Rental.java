@@ -89,4 +89,9 @@ public class Rental {
         return this;
     }
 
+    // 보유 옷 연결
+    public Rental updateClothes(Long clothesId) {
+        this.clothesId = clothesId;
+        return this;
+    }
 }
