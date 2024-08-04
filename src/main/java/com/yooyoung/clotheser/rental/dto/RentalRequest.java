@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 public class RentalRequest {
 
-    @Schema(title = "보유 옷 id", description = "보유 옷을 선택해서 대여글 작성하는 경우 입력", example = "1")
+    @Schema(title = "보유 옷 id", description = "기존 보유 옷과 연결할 경우 입력", example = "1")
     private Long clothesId;
 
     @Schema(title = "제목", description = "50자 이내", example = "스퀘어 블라우스", requiredMode = Schema.RequiredMode.REQUIRED)

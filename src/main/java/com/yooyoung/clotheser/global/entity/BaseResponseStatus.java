@@ -84,7 +84,7 @@ public enum BaseResponseStatus {
     NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),
 
     // 5. Clothes
-    NOT_FOUNT_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
+    NOT_FOUND_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
 
     /*
         4000 : Database, Server 오류

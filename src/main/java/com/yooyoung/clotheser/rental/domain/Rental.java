@@ -71,6 +71,7 @@ public class Rental {
     private LocalDateTime deletedAt;
 
     public Rental updateRental(RentalRequest rentalRequest, User user) {
+        this.clothesId = rentalRequest.getClothesId();
         this.user = user;
         this.title = rentalRequest.getTitle();
         this.description = rentalRequest.getDescription();

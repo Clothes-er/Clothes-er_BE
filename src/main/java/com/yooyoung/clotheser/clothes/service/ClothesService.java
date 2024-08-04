@@ -45,9 +45,32 @@ public class ClothesService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 기존 대여글과 연결할 경우
+        Long rentalId = clothesRequest.getRentalId();
+        boolean hasRental = false;
+        Rental rental = null;
+        if (rentalId != null && rentalId > 0) {
+            // 대여글 존재 확인
+            rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                    .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+            // 대여글 회원과 보유 옷 등록하려는 회원 일치 확인
+            if (!rental.getUser().getId().equals(user.getId())) {
+                throw new BaseException(FORBIDDEN_CREATE_CLOTHES, FORBIDDEN);
+            }
+
+            hasRental = true;
+        }
+
         // 보유 옷 저장
         Clothes clothes = clothesRequest.toEntity(user);
         clothesRepository.save(clothes);
+
+        // 대여글 있는 경우 보유 옷 id 저장
+        if (hasRental) {
+            Rental updatedRental = rental.updateClothes(clothes.getId());
+            rentalRepository.save(updatedRental);
+        }
 
         // 보유 옷 이미지 저장
         List<String> imgUrls = clothesImageService.uploadClothesImages(images, clothes);
@@ -59,22 +82,6 @@ public class ClothesService {
             userSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
-
-        // 기존 대여글과 연결할 경우
-        Long rentalId = clothesRequest.getRentalId();
-        if (rentalId != null && rentalId > 0) {
-            // 대여글 존재 확인
-            Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
-                    .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
-
-            // 대여글 회원과 보유 옷 등록하려는 회원 일치 확인
-            if (!rental.getUser().getId().equals(user.getId())) {
-                throw new BaseException(FORBIDDEN_CREATE_CLOTHES, FORBIDDEN);
-            }
-
-            Rental updatedRental = rental.updateClothes(clothes.getId());
-            rentalRepository.save(updatedRental);
         }
 
         return new ClothesResponse(user, userSid, clothes, imgUrls);

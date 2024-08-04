@@ -26,6 +26,8 @@ public class Clothes {
     @Column(unique = true, nullable = false)
     private Long id;
 
+    private Long rentalId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
@@ -71,5 +73,11 @@ public class Clothes {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime deletedAt;
+
+    // 대여글 연결
+    public Clothes updateRental(Long rentalId) {
+        this.rentalId = rentalId;
+        return this;
+    }
 
 }

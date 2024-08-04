@@ -53,6 +53,7 @@ public class ClothesRequest {
 
     public Clothes toEntity(User user) {
         return Clothes.builder()
+                .rentalId(rentalId)
                 .user(user)
                 .name(name)
                 .description(description)

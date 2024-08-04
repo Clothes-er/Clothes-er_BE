@@ -20,6 +20,9 @@ public class ClothesResponse {
     @Schema(title = "보유 옷 id", example = "1")
     private Long id;
 
+    @Schema(title = "대여글 id", example = "1")
+    private Long rentalId;
+
     // 회원 정보
     @Schema(title = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09")
     private String userSid;
@@ -78,6 +81,8 @@ public class ClothesResponse {
 
     public ClothesResponse(User user, String userSid, Clothes clothes, List<String> imgUrls) {
         this.id = clothes.getId();
+        this.rentalId = clothes.getRentalId();
+
         this.userSid = userSid;
         this.profileUrl = clothes.getUser().getProfileUrl();
         this.nickname = clothes.getUser().getNickname();
