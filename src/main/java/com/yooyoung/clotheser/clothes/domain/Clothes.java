@@ -1,6 +1,5 @@
-package com.yooyoung.clotheser.rental.domain;
+package com.yooyoung.clotheser.clothes.domain;
 
-import com.yooyoung.clotheser.rental.dto.RentalRequest;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Rental {
+public class Clothes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +29,9 @@ public class Rental {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
-    
-    private Long clothesId;
 
     @Column(nullable = false, length = 50)
-    private String title;
+    private String name;
 
     @Column(nullable = false, length = 500)
     private String description;
@@ -48,14 +45,19 @@ public class Rental {
     @Column(length = 20)
     private String style;
 
+    private Integer price;
+
     @Column(length = 20)
     private String brand;
 
     @Column(length = 10)
     private String size;
 
-    @Column(length = 10)
-    private String fit;
+    private String shoppingUrl;
+
+    @Column(columnDefinition = "TINYINT(1)", nullable = false)
+    @ColumnDefault("true")
+    private Boolean isPublic;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
@@ -69,24 +71,5 @@ public class Rental {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime deletedAt;
-
-    public Rental updateRental(RentalRequest rentalRequest, User user) {
-        this.user = user;
-        this.title = rentalRequest.getTitle();
-        this.description = rentalRequest.getDescription();
-        this.gender = rentalRequest.getGender();
-        this.category = rentalRequest.getCategory();
-        this.style = rentalRequest.getStyle();
-        this.brand = rentalRequest.getBrand();
-        this.size = rentalRequest.getSize();
-        this.fit = rentalRequest.getFit();
-        this.updatedAt = LocalDateTime.now();
-        return this;
-    }
-
-    public Rental deleteRental() {
-        this.deletedAt = LocalDateTime.now();
-        return this;
-    }
 
 }

@@ -49,9 +49,13 @@ public class RentalController {
                 }
             }
 
+            if (images == null) {
+                images = new MultipartFile[0];
+            }
+
             // 대여글 이미지 최대 3장
             if (images.length > 3) {
-                throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
+                throw new BaseException(TOO_MANY_RENTAL_IMAGES, PAYLOAD_TOO_LARGE);
             }
 
             return new ResponseEntity<>(new BaseResponse<>(rentalService.createRental(rentalRequest, images, userDetails.user)), CREATED);
@@ -206,7 +210,7 @@ public class RentalController {
 
             // 대여글 이미지 최대 3장
             if (images.length > 3) {
-                throw new BaseException(TOO_MANY_IMAGES, PAYLOAD_TOO_LARGE);
+                throw new BaseException(TOO_MANY_RENTAL_IMAGES, PAYLOAD_TOO_LARGE);
             }
 
             return new ResponseEntity<>(new BaseResponse<>(rentalService.updateRental(rentalRequest, images, userDetails.user, rentalId)), OK);
