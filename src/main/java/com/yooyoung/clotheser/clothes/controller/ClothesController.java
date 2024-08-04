@@ -49,6 +49,10 @@ public class ClothesController {
                 }
             }
 
+            if (images == null) {
+                images = new MultipartFile[0];
+            }
+
             // 보유 옷 이미지 최대 3장
             if (images.length > 3) {
                 throw new BaseException(TOO_MANY_CLOTHES_IMAGES, PAYLOAD_TOO_LARGE);

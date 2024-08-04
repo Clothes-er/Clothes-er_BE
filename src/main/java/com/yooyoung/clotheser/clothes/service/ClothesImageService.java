@@ -37,8 +37,8 @@ public class ClothesImageService {
     public List<String> uploadClothesImages(MultipartFile[] images, Clothes clothes) throws BaseException {
         List<String> imgUrls = new ArrayList<>();
 
-        // 보유 옷 이미지 없는 경우
-        if (images[0].isEmpty()) {
+        // 보유 옷 이미지 없는 경우 (1: Swaager, 2: Postman)
+        if (images.length == 0 || images[0].isEmpty()) {
             return null;
         }
 

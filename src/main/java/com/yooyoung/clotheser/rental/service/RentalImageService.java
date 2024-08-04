@@ -38,8 +38,8 @@ public class RentalImageService {
     public List<String> uploadImages(MultipartFile[] images, Rental rental) throws BaseException {
         List<String> imgUrls = new ArrayList<>();
 
-        // 대여글 이미지 없는 경우
-        if (images[0].isEmpty()) {
+        // 대여글 이미지 없는 경우 (1: Swaager, 2: Postman)
+        if (images.length == 0 || images[0].isEmpty()) {
             return null;
         }
 
