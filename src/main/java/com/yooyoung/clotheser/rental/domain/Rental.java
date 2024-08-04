@@ -30,8 +30,7 @@ public class Rental {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private User user;
-
-    // TODO: 필요 시 보유 옷 FK 걸기
+    
     private Long clothesId;
 
     @Column(nullable = false, length = 50)

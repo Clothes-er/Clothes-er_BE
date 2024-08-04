@@ -2,6 +2,8 @@ package com.yooyoung.clotheser.rental.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
+import com.yooyoung.clotheser.clothes.domain.Clothes;
+import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
@@ -50,6 +52,7 @@ public class RentalService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final RentalCheckRepository rentalCheckRepository;
+    private final ClothesRepository clothesRepository;
 
 
     /* 대여글 생성 */
@@ -60,9 +63,18 @@ public class RentalService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
-        // TODO: 보유 옷으로부터 대여글 생성하는지 확인
+        // 보유 옷에서 대여글을 작성하려는 경우
+        Long clothesId = rentalRequest.getClothesId();
+        if (clothesId != null && clothesId > 0) {
+            // 보유 옷 존재 확인
+            Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                    .orElseThrow(() -> new BaseException(NOT_FOUNT_CLOTHES, NOT_FOUND));
 
-        // TODO: 보유 옷 회원과 대여글 작성하려는 회원 일치 확인
+            // 보유 옷 회원과 대여글 작성하려는 회원 일치 확인
+            if (!clothes.getUser().getId().equals(user.getId())) {
+                throw new BaseException(FORBIDDEN_CREATE_RENTAL, FORBIDDEN);
+            }
+        }
 
         Rental rental = rentalRequest.toEntity(user);
         rentalRepository.save(rental);

@@ -18,9 +18,12 @@ import java.util.List;
 @Builder
 public class RentalRequest {
 
-    @Schema(title = "제목", description = "20자 이내", example = "스퀘어 블라우스", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "보유 옷 id", description = "보유 옷을 선택해서 대여글 작성하는 경우 입력", example = "1")
+    private Long clothesId;
+
+    @Schema(title = "제목", description = "50자 이내", example = "스퀘어 블라우스", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "제목을 입력해주세요.")
-    @Size(max = 20, message = "제목은 20자 이내로 입력해주세요.")
+    @Size(max = 50, message = "제목은 50자 이내로 입력해주세요.")
     private String title;
 
     @Schema(title = "상세 설명", description = "500자 이내", example = "여름에 입기 너무 좋아요!\n새로운 스타일을 도전해보세요~", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -50,6 +53,7 @@ public class RentalRequest {
     public Rental toEntity(User user) {
         return Rental.builder()
                 .user(user)
+                .clothesId(clothesId)
                 .title(title)
                 .description(description)
                 .gender(gender)

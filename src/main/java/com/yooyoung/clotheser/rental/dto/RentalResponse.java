@@ -19,6 +19,9 @@ public class RentalResponse {
     @Schema(title = "대여글 id", example = "3")
     private Long id;
 
+    @Schema(title = "보유 옷 id", example = "1")
+    private Long clothesId;
+
     // 회원 정보
     @Schema(title = "암호화된 회원 id", example = "xfweriok12")
     private String userSid;
@@ -67,6 +70,7 @@ public class RentalResponse {
 
     public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
         this.id = rental.getId();
+        this.clothesId = rental.getClothesId();
 
         this.userSid = userSid;
         this.profileUrl = rental.getUser().getProfileUrl();

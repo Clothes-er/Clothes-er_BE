@@ -54,6 +54,7 @@ public enum BaseResponseStatus {
     REQUEST_RENTAL_CHECK(false, 2206, "대여자가 옷 상태를 먼저 체크해야 대여할 수 있습니다."),
     FORBIDEEN_DELETE_RENTAL(false, 2207, "대여 중인 경우에는 대여글을 삭제할 수 없습니다."),
     REVIEW_EXISTS(false, 2208, "거래 후기는 한 번만 작성할 수 있습니다."),
+    FORBIDDEN_CREATE_RENTAL(false, 2209, "보유 옷을 가진 회원만 해당 대여글을 작성할 수 있습니다."),
 
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
@@ -80,6 +81,9 @@ public enum BaseResponseStatus {
 
     // 4. Chat
     NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),
+
+    // 5. Clothes
+    NOT_FOUNT_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
 
     /*
         4000 : Database, Server 오류
