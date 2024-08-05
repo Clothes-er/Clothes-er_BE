@@ -6,7 +6,9 @@ import com.yooyoung.clotheser.clothes.service.ClothesService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -59,6 +58,20 @@ public class ClothesController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(clothesService.createClothes(clothesRequest, images, userDetails.user)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "보유 옷 조회", description = "보유 옷의 상세 정보를 조회한다.")
+    @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
+    @GetMapping("/{clothesId}")
+    public ResponseEntity<BaseResponse<ClothesResponse>> getRental(@PathVariable Long clothesId,
+                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(clothesService.getClothes(clothesId, user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
