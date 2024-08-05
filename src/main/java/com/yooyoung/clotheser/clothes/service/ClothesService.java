@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.clothes.service;
 
 import com.yooyoung.clotheser.clothes.domain.Clothes;
+import com.yooyoung.clotheser.clothes.domain.ClothesImg;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
@@ -102,7 +103,10 @@ public class ClothesService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
         // 보유 옷 이미지 불러오기
-        List<String> imgUrls = clothesImgRepository.findImgUrlsByClothesId(clothesId);
+        List<ClothesImg> clothesImgs = clothesImgRepository.findAllByClothesId(clothesId);
+        List<String> imgUrls = clothesImgs.stream()
+                .map(ClothesImg::getImgUrl)
+                .toList();
 
         // 보유 옷 등록자의 id 암호화하기
         String userSid;
@@ -114,6 +118,72 @@ public class ClothesService {
         }
 
         return new ClothesResponse(user, userSid, clothes, imgUrls);
+    }
+
+    /* 보유 옷 수정 */
+    public ClothesResponse updateClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user, Long clothesId) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 보유 옷 불러오기
+        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
+
+        // 본인의 보유 옷인지 확인
+        if (!user.getId().equals(clothes.getUser().getId())) {
+            throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
+        }
+
+        // 대여글 연결을 변경하는 경우
+        Long originalRentalId = clothes.getRentalId();
+        Rental originalRental = rentalRepository.findByIdAndDeletedAtNull(originalRentalId).orElse(null);
+
+        Long newRentalId = clothesRequest.getRentalId();
+        Rental newRental = null;
+        if (newRentalId != null && newRentalId > 0) {
+            // 대여글 존재 확인
+            newRental = rentalRepository.findByIdAndDeletedAtNull(newRentalId)
+                    .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+            // 대여글 작성자와 보유 글 등록자 일치 확인
+            if(!newRental.getUser().getId().equals(user.getId())) {
+                throw new BaseException(FORBIDDEN_UPDATE_CLOTHES, FORBIDDEN);
+            }
+        }
+
+        // 기존 대여글이 있었으면 보유 옷 연결 끊기
+        if (originalRental != null) {
+            originalRental = originalRental.updateClothes(null);
+            rentalRepository.save(originalRental);
+        }
+        // 새로운 대여글이 있으면 보유 옷 연결
+        if (newRental != null) {
+            newRental = newRental.updateClothes(clothes.getId());
+            rentalRepository.save(newRental);
+        }
+
+        // 보유 옷 이미지 변경
+        List<ClothesImg> clothesImgs = clothesImgRepository.findAllByClothesId(clothesId);
+        clothesImageService.deleteClothesImages(clothesImgs);
+        List<String> imgUrls = clothesImageService.uploadClothesImages(images, clothes);
+
+        // 보유 옷 수정
+        Clothes updatedClothes = clothes.updateClothes(clothesRequest, user);
+        clothesRepository.save(updatedClothes);
+
+        // 본인의 id 암호화하기
+        String userSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()), AES_KEY);
+            userSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        return new ClothesResponse(user, userSid, updatedClothes, imgUrls);
 
     }
 

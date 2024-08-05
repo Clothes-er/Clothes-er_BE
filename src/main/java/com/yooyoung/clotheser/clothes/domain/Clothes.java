@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.clothes.domain;
 
+import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;
@@ -77,6 +78,24 @@ public class Clothes {
     // 대여글 연결
     public Clothes updateRental(Long rentalId) {
         this.rentalId = rentalId;
+        return this;
+    }
+
+    // 보유 옷 수정
+    public Clothes updateClothes(ClothesRequest clothesRequest, User user) {
+        this.rentalId = clothesRequest.getRentalId();
+        this.user = user;
+        this.name = clothesRequest.getName();
+        this.description = clothesRequest.getDescription();
+        this.gender = clothesRequest.getGender();
+        this.category = clothesRequest.getCategory();
+        this.style = clothesRequest.getStyle();
+        this.price = clothesRequest.getPrice();
+        this.brand = clothesRequest.getBrand();
+        this.size = clothesRequest.getSize();
+        this.shoppingUrl = clothesRequest.getShoppingUrl();
+        this.isPublic = clothesRequest.getIsPublic();
+        this.updatedAt = LocalDateTime.now();
         return this;
     }
 

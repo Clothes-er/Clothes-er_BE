@@ -11,7 +11,6 @@ import java.util.List;
 public interface ClothesImgRepository extends JpaRepository<ClothesImg, Long> {
 
     // 보유 옷의 이미지들 불러오기
-    @Query("select ci.imgUrl from ClothesImg ci where ci.clothes.id = :clothesId")
-    List<String> findImgUrlsByClothesId(Long clothesId);
+    List<ClothesImg> findAllByClothesId(Long clothesId);
 
 }

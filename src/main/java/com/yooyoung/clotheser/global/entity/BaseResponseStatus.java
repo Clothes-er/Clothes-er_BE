@@ -52,9 +52,10 @@ public enum BaseResponseStatus {
     RENTAL_CHECK_EXISTS(false, 2204, "옷 상태는 한 번만 체크할 수 있습니다."),
     FORBIDDEN_CREATE_RENTAL_CHECK(false, 2205, "대여자만 옷 상태를 체크할 수 있습니다."),
     REQUEST_RENTAL_CHECK(false, 2206, "대여자가 옷 상태를 먼저 체크해야 대여할 수 있습니다."),
-    FORBIDEEN_DELETE_RENTAL(false, 2207, "대여 중인 경우에는 대여글을 삭제할 수 없습니다."),
+    FORBIDDEN_DELETE_RENTAL(false, 2207, "대여 중인 경우에는 대여글을 삭제할 수 없습니다."),
     REVIEW_EXISTS(false, 2208, "거래 후기는 한 번만 작성할 수 있습니다."),
     FORBIDDEN_CREATE_RENTAL(false, 2209, "보유 옷을 가진 회원만 해당 대여글을 작성할 수 있습니다."),
+    FORBIDDEN_UPDATE_RENTAL(false, 2210, "보유 옷을 가진 회원만 해당 대여글을 수정할 수 있습니다."),
 
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
@@ -65,6 +66,7 @@ public enum BaseResponseStatus {
     // 5. Clothes (2400 ~ 2499)
     TOO_MANY_CLOTHES_IMAGES(false, 2400, "보유 옷 이미지는 최대 3장까지 첨부할 수 있습니다."),
     FORBIDDEN_CREATE_CLOTHES(false, 2401, "대여글을 작성한 회원만 해당 보유 옷을 등록할 수 있습니다."),
+    FORBIDDEN_UPDATE_CLOTHES(false, 2402, "대여글을 작성한 회원만 해당 보유 옷을 수정할 수 있습니다."),
 
     /*
         3000 : Response 오류

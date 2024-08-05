@@ -33,6 +33,7 @@ public class ClothesController {
 
     private final ClothesService clothesService;
 
+    /* 보유 옷 생성 */
     @Operation(summary = "보유 옷 생성", description = "보유 옷을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<ClothesResponse>> createClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
@@ -64,14 +65,49 @@ public class ClothesController {
         }
     }
 
+    /* 보유 옷 조회 */
     @Operation(summary = "보유 옷 조회", description = "보유 옷의 상세 정보를 조회한다.")
     @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
     @GetMapping("/{clothesId}")
-    public ResponseEntity<BaseResponse<ClothesResponse>> getRental(@PathVariable Long clothesId,
+    public ResponseEntity<BaseResponse<ClothesResponse>> getClothes(@PathVariable Long clothesId,
                                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(clothesService.getClothes(clothesId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 보유 옷 수정 */
+    @Operation(summary = "보유 옷 수정", description = "보유 옷을 수정한다.")
+    @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
+    @PutMapping(value = "/{clothesId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<BaseResponse<ClothesResponse>> updateClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
+                                                                     BindingResult bindingResult,
+                                                                     @RequestPart(value = "images", required = false) MultipartFile[] images,
+                                                                     @PathVariable Long clothesId,
+                                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            if (images == null) {
+                images = new MultipartFile[0];
+            }
+
+            // 보유 옷 이미지 최대 3장
+            if (images.length > 3) {
+                throw new BaseException(TOO_MANY_CLOTHES_IMAGES, PAYLOAD_TOO_LARGE);
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(clothesService.updateClothes(clothesRequest, images, userDetails.user, clothesId)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
