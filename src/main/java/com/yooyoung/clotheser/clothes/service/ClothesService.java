@@ -6,9 +6,12 @@ import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
+
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
+
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
@@ -185,6 +188,34 @@ public class ClothesService {
 
         return new ClothesResponse(user, userSid, updatedClothes, imgUrls);
 
+    }
+
+    /* 보유 옷 삭제 */
+    public BaseResponseStatus deleteClothes(Long clothesId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 보유 옷 불러오기
+        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
+
+        // 본인의 보유 옷인지 확인
+        if (!user.getId().equals(clothes.getUser().getId())) {
+            throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
+        }
+
+        // 보유 옷 이미지 물리 삭제
+        List<ClothesImg> clothesImgs = clothesImgRepository.findAllByClothesId(clothesId);
+        clothesImageService.deleteClothesImages(clothesImgs);
+
+        // 보유 옷 논리 삭제
+        Clothes deletedClothes = clothes.deleteClothes();
+        clothesRepository.save(deletedClothes);
+
+        return SUCCESS;
     }
 
 }

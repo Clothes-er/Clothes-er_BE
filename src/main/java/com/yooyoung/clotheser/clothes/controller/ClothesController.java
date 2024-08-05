@@ -5,6 +5,7 @@ import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.service.ClothesService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,6 +109,21 @@ public class ClothesController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(clothesService.updateClothes(clothesRequest, images, userDetails.user, clothesId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 보유 옷 삭제 */
+    @Operation(summary = "보유 옷 삭제", description = "보유 옷을 삭제한다.")
+    @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
+    @DeleteMapping("/{clothesId}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteClothes(@PathVariable Long clothesId,
+                                                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(clothesService.deleteClothes(clothesId, user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

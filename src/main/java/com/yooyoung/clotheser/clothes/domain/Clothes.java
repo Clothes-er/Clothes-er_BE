@@ -99,4 +99,10 @@ public class Clothes {
         return this;
     }
 
+    // 보유 옷 삭제
+    public Clothes deleteClothes() {
+        this.deletedAt = LocalDateTime.now();
+        return this;
+    }
+
 }
