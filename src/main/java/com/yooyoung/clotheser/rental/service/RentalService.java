@@ -333,39 +333,38 @@ public class RentalService {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
-        // 보유 옷 수정하는 경우
-        Long clothesId = rentalRequest.getClothesId();
-        boolean hasClothes = false;
-        Clothes clothes = null;
-        if (clothesId != null && clothesId > 0) {
+        // 보유 옷 연결을 변경하는 경우
+        Long originalClothesId = rental.getClothesId();
+        Clothes originalClothes = clothesRepository.findByIdAndDeletedAtNull(originalClothesId).orElse(null);
+
+        Long newClothesId = rentalRequest.getClothesId();
+        Clothes newClothes = null;
+        // 새로운 보유 옷 오류 검사
+        if (newClothesId != null && newClothesId > 0) {
             // 보유 옷 존재 확인
-            clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+            newClothes = clothesRepository.findByIdAndDeletedAtNull(newClothesId)
                     .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
             // 보유 옷 회원과 대여글 작성하려는 회원 일치 확인
-            if (!clothes.getUser().getId().equals(user.getId())) {
-                throw new BaseException(FORBIDDEN_CREATE_RENTAL, FORBIDDEN);
+            if (!newClothes.getUser().getId().equals(user.getId())) {
+                throw new BaseException(FORBIDDEN_UPDATE_RENTAL, FORBIDDEN);
             }
+        }
 
-            hasClothes = true;
+        // 기존 보유 옷이 있었으면 대여글 연결 끊기
+        if (originalClothes != null) {
+            originalClothes = originalClothes.updateRental(null);
+            clothesRepository.save(originalClothes);
+        }
+        // 새로운 보유 옷이 있으면 대여글 연결
+        if (newClothes != null) {
+            newClothes = newClothes.updateRental(rental.getId());
+            clothesRepository.save(newClothes);
         }
 
         // 대여글 수정
         Rental updatedRental = rental.updateRental(rentalRequest, user);
         rentalRepository.save(updatedRental);
-
-        // 보유 옷 있는 경우 대여글 id 변경
-        if (hasClothes) {
-            // 기존 보유 옷의 대여글 연결 끊기
-            Clothes originalClothes = clothesRepository.findByIdAndDeletedAtNull(rental.getClothesId()).orElse(null);
-            if (originalClothes != null) {
-                originalClothes = originalClothes.updateRental(null);
-                clothesRepository.save(originalClothes);
-            }
-            // 새로운 보유 옷과 대여글 연결
-            Clothes updatedClothes = clothes.updateRental(updatedRental.getId());
-            clothesRepository.save(updatedClothes);
-        }
 
         // 대여글 이미지들 삭제 후 저장
         List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
@@ -419,7 +418,7 @@ public class RentalService {
 
         // 대여중인지 확인
         if (rentalInfoRepository.existsByRentalIdAndState(rentalId, RentalState.RENTED)) {
-            throw new BaseException(FORBIDEEN_DELETE_RENTAL, FORBIDDEN);
+            throw new BaseException(FORBIDDEN_DELETE_RENTAL, FORBIDDEN);
         }
 
         // 대여글 논리 삭제
