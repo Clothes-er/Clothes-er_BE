@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.clothes.service;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
+import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.util.AESUtil;
@@ -32,9 +33,10 @@ public class ClothesService {
     @Value("${aes.key}")
     private String AES_KEY;
 
-    private final ClothesRepository clothesRepository;
     private final ClothesImageService clothesImageService;
-
+    
+    private final ClothesRepository clothesRepository;
+    private final ClothesImgRepository clothesImgRepository;
     private final RentalRepository rentalRepository;
 
     /* 보유 옷 생성 */
@@ -85,6 +87,34 @@ public class ClothesService {
         }
 
         return new ClothesResponse(user, userSid, clothes, imgUrls);
+    }
+
+    /* 보유 옷 조회 */
+    public ClothesResponse getClothes(Long clothesId, User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 보유 옷 불러오기
+        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
+
+        // 보유 옷 이미지 불러오기
+        List<String> imgUrls = clothesImgRepository.findImgUrlsByClothesId(clothesId);
+
+        // 보유 옷 등록자의 id 암호화하기
+        String userSid;
+        try {
+            String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()), AES_KEY);
+            userSid = Base64UrlSafeUtil.encode(encodedUserId);
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+
+        return new ClothesResponse(user, userSid, clothes, imgUrls);
+
     }
 
 }
