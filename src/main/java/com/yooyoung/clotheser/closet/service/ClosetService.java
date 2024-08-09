@@ -1,7 +1,12 @@
 package com.yooyoung.clotheser.closet.service;
 
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
+import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
+import com.yooyoung.clotheser.clothes.domain.Clothes;
+import com.yooyoung.clotheser.clothes.domain.ClothesImg;
+import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
+import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
@@ -37,15 +42,72 @@ public class ClosetService {
     @Value("${aes.key}")
     private String AES_KEY;
 
+    private final UserRepository userRepository;
+
     private final RentalRepository rentalRepository;
     private final RentalImgRepository rentalImgRepository;
     private final RentalPriceRepository rentalPriceRepository;
+    private final RentalInfoRepository rentalInfoRepository;
 
-    private final UserRepository userRepository;
-    @Autowired
-    private RentalInfoRepository rentalInfoRepository;
+    private final ClothesRepository clothesRepository;
+    private final ClothesImgRepository clothesImgRepository;
 
-    // 나의 전체 대여글 목록 조회
+    /* 나의 전체 보유 옷 목록 조회 */
+    public List<UserClothesListResponse> getMyClothes(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 나의 전체 보유 옷 목록 불러오기
+        List<Clothes> myClothes = clothesRepository.findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
+        List<UserClothesListResponse> responses = new ArrayList<>();
+        for (Clothes clothes : myClothes) {
+            // 첫 번째 이미지 불러오기
+            Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
+            String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
+
+            responses.add(new UserClothesListResponse(clothes, imgUrl));
+        }
+
+        return responses;
+    }
+
+    /* 남의 전체 보유 옷 목록 조회 */
+    public List<UserClothesListResponse> getUserClothes(User user, String userSid) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 조회하려는 회원 불러오기
+        long userId;
+        try {
+            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
+            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
+        }
+        User owner = userRepository.findByIdAndDeletedAtNull(userId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+
+        // 남의 전체 보유 옷 목록 불러오기
+        List<Clothes> myClothes = clothesRepository.findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(owner.getId());
+        List<UserClothesListResponse> responses = new ArrayList<>();
+        for (Clothes clothes : myClothes) {
+            // 첫 번째 이미지 불러오기
+            Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
+            String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
+
+            responses.add(new UserClothesListResponse(clothes, imgUrl));
+        }
+
+        return responses;
+    }
+
+    /* 나의 전체 대여글 목록 조회 */
     public List<UserRentalListResponse> getMyRentals(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -72,7 +134,7 @@ public class ClosetService {
         return responses;
     }
 
-    // 남의 대여글 목록 조회
+    /* 남의 대여글 목록 조회 */
     public List<UserRentalListResponse> getUserRentals(User user, String userSid) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -111,7 +173,7 @@ public class ClosetService {
 
     }
 
-    // 공유 내역 조회
+    /* 공유 내역 조회 */
     public List<RentalHistoryResponse> getShareHistory(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -154,7 +216,7 @@ public class ClosetService {
         return responses;
     }
 
-    // 대여 내역 조회
+    /* 대여 내역 조회 */
     public List<RentalHistoryResponse> getRentalHistory(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
