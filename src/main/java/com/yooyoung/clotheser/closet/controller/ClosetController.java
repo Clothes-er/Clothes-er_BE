@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.closet.controller;
 
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
+import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.closet.service.ClosetService;
 import com.yooyoung.clotheser.global.entity.BaseException;
@@ -30,7 +31,33 @@ public class ClosetController {
 
     private final ClosetService closetService;
 
-    @Operation(summary = "나의 전체 대여글 목록 조회", description = "'보유 - 공유 등록' 탭에서 나의 대여글 목록 전체를 조회한다.")
+    @Operation(summary = "나의 보유 옷 목록 조회", description = "'보유 - 옷장' 탭에서 나의 보유 옷 목록 전체를 조회한다.")
+    @GetMapping("/clothes")
+    public ResponseEntity<BaseResponse<List<UserClothesListResponse>>> getMyClothes(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(closetService.getMyClothes(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "남의 보유 옷 목록 조회", description = "'보유 - 옷장' 탭에서 남의 보유 옷 목록 전체를 조회한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @GetMapping("/{userSid}/clothes")
+    public ResponseEntity<BaseResponse<List<UserClothesListResponse>>> getUserClothes(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                                     @PathVariable String userSid){
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(closetService.getUserClothes(user, userSid)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "나의 대여글 목록 조회", description = "'보유 - 공유 등록' 탭에서 나의 대여글 목록 전체를 조회한다.")
     @GetMapping("/rentals")
     public ResponseEntity<BaseResponse<List<UserRentalListResponse>>> getMyRentals(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -42,7 +69,7 @@ public class ClosetController {
         }
     }
 
-    @Operation(summary = "남의 전체 대여글 목록 조회", description = "'보유 - 공유 등록' 탭에서 남의 대여글 목록 전체를 조회한다.")
+    @Operation(summary = "남의 대여글 목록 조회", description = "'보유 - 공유 등록' 탭에서 남의 대여글 목록 전체를 조회한다.")
     @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
     @GetMapping("/{userSid}/rentals")
     public ResponseEntity<BaseResponse<List<UserRentalListResponse>>> getUserRentals(@AuthenticationPrincipal CustomUserDetails userDetails,
