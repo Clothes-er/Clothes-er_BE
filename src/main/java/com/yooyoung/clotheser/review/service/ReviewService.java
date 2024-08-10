@@ -170,11 +170,11 @@ public class ReviewService {
                 .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue())) // KeywordReviewResponse로 변환
                 .collect(Collectors.toList());
 
-        return new ReviewHistoryResponse(keywordReviews, textReviews);
+        return new ReviewHistoryResponse(user, keywordReviews, textReviews);
 
     }
 
-    // 나의 거래 후기 내역 조회
+    // 남의 거래 후기 내역 조회
     public ReviewHistoryResponse getUserReviews(User user, String userSid) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -229,7 +229,7 @@ public class ReviewService {
                 .map(entry -> new KeywordReviewResponse(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
 
-        return new ReviewHistoryResponse(keywordReviews, textReviews);
+        return new ReviewHistoryResponse(owner, keywordReviews, textReviews);
 
     }
 
