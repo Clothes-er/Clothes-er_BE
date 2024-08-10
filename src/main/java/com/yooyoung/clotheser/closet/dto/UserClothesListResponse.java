@@ -20,6 +20,9 @@ public class UserClothesListResponse {
     @Schema(title = "상품명", example = "여름 나시")
     private String name;
 
+    @Schema(title = "브랜드", example = "에이블리")
+    private String brand;
+
     @Schema(title = "보유 옷 등록 시간", example = "2시간 전")
     private String createdAt;
 
@@ -27,6 +30,7 @@ public class UserClothesListResponse {
         this.id = clothes.getId();
         this.imgUrl = imgUrl;
         this.name = clothes.getName();
+        this.brand = clothes.getBrand();
         this.createdAt = Time.calculateTime(clothes.getCreatedAt());
     }
 

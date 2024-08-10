@@ -23,6 +23,9 @@ public class UserRentalListResponse {
     @Schema(title = "최소 가격", example = "2000")
     private int minPrice;
 
+    @Schema(title = "브랜드", example = "에이블리")
+    private String brand;
+
     @Schema(title = "대여글 생성 시간", example = "2시간 전")
     private String createdAt;
 
@@ -31,6 +34,7 @@ public class UserRentalListResponse {
         this.imgUrl = imgUrl;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
+        this.brand = rental.getBrand();
         this.createdAt = Time.calculateTime(rental.getCreatedAt());
     }
 
