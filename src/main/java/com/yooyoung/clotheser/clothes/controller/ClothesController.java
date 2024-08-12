@@ -1,11 +1,13 @@
 package com.yooyoung.clotheser.clothes.controller;
 
+import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.service.ClothesService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +35,20 @@ import static org.springframework.http.HttpStatus.*;
 public class ClothesController {
 
     private final ClothesService clothesService;
+    private final RentalService rentalService;
+
+    /* 보유 옷이 없는 나의 대여글 목록 조회 (보유 옷 생성 전 사용) */
+    @Operation(summary = "보유 옷이 없는 나의 대여글 목록 조회", description = "보유 옷 등록 전에 보유 옷이 없는 나의 대여글 목록을 조회한다.")
+    @GetMapping("/my-rentals")
+    public ResponseEntity<BaseResponse<List<UserRentalListResponse>>> getMyNoClothesRentals(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.getMyNoClothesRentals(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     /* 보유 옷 생성 */
     @Operation(summary = "보유 옷 생성", description = "보유 옷을 생성한다.")

@@ -16,4 +16,7 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     // 나의 옷장 - 보유 옷 목록 조회
     List<Clothes> findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(Long userId);
 
+    // 대여글 작성 - 대여글 없는 보유 옷 목록 조회
+    List<Clothes> findAllByUserIdAndRentalIdNullAndDeletedAtNullOrderByCreatedAtDesc(Long userId);
+
 }
