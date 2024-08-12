@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.clothes.service;
 
+import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
@@ -22,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -42,6 +45,28 @@ public class ClothesService {
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
     private final RentalRepository rentalRepository;
+
+    /* 대여글이 없는 나의 보유 옷 목록 조회 */
+    public List<UserClothesListResponse> getMyNoRentalClothes(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 보유 옷 목록 불러오기
+        List<Clothes> myClothes = clothesRepository.findAllByUserIdAndRentalIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
+        List<UserClothesListResponse> responses = new ArrayList<>();
+        for (Clothes clothes : myClothes) {
+            // 첫 번째 이미지 불러오기
+            Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
+            String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
+
+            responses.add(new UserClothesListResponse(clothes, imgUrl));
+        }
+
+        return responses;
+    }
 
     /* 보유 옷 생성 */
     public ClothesResponse createClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user) throws BaseException {
