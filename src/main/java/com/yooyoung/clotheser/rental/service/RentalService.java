@@ -105,6 +105,11 @@ public class RentalService {
                 throw new BaseException(FORBIDDEN_CREATE_RENTAL, FORBIDDEN);
             }
 
+            // 이미 연동된 보유 옷인지 확인
+            if (clothes.getRentalId() != null) {
+                throw new BaseException(CLOTHES_HAS_RENTAL, CONFLICT);
+            }
+
             hasClothes = true;
         }
 

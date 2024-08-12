@@ -90,6 +90,11 @@ public class ClothesService {
                 throw new BaseException(FORBIDDEN_CREATE_CLOTHES, FORBIDDEN);
             }
 
+            // 이미 연동된 대여글인지 확인
+            if (rental.getClothesId() != null) {
+                throw new BaseException(RENTAL_HAS_CLOTHES, CONFLICT);
+            }
+
             hasRental = true;
         }
 
