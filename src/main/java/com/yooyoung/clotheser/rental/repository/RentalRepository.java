@@ -33,4 +33,8 @@ public interface RentalRepository extends JpaRepository<Rental, Long> {
 
     // 나의 옷장
     List<Rental> findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(Long userId);
+
+    // 보유 옷 등록 - 보유 옷 없는 대여글 목록 조회
+    List<Rental> findAllByUserIdAndClothesIdNullAndDeletedAtNullOrderByCreatedAtDesc(Long userId);
+
 }

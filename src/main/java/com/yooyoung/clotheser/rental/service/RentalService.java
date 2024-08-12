@@ -2,6 +2,7 @@ package com.yooyoung.clotheser.rental.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
+import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
@@ -54,6 +55,33 @@ public class RentalService {
     private final RentalCheckRepository rentalCheckRepository;
     private final ClothesRepository clothesRepository;
 
+    /* 보유 옷이 없는 나의 대여글 목록 조회 */
+    public List<UserRentalListResponse> getMyNoClothesRentals(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 대여글 목록 불러오기
+        List<Rental> myRentals = rentalRepository.findAllByUserIdAndClothesIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
+
+        List<UserRentalListResponse> responses = new ArrayList<>();
+        for (Rental rental : myRentals) {
+            // 첫 번째 이미지 불러오기
+            Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
+            String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
+
+            // 가격 정보 중에 제일 싼 가격 불러오기
+            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
+            int minPrice = optionalPrice.orElse(0);
+
+            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice));
+        }
+
+        return responses;
+
+    }
 
     /* 대여글 생성 */
     public RentalResponse createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
