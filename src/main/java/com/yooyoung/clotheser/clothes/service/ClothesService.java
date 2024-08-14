@@ -3,11 +3,13 @@ package com.yooyoung.clotheser.clothes.service;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
+import com.yooyoung.clotheser.clothes.dto.ClothesListResponse;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 
+import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
@@ -15,6 +17,7 @@ import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.repository.RentalRepository;
+import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +44,7 @@ public class ClothesService {
     private String AES_KEY;
 
     private final ClothesImageService clothesImageService;
+    private final ClothesFilterService clothesFilterService;
     
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
@@ -246,6 +250,42 @@ public class ClothesService {
         clothesRepository.save(deletedClothes);
 
         return SUCCESS;
+    }
+
+    /* 보유 옷 목록 조회 */
+    public List<ClothesListResponse> getClothesList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
+                                                   Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 필터링된 보유 옷 목록 조회
+        List<Clothes> clothesList = clothesFilterService.getFilteredClothesList(user, search, sort, gender,
+                minHeight, maxHeight, age, category, style);
+
+        List<ClothesListResponse> responses = new ArrayList<>();
+        for (Clothes clothes : clothesList) {
+            // userId 암호화하기
+            String userSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()), AES_KEY);
+                userSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
+            // 첫 번째 이미지 불러오기
+            Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
+            String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
+
+            responses.add(new ClothesListResponse(clothes, userSid, imgUrl));
+
+        }
+
+        return responses;
+
     }
 
 }
