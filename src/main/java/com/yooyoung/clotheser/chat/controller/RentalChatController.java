@@ -22,7 +22,7 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/chats/rental-rooms")
-@Tag(name = "ChatRoom (Rental)", description = "대여글 채팅방 API")
+@Tag(name = "ChatRoom - Rental", description = "대여글 채팅방 API")
 public class RentalChatController {
 
     private final RentalChatService rentalChatService;

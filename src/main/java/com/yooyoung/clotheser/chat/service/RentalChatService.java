@@ -73,8 +73,7 @@ public class RentalChatService {
         // 채팅방이 이미 존재하는지 확인 (대여자가 동일한 대여글에서 채팅방 하나만 가능) -> roomId 리턴
         Optional<ChatRoom> existedChatRoom = chatRoomRepository.findOneByBuyerIdAndRentalId(user.getId(), rentalId);
         if (existedChatRoom.isPresent()) {
-            throw new ChatRoomException(CHAT_ROOM_EXISTS, CONFLICT, existedChatRoom.get().getId());
-
+            throw new ChatRoomException(RENTAL_CHAT_ROOM_EXISTS, CONFLICT, existedChatRoom.get().getId());
         }
 
         // 채팅방 생성
@@ -113,7 +112,7 @@ public class RentalChatService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
-        List<ChatRoom> chatRoomList = chatRoomRepository.findAllByUserId(user.getId());
+        List<ChatRoom> chatRoomList = chatRoomRepository.findRentalChatRoomsByUserId(user.getId());
         List<RentalChatRoomListResponse> chatRoomResponseList = new ArrayList<>();
         for (ChatRoom chatRoom : chatRoomList) {
 
@@ -163,8 +162,8 @@ public class RentalChatService {
         }
 
         // 채팅방 존재 확인
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
+        ChatRoom chatRoom = chatRoomRepository.findOneByIdAndRentalIdNotNull(roomId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_CHAT_ROOM, NOT_FOUND));
 
         // 채팅방 참여자인지 확인
         if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
@@ -194,12 +193,6 @@ public class RentalChatService {
             opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
-
-        // 유저 기반 채팅방인지 확인
-        if (chatRoom.getRental() == null) {
-            return new RentalChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
-                    null, null, null, null, null);
         }
 
         // 첫 번째 이미지 불러오기
@@ -240,7 +233,7 @@ public class RentalChatService {
 
     }
 
-    /* 채팅 메시지 생성 후 DB에 저장 */
+    /* 채팅 메시지 생성 후 DB에 저장 (대여글/유저 구분 X) */
     public ChatMessageResponse createChatMessage(ChatMessageRequest chatMessageRequest, Long roomId, User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인

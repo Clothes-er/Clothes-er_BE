@@ -24,7 +24,7 @@ public class RentalChatRoomResponse {
     @Schema(title = "판매자 닉네임", example = "황숙명")
     private String lenderNickname;
 
-    @Schema(title = "암호화된 상대방 id", example = "xfweriok12")
+    @Schema(title = "암호화된 상대방 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09")
     private String opponentSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String opponentNickname;
