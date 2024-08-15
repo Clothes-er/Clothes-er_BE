@@ -60,9 +60,11 @@ public enum BaseResponseStatus {
 
     // 4. Chat (2300 ~ 2399)
     FORBIDDEN_CREATE_CHAT_ROOM(false, 2300, "대여글 작성자는 채팅방을 만들 수 없습니다."),
-    CHAT_ROOM_EXISTS(false, 2301, "해당 대여글의 채팅방이 이미 존재합니다."),
+    RENTAL_CHAT_ROOM_EXISTS(false, 2301, "해당 대여글의 채팅방이 이미 존재합니다."),
     FORBIDDEN_ENTER_CHAT_ROOM(false, 2302, "채팅방 참여자가 아닙니다."),
     REQUEST_EMPTY_MESSAGE(false, 2303, "메시지를 입력해주세요."),
+    USER_CHAT_ROOM_EXISTS(false, 2304, "해당 유저 채팅방이 이미 존재합니다."),
+    FORBIDDEN_CREATE_CHAT_ROOM_MYSELF(false, 2305, "본인은 본인과 채팅방을 만들 수 없습니다."),
 
     // 5. Clothes (2400 ~ 2499)
     TOO_MANY_CLOTHES_IMAGES(false, 2400, "보유 옷 이미지는 최대 3장까지 첨부할 수 있습니다."),
@@ -86,6 +88,8 @@ public enum BaseResponseStatus {
 
     // 4. Chat
     NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),
+    NOT_FOUND_RENTAL_CHAT_ROOM(false, 3301, "해당 대여글 채팅방을 찾을 수 없습니다."),
+    NOT_FOUND_USER_CHAT_ROOM(false, 3302, "해당 유저 채팅방을 찾을 수 없습니다."),
 
     // 5. Clothes
     NOT_FOUND_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),

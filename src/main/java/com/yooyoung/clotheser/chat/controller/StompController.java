@@ -2,7 +2,7 @@ package com.yooyoung.clotheser.chat.controller;
 
 import com.yooyoung.clotheser.chat.dto.ChatMessageRequest;
 import com.yooyoung.clotheser.chat.dto.ChatMessageResponse;
-import com.yooyoung.clotheser.chat.service.ChatService;
+import com.yooyoung.clotheser.chat.service.RentalChatService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.*;
 public class StompController {
 
     private final SimpMessageSendingOperations simpleMessageSendingOperations;
-    private final ChatService chatService;
+    private final RentalChatService rentalChatService;
 
     // 새로운 사용자가 웹 소켓을 연결할 때 실행됨
     // @EventListener은 한 개의 매개변수만 가질 수 있다.
@@ -67,7 +67,7 @@ public class StompController {
             }
 
             // 채팅 메시지 DB에 저장
-            ChatMessageResponse chatMessageResponse = chatService.createChatMessage(chatMessageRequest, roomId, userDetails.user);
+            ChatMessageResponse chatMessageResponse = rentalChatService.createChatMessage(chatMessageRequest, roomId, userDetails.user);
 
             // /sub/message를 구독 중인 client에 메세지 보내기
             simpleMessageSendingOperations.convertAndSend("/sub/chats/" + roomId, new ResponseEntity<>(new BaseResponse<>(chatMessageResponse), CREATED));
