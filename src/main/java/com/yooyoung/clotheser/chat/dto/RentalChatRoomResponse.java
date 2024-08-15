@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @Setter(AccessLevel.NONE)
 // 채팅방 내역 (채팅 화면)
-public class ChatRoomResponse {
+public class RentalChatRoomResponse {
 
     @Schema(title = "채팅방 id", example = "1")
     private Long id;
@@ -54,8 +54,8 @@ public class ChatRoomResponse {
     private List<ChatMessageResponse> messages;
 
     /* 채팅방 생성 시 쓰는 생성자 */
-    public ChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname,
-                            Rental rental, String rentalImgUrl, Integer minPrice) {
+    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname,
+                                  Rental rental, String rentalImgUrl, Integer minPrice) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
@@ -71,8 +71,8 @@ public class ChatRoomResponse {
     }
 
     /* 채팅방 조회 시 쓰는 생성자 */
-    public ChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages,
-                            String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
+    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages,
+                                  String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();

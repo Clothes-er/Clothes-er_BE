@@ -1,6 +1,5 @@
 package com.yooyoung.clotheser.chat.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.global.entity.Time;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
@@ -11,12 +10,10 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Data
 @Setter(AccessLevel.NONE)
 /* 채팅방 목록 */
-public class ChatRoomListResponse {
+public class RentalChatRoomListResponse {
 
     @Schema(title = "채팅방 id", example = "1")
     private Long id;
@@ -40,21 +37,13 @@ public class ChatRoomListResponse {
     @Schema(title = "대여 상태", example = "RENTED")
     private RentalState rentalState;
 
-    @Schema(title = "대여 시작일", example = "2024년 06월 20일")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일", timezone = "Asia/Seoul")
-    private LocalDate startDate;
-
-    @Schema(title = "반납 예정일", example = "2024년 06월 25일")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일", timezone = "Asia/Seoul")
-    private LocalDate endDate;
-
     @Schema(title = "최근 메시지", example = "안녕하세요~")
     private String recentMessage;
     @Schema(title = "마지막으로 메시지 보낸 시간", example = "3시간 전")
     private String recentMessageTime;
 
-    public ChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalInfo rentalInfo,
-                                String recentMessage, String rentalImgUrl, User opponent) {
+    public RentalChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalInfo rentalInfo,
+                                      String recentMessage, String rentalImgUrl, User opponent) {
         this.id = chatRoom.getId();
 
         this.userSid = userSid;
@@ -67,8 +56,6 @@ public class ChatRoomListResponse {
 
         if (rentalInfo != null) {
             this.rentalState = rentalInfo.getState();
-            this.startDate = rentalInfo.getStartDate();
-            this.endDate = rentalInfo.getEndDate();
         }
 
         this.recentMessage = recentMessage;
