@@ -189,8 +189,8 @@ public class RentalService {
     }
 
     /* 대여글 목록 조회 */
-    public List<RentalListResponse> getRentalList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
-                                                  Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) throws BaseException {
+    public List<RentalListResponse> getRentalList(User user, String search, String sort, List<Gender> gender, Integer minHeight, Integer maxHeight,
+                                                  List<AgeFilter> age, List<String> category, List<String> style, RentalSituation situation) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
@@ -199,7 +199,7 @@ public class RentalService {
 
         // 필터링된 대여글 목록 불러오기
         List<Rental> rentalList = rentalFilterService.getFilteredRentals(user, search, sort, gender,
-                minHeight, maxHeight, age, category, style);
+                minHeight, maxHeight, age, category, style, situation);
 
         List<RentalListResponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
