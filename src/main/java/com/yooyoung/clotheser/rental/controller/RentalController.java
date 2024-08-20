@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.rental.controller;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.clothes.service.ClothesService;
 import com.yooyoung.clotheser.global.entity.*;
+import com.yooyoung.clotheser.rental.domain.RentalSituation;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
@@ -104,7 +105,8 @@ public class RentalController {
             @Parameter(name = "maxHeight", description = "최대 키를 기준으로 필터링한다.", example = "165"),
             @Parameter(name = "age", description = "나이대를 기준으로 필터링한다. (중복 가능)"),
             @Parameter(name = "category", description = "카테고리를 기준으로 필터링한다. (중복 가능)", example = "[\"셔츠\"]"),
-            @Parameter(name = "style", description = "스타일을 기준으로 필터링한다. (중복 가능)", example = "[\"러블리\"]")
+            @Parameter(name = "style", description = "스타일을 기준으로 필터링한다. (중복 가능)", example = "[\"러블리\"]"),
+            @Parameter(name = "situation", description = "제목 또는 설명을 기준으로 상황별 카테고리화를 한다.")
     })
     @GetMapping("")
     public ResponseEntity<BaseResponse<List<RentalListResponse>>> getRentalList(
@@ -116,12 +118,13 @@ public class RentalController {
             @RequestParam(required = false) Integer maxHeight,
             @RequestParam(required = false) List<AgeFilter> age,
             @RequestParam(required = false) List<String> category,
-            @RequestParam(required = false) List<String> style
-    ) {
+            @RequestParam(required = false) List<String> style,
+            @RequestParam(required = false) RentalSituation situation
+            ) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.getRentalList(user, search, sort, gender,
-                    minHeight, maxHeight, age, category, style)), OK);
+                    minHeight, maxHeight, age, category, style, situation)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

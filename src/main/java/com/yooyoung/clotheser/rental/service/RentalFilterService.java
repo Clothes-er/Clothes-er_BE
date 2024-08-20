@@ -8,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.rental.domain.QRental;
 import com.yooyoung.clotheser.rental.domain.Rental;
+import com.yooyoung.clotheser.rental.domain.RentalSituation;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.QUser;
 import com.yooyoung.clotheser.user.domain.User;
@@ -24,8 +25,8 @@ public class RentalFilterService {
     private final JPAQueryFactory queryFactory;
 
     /* 대여글 목록 필터링 */
-    public List<Rental> getFilteredRentals(User user, String search, String sort, List<Gender> gender, Integer minHeight,
-                                           Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) {
+    public List<Rental> getFilteredRentals(User user, String search, String sort, List<Gender> gender, Integer minHeight, Integer maxHeight,
+                                           List<AgeFilter> age, List<String> category, List<String> style, RentalSituation situation) {
 
         double latitude = user.getLatitude();
         double longitude = user.getLongitude();
@@ -72,6 +73,19 @@ public class RentalFilterService {
         // 스타일 필터링
         if (style != null && !style.isEmpty()) {
             query.where(qRental.style.in(style));
+        }
+
+        // 상황별 카테고리화
+        if (situation != null) {
+            List<String> keywords = situation.getKeywords();
+            BooleanExpression keywordCondition = qRental.title.containsIgnoreCase(keywords.get(0))
+                    .or(qRental.description.containsIgnoreCase(keywords.get(0)));
+
+            for (int i = 1; i < keywords.size(); i++) {
+                keywordCondition = keywordCondition.or(qRental.title.containsIgnoreCase(keywords.get(i)))
+                        .or(qRental.description.containsIgnoreCase(keywords.get(i)));
+            }
+            query.where(keywordCondition);
         }
 
         // 정렬
