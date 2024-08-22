@@ -67,7 +67,7 @@ public class UserChatService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
         // 채팅방이 이미 존재하는지 확인 (이미 해당 유저와의 채팅방이 있는 경우 roomId 리턴)
-        Optional<ChatRoom> existedChatRoom = chatRoomRepository.findOneByBuyerIdAndLenderId(user.getId(), lender.getId());
+        Optional<ChatRoom> existedChatRoom = chatRoomRepository.findOneByBuyerIdAndLenderIdAndRentalIdNull(user.getId(), lender.getId());
         if (existedChatRoom.isPresent()) {
             throw new ChatRoomException(USER_CHAT_ROOM_EXISTS, CONFLICT, existedChatRoom.get().getId());
         }

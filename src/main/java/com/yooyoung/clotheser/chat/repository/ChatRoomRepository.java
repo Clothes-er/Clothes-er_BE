@@ -21,7 +21,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     Optional<ChatRoom> findOneByIdAndRentalIdNull(Long id);
 
     // 유저 채팅방 확인 (userId)
-    Optional<ChatRoom> findOneByBuyerIdAndLenderId(Long buyerId, Long lenderId);
+    Optional<ChatRoom> findOneByBuyerIdAndLenderIdAndRentalIdNull(Long buyerId, Long lenderId);
 
     // updatedAt이 null이 아닌 대여글 채팅방 목록 조회 (null이면 채팅 메시지 없는 채팅방)
     @Query("select c from ChatRoom c where (c.buyer.id = :userId or c.lender.id = :userId) and " +
