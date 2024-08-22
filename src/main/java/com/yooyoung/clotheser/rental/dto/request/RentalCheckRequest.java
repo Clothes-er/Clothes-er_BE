@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;

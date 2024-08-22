@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.response;
 
 import com.yooyoung.clotheser.global.entity.Time;
 import com.yooyoung.clotheser.rental.domain.Rental;

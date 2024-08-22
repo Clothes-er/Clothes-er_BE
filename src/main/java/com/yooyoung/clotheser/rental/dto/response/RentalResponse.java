@@ -1,7 +1,8 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.rental.domain.Rental;
+import com.yooyoung.clotheser.rental.dto.RentalPriceDto;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;

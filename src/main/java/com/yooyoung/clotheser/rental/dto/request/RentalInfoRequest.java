@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.chat.domain.ChatRoom;

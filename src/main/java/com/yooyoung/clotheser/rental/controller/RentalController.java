@@ -1,10 +1,12 @@
 package com.yooyoung.clotheser.rental.controller;
 
-import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.clothes.service.ClothesService;
 import com.yooyoung.clotheser.global.entity.*;
 import com.yooyoung.clotheser.rental.domain.RentalSituation;
-import com.yooyoung.clotheser.rental.dto.*;
+import com.yooyoung.clotheser.rental.dto.request.RentalCheckRequest;
+import com.yooyoung.clotheser.rental.dto.request.RentalInfoRequest;
+import com.yooyoung.clotheser.rental.dto.request.RentalRequest;
+import com.yooyoung.clotheser.rental.dto.response.*;
 import com.yooyoung.clotheser.rental.service.RentalService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 
@@ -41,7 +43,7 @@ public class RentalController {
     /* 대여글이 없는 나의 보유 옷 목록 조회 (대여글 생성 전 사용) */
     @Operation(summary = "대여글이 없는 나의 보유 옷 목록 조회", description = "대여글 작성 전에 대여글이 없는 나의 보유 옷 목록을 조회한다.")
     @GetMapping("/my-clothes")
-    public ResponseEntity<BaseResponse<List<UserClothesListResponse>>> getMyNoRentalClothes(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BaseResponse<List<NoRentalClothesListResponse>>> getMyNoRentalClothes(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(clothesService.getMyNoRentalClothes(user)), OK);
@@ -54,9 +56,9 @@ public class RentalController {
     @Operation(summary = "대여글 생성", description = "대여글을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<RentalResponse>> createRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
-                                                                         BindingResult bindingResult,
-                                                                         @RequestPart(value = "images", required = false) MultipartFile[] images,
-                                                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                                     BindingResult bindingResult,
+                                                                     @RequestPart(value = "images", required = false) MultipartFile[] images,
+                                                                     @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             // 입력 유효성 검사
             if (bindingResult.hasErrors()) {

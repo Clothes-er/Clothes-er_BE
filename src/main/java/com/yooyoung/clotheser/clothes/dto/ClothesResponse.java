@@ -56,7 +56,7 @@ public class ClothesResponse {
     @Schema(title = "스타일", example = "캐주얼")
     private String style;
 
-    @Schema(title = "구매 가격", example = "19,900")
+    @Schema(title = "구매 가격", example = "19900")
     private Integer price;
 
     @Schema(title = "브랜드", example = "에이블리")

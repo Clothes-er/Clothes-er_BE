@@ -1,6 +1,6 @@
 package com.yooyoung.clotheser.rental.domain;
 
-import com.yooyoung.clotheser.rental.dto.RentalRequest;
+import com.yooyoung.clotheser.rental.dto.request.RentalRequest;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;

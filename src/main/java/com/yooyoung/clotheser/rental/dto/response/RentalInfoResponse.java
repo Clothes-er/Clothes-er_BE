@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;

@@ -1,6 +1,7 @@
-package com.yooyoung.clotheser.rental.dto;
+package com.yooyoung.clotheser.rental.dto.request;
 
 import com.yooyoung.clotheser.rental.domain.Rental;
+import com.yooyoung.clotheser.rental.dto.RentalPriceDto;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 
