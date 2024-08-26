@@ -120,6 +120,12 @@ public class User {
         return this;
     }
 
+    // 관리자가 최초 로그인인 경우
+    public User updateIsFirstLogin() {
+        this.isFirstLogin = false;
+        return this;
+    }
+
     // 회원의 레벨 조회
     public int getUserLevel() {
         int rentalCount = this.getRentalCount();
