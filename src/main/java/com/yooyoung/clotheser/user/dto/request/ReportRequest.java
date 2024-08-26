@@ -21,7 +21,7 @@ public class ReportRequest {
     private String reason;
 
     @Schema(title = "신고 내용", example = "대여일에 만나기로 했는데 잠수 탔어요.", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "신고 사유를 입력해주세요.")
+    @NotBlank(message = "신고 내용을 입력해주세요.")
     private String content;
 
     public Report toEntity(User user, User reportee) {
