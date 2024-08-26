@@ -316,8 +316,8 @@ public class UserController {
     @Operation(summary = "스펙 및 취향 수정", description = "회원의 스펙과 취향을 수정한다.")
     @PatchMapping("/style")
     public ResponseEntity<BaseResponse<UserProfileResponse>> updateStyle(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                           @Valid @RequestBody UserStyleRequest userStyleRequest,
-                                                                           BindingResult bindingResult) {
+                                                                         @Valid @RequestBody UserStyleRequest userStyleRequest,
+                                                                         BindingResult bindingResult) {
         try {
             User user = userDetails.user;
 
@@ -330,6 +330,29 @@ public class UserController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(userService.updateStyle(user, userStyleRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "회원 신고", description = "회원을 신고한다.")
+    @PostMapping("/report")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> reportUser(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                       @Valid @RequestBody ReportRequest reportRequest,
+                                                                       BindingResult bindingResult) {
+        try {
+            User user = userDetails.user;
+
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(userService.reportUser(user, reportRequest)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

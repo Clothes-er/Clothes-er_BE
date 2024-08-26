@@ -14,12 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 
@@ -45,8 +47,9 @@ public class JwtProvider {
     }
 
     // 토큰 생성
-    public TokenResponse createToken(Long userId) {
+    public TokenResponse createToken(Long userId, String role) {
         Claims claims = Jwts.claims().subject(String.valueOf(userId)).build();
+
         long now = (new Date()).getTime();
 
         // 토큰 유효 시간
@@ -55,6 +58,7 @@ public class JwtProvider {
 
         String accessToken = Jwts.builder()
                 .claims(claims)
+                .claim("role", role)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + accessTokenExp))
                 .signWith(key)
@@ -87,8 +91,14 @@ public class JwtProvider {
 
     // JWT 토큰을 복호화하여 토큰에 들어있는 정보를 꺼냄 (권한 확인)
     public Authentication getAuthentication(String token) throws BaseException {
+        // JWT에서 사용자 역할 추출
+        String role = this.getRole(token);
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(this.getUserId(token).toString());
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+
+        // 역할을 기반으로 권한을 설정
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+        return new UsernamePasswordAuthenticationToken(userDetails, "", Collections.singletonList(authority));
     }
 
     // 토큰으로부터 userId 획득
@@ -98,6 +108,15 @@ public class JwtProvider {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload().getSubject());
+    }
+
+    // 토큰으로부터 사용자 역할 획득
+    public String getRole(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload().get("role", String.class);
     }
 
     // 토큰 검증

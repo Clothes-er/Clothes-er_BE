@@ -28,8 +28,8 @@ public class RentalFilterService {
     public List<Rental> getFilteredRentals(User user, String search, String sort, List<Gender> gender, Integer minHeight, Integer maxHeight,
                                            List<AgeFilter> age, List<String> category, List<String> style, RentalSituation situation) {
 
-        double latitude = user.getLatitude();
-        double longitude = user.getLongitude();
+        Double latitude = user.getLatitude();    // 관리자 계정은 주소 없을 수도 있으므로 Wrapper 타입
+        Double longitude = user.getLongitude();
 
         QRental qRental = QRental.rental;
         QUser qUser = QUser.user;
@@ -106,7 +106,7 @@ public class RentalFilterService {
     }
 
     /* 주소 기반 대여글 목록 불러오기 */
-    private BooleanExpression distanceWithin(QUser writer, double longitude, double latitude) {
+    private BooleanExpression distanceWithin(QUser writer, Double longitude, Double latitude) {
         return Expressions.booleanTemplate("ST_Distance_Sphere(point({0}, {1}), point({2}, {3})) <= {4}",
                 writer.longitude, writer.latitude, longitude, latitude, 2000);
     }

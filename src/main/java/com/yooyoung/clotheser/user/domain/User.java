@@ -76,9 +76,9 @@ public class User {
 
     // 관리자 계정은 DB에서 직접 변경
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")     // DB 기본값 설정
-    @Builder.Default            // 객체 생성 시 기본값 설정
-    private Boolean isAdmin = false;
+    @ColumnDefault("0")
+    @Builder.Default
+    private Role isAdmin = Role.USER;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
@@ -117,6 +117,12 @@ public class User {
     // 마지막으로 로그인한 시간 수정
     public User updateLastLoginAt() {
         this.lastLoginAt = LocalDateTime.now();
+        return this;
+    }
+
+    // 관리자가 최초 로그인인 경우
+    public User updateIsFirstLogin() {
+        this.isFirstLogin = false;
         return this;
     }
 

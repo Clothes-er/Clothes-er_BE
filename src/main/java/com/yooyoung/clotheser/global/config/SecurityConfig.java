@@ -41,10 +41,12 @@ public class SecurityConfig {
         return httpSecurity             // SecurityFilterChain에서 요청에 접근할 수 있어서 인증, 인가 서비스에 사용
                 .httpBasic(HttpBasicConfigurer::disable)    // http basic auth 기반으로 로그인 인증창이 뜨는데, 기본 인증을 이용하지 않으려면 .disable() 추가
                 .csrf(AbstractHttpConfigurer::disable)  // api server 이용 시 세션 기반 인증 disable (html tag를 통한 공격 방지)
-                .formLogin(AbstractHttpConfigurer::disable) //
+                .formLogin(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger/**").permitAll()  // swagger 엔드포인트
+                        .requestMatchers("/api/v1/admin/login").permitAll()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // 관리자만 접근 가능
                         .requestMatchers("/api/v1/users/signup").permitAll()
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/send-email").permitAll()
