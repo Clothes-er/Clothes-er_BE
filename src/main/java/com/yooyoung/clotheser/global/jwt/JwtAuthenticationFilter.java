@@ -48,7 +48,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                                 .orElseThrow(() -> new BaseException(INVALID_JWT_TOKEN, NOT_FOUND));
 
                         Long userId = rt.getUserId();
-                        TokenResponse tokenResponse = jwtProvider.createToken(userId);
+                        String role = jwtProvider.getRole(accessToken);
+
+                        TokenResponse tokenResponse = jwtProvider.createToken(userId, role);
                         String newAccessToken = tokenResponse.getAccessToken();
 
                         jwtProvider.setHeaderAccessToken((HttpServletResponse) response, newAccessToken);

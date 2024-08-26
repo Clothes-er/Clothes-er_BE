@@ -99,7 +99,7 @@ public class UserService {
         }
 
         // 토큰 생성
-        TokenResponse tokenResponse = jwtProvider.createToken(user.getId());
+        TokenResponse tokenResponse = jwtProvider.createToken(user.getId(), user.getIsAdmin().name());
 
         // DB에 Refresh Token 있는지 확인
         RefreshToken preRefreshToken = refreshTokenRepository.findByUserId(user.getId());

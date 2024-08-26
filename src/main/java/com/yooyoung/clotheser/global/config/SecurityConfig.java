@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests((authorize) -> authorize     // 각 경로별 권한 처리
                         .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger/**").permitAll()  // swagger 엔드포인트
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // 관리자만 접근 가능
                         .requestMatchers("/api/v1/users/signup").permitAll()
                         .requestMatchers("/api/v1/users/check-nickname/{nickname}").permitAll()
                         .requestMatchers("/api/v1/users/send-email").permitAll()
