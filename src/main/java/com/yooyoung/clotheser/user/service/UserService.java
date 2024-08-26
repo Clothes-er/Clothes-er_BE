@@ -2,6 +2,8 @@ package com.yooyoung.clotheser.user.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.yooyoung.clotheser.admin.domain.Report;
+import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
@@ -51,6 +53,7 @@ public class UserService {
     private final FavClothesRepository favClothesRepository;
     private final FavStyleRepository favStyleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ReportRepository reportRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -407,4 +410,29 @@ public class UserService {
         return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 
+    public BaseResponseStatus reportUser(User user, ReportRequest reportRequest) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 신고하려는 회원 불러오기 (자신도 가능)
+        Long userId;
+        try {
+            String base64DecodedUserId = Base64UrlSafeUtil.decode(reportRequest.getUserSid());
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+        } catch (Exception e) {
+            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
+        }
+        User reportee = userRepository.findByIdAndDeletedAtNull(userId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+
+        // 신고 내역 저장
+        Report report = reportRequest.toEntity(user, reportee);
+        reportRepository.save(report);
+
+        return SUCCESS;
+
+    }
 }
