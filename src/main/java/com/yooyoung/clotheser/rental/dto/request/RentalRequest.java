@@ -40,7 +40,7 @@ public class RentalRequest {
     private String style;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
-    @Valid
+    @Valid      // 리스트의 각 요소 유효성 검사 목적
     @NotEmpty(message = "가격 정보를 입력해주세요.")
     private List<RentalPriceDto> prices;
 

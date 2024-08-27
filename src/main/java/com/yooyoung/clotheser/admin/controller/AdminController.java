@@ -1,11 +1,13 @@
 package com.yooyoung.clotheser.admin.controller;
 
+import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
 import com.yooyoung.clotheser.admin.service.AdminService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.user.dto.request.LoginRequest;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,7 +55,6 @@ public class AdminController {
         }
     }
 
-
     /* 신고 목록 조회 */
     @Operation(summary = "신고 목록 조회", description = "신고 목록을 조회한다.")
     @GetMapping("/reports")
@@ -70,9 +71,32 @@ public class AdminController {
     @Operation(summary = "신고 조회", description = "특정 신고 내역을 조회한다.")
     @Parameter(name = "reportId", description = "신고 id", example = "1", required = true)
     @GetMapping("/reports/{reportId}")
-    public ResponseEntity<BaseResponse<ReportResponse>> getReport(@PathVariable("reportId") Long reportId) {
+    public ResponseEntity<BaseResponse<ReportResponse>> getReport(@PathVariable Long reportId) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(adminService.getReport(reportId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 신고 조치 */
+    @Operation(summary = "신고 조치", description = "특정 신고에 대한 조치를 취한다.")
+    @Parameter(name = "reportId", description = "신고 id", example = "1", required = true)
+    @PostMapping("/reports/{reportId}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> actionReport(@PathVariable Long reportId,
+                                                                         @Valid @RequestBody ReportActionRequest reportActionRequest,
+                                                                         BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(adminService.actionReport(reportId, reportActionRequest)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

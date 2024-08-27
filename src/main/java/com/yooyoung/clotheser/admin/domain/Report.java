@@ -58,4 +58,9 @@ public class Report {
     @Column(insertable = false) // 생성 시 null
     private LocalDateTime updatedAt;
 
+    public Report updateAction(ReportAction action) {
+        this.action = action;
+        this.state = ReportState.ACTIONED;
+        return this;
+    }
 }

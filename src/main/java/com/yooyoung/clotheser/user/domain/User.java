@@ -80,6 +80,11 @@ public class User {
     @Builder.Default
     private Role isAdmin = Role.USER;
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean isRestricted = false;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -182,12 +187,21 @@ public class User {
     }
 
     // 옷장 점수 수정
-    public void updateClosetScore(double difference) {
+    public User updateClosetScore(double difference) {
         this.closetScore += difference;
+        this.updatedAt = LocalDateTime.now();
+
         if (this.closetScore > 20)
             this.closetScore = 20;
         else if (this.closetScore < 0)
             this.closetScore = 0;
+
+        return this;
     }
 
+    // 이용 제한 설정
+    public User updateIsRestricted() {
+        this.isRestricted = true;
+        return this;
+    }
 }

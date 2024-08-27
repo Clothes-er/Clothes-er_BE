@@ -1,11 +1,15 @@
 package com.yooyoung.clotheser.admin.service;
 
 import com.yooyoung.clotheser.admin.domain.Report;
+import com.yooyoung.clotheser.admin.domain.ReportAction;
+import com.yooyoung.clotheser.admin.domain.ReportState;
+import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
 import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
+import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
 import com.yooyoung.clotheser.user.domain.Role;
@@ -101,5 +105,49 @@ public class AdminService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
         return new ReportResponse(report);
+    }
+
+    /* 신고 처리 */
+    public BaseResponseStatus actionReport(Long reportId, ReportActionRequest reportActionRequest) throws BaseException {
+
+        // 신고 불러오기
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
+
+        // 신고 조치는 한 번만 가능
+        if (report.getState() == ReportState.ACTIONED) {
+            throw new BaseException(REPORT_ACTION_EXISTS, CONFLICT);
+        }
+
+        // 조치별 이후 로직
+        ReportAction action = reportActionRequest.getAction();
+        switch (action) {
+            // 1. 이용 제한
+            case RESTRICTED -> {
+                // 회원 이용 제한 설정
+                // -> 로그인 시도 시 "서비스 이용이 제한되었습니다."
+                // -> 대여글, 보유 옷 숨김 처리 (목록 응답값에서 제외됨)
+                // -> 채팅방 목록, 채팅방 조회에서 isRestricted = true
+                User reportee = report.getReportee();
+                reportee = reportee.updateIsRestricted();
+                userRepository.save(reportee);
+            }
+
+            // 2. 옷장 점수 차감
+            case DOCKED -> {
+                User reportee = report.getReportee();
+                reportee = reportee.updateClosetScore(-2);
+                userRepository.save(reportee);
+            }
+
+            // 3. 무시
+            case IGNORED -> {}
+        }
+
+        // 신고 조치 내역 변경
+        report = report.updateAction(action);
+        reportRepository.save(report);
+
+        return SUCCESS;
     }
 }
