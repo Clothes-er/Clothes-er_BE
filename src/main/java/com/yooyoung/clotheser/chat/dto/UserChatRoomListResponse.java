@@ -22,6 +22,8 @@ public class UserChatRoomListResponse {
     private String nickname;
     @Schema(title = "상대방 프로필 사진 URL", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/profiles/noonsong.png")
     private String profileImgUrl;
+    @Schema(title = "상대방 이용 제한 여부", example = "false")
+    private Boolean isRestricted;
 
     @Schema(title = "최근 메시지", example = "안녕하세요~")
     private String recentMessage;
@@ -33,6 +35,7 @@ public class UserChatRoomListResponse {
         this.userSid = userSid;
         this.nickname = opponent.getNickname();
         this.profileImgUrl = opponent.getProfileUrl();
+        this.isRestricted = opponent.getIsRestricted();
         this.recentMessage = recentMessage;
         this.recentMessageTime = Time.calculateTime(chatRoom.getUpdatedAt());
     }

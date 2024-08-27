@@ -100,7 +100,7 @@ public class RentalChatService {
         // 가격 정보 중에 제일 싼 가격 불러오기
         Integer minPrice = rentalPriceRepository.findMinPrice(rental).orElse(null);
 
-        return new RentalChatRoomResponse(chatRoom, lenderSid, chatRoom.getLender().getNickname(), rental, rentalImgUrl, minPrice);
+        return new RentalChatRoomResponse(chatRoom, lenderSid, chatRoom.getLender(), rental, rentalImgUrl, minPrice);
 
     }
 
@@ -228,7 +228,7 @@ public class RentalChatService {
             isReviewed = false;
         }
 
-        return new RentalChatRoomResponse(chatRoom, opponentSid, opponent.getNickname(), chatMessageResponseList,
+        return new RentalChatRoomResponse(chatRoom, opponentSid, opponent, chatMessageResponseList,
                 rentalImgUrl, minPrice, isChecked, rentalState, isReviewed);
 
     }

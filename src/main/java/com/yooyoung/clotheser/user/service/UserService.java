@@ -101,6 +101,11 @@ public class UserService {
             throw new BaseException(LOGIN_MISMATCH, BAD_REQUEST);
         }
 
+        // 이용 제한된 회원 확인
+        if (user.getIsRestricted()) {
+            throw new BaseException(LOGIN_RESTRICTED, FORBIDDEN);
+        }
+
         // 토큰 생성
         TokenResponse tokenResponse = jwtProvider.createToken(user.getId(), user.getIsAdmin().name());
 

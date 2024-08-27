@@ -4,6 +4,7 @@ import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -28,6 +29,8 @@ public class RentalChatRoomResponse {
     private String opponentSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String opponentNickname;
+    @Schema(title = "상대방 이용 제한 여부", example = "false")
+    private Boolean isRestricted;
 
     // 대여글 정보
     @Schema(title = "대여글 id", example = "1")
@@ -54,14 +57,15 @@ public class RentalChatRoomResponse {
     private List<ChatMessageResponse> messages;
 
     /* 채팅방 생성 시 쓰는 생성자 */
-    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname,
+    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, User opponent,
                                   Rental rental, String rentalImgUrl, Integer minPrice) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
 
         this.opponentSid = opponentSid;
-        this.opponentNickname = opponentNickname;
+        this.opponentNickname = opponent.getNickname();
+        this.isRestricted = opponent.getIsRestricted();
 
         this.rentalId = rental.getId();
         this.rentalImgUrl = rentalImgUrl;
@@ -71,14 +75,15 @@ public class RentalChatRoomResponse {
     }
 
     /* 채팅방 조회 시 쓰는 생성자 */
-    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages,
+    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, User opponent, List<ChatMessageResponse> messages,
                                   String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
 
         this.opponentSid = opponentSid;
-        this.opponentNickname = opponentNickname;
+        this.opponentNickname = opponent.getNickname();
+        this.isRestricted = opponent.getIsRestricted();
 
         this.rentalId = chatRoom.getRental().getId();
         this.rentalImgUrl = rentalImgUrl;
