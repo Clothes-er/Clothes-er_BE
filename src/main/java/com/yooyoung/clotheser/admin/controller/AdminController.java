@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.admin.controller;
 
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
+import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.service.AdminService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
@@ -43,6 +44,17 @@ public class AdminController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(adminService.adminLogin(loginRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "신고 목록 조회", description = "신고 목록을 조회한다.")
+    @GetMapping("/reports")
+    public ResponseEntity<BaseResponse<List<ReportListResponse>>> getReportList() {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(adminService.getReportList()), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

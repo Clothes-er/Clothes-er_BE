@@ -1,6 +1,9 @@
 package com.yooyoung.clotheser.admin.service;
 
+import com.yooyoung.clotheser.admin.domain.Report;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
+import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
+import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
@@ -15,6 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
@@ -28,6 +34,7 @@ public class AdminService {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final ReportRepository reportRepository;
 
     // 로그인
     public AdminLoginResponse adminLogin(LoginRequest loginRequest) throws BaseException {
@@ -74,4 +81,14 @@ public class AdminService {
         return new AdminLoginResponse(user, tokenResponse);
     }
 
+    public List<ReportListResponse> getReportList() throws BaseException {
+
+        List<Report> reports = reportRepository.findAllByOrderByIdDesc();
+        List<ReportListResponse> responses = new ArrayList<>();
+        for (Report report : reports) {
+            responses.add(new ReportListResponse(report));
+        }
+
+        return responses;
+    }
 }
