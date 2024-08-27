@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.admin.service;
 import com.yooyoung.clotheser.admin.domain.Report;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
+import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
 import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
@@ -36,7 +37,7 @@ public class AdminService {
     private final JwtProvider jwtProvider;
     private final ReportRepository reportRepository;
 
-    // 로그인
+    /* 관리자 로그인 */
     public AdminLoginResponse adminLogin(LoginRequest loginRequest) throws BaseException {
 
         // 이메일로 회원 존재 확인
@@ -81,6 +82,7 @@ public class AdminService {
         return new AdminLoginResponse(user, tokenResponse);
     }
 
+    /* 신고 목록 조회 */
     public List<ReportListResponse> getReportList() throws BaseException {
 
         List<Report> reports = reportRepository.findAllByOrderByIdDesc();
@@ -90,5 +92,14 @@ public class AdminService {
         }
 
         return responses;
+    }
+
+    /* 신고 조회 */
+    public ReportResponse getReport(Long reportId) throws BaseException {
+
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
+
+        return new ReportResponse(report);
     }
 }

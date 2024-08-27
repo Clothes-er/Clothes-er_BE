@@ -94,6 +94,9 @@ public enum BaseResponseStatus {
     // 5. Clothes
     NOT_FOUND_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
 
+    // 6. Report
+    NOT_FOUND_REPORT(false, 3500, "해당 신고를 찾을 수 없습니다."),
+
     /*
         4000 : Database, Server 오류
     */

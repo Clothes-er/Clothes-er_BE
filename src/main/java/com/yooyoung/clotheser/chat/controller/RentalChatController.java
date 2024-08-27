@@ -59,7 +59,7 @@ public class RentalChatController {
     @Parameter(name = "roomId", description = "채팅방 id", example = "1", required = true)
     @GetMapping("/{roomId}")
     public ResponseEntity<BaseResponse<RentalChatRoomResponse>> getRentalChatRoom(@PathVariable("roomId") Long roomId,
-                                                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(rentalChatService.getRentalChatRoom(roomId, userDetails.user)), OK);
         }
