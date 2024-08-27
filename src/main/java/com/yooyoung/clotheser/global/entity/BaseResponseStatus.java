@@ -39,11 +39,15 @@ public enum BaseResponseStatus {
 
     // 로그인
     LOGIN_MISMATCH(false, 2130, "이메일과 비밀번호가 일치하지 않습니다."),
+    LOGIN_RESTRICTED(false, 2131, "서비스 이용이 제한되었습니다."),
 
     // 인증
     INVALID_AUTH_CODE(false, 2140, "유효하지 않은 인증 번호입니다."),
     FAILED_TO_CHECK_EMAIL(false, 2141, "이메일 인증에 실패하였습니다."),
     FAILED_TO_CHECK_PHONE(false, 2142, "휴대폰 인증에 실패하였습니다."),
+
+    // 신고
+    REPORT_ACTION_EXISTS(false, 2150, "이미 처리된 신고입니다."),
 
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
@@ -93,6 +97,9 @@ public enum BaseResponseStatus {
 
     // 5. Clothes
     NOT_FOUND_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
+
+    // 6. Report
+    NOT_FOUND_REPORT(false, 3500, "해당 신고를 찾을 수 없습니다."),
 
     /*
         4000 : Database, Server 오류

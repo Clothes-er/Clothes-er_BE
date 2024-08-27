@@ -25,6 +25,8 @@ public class RentalChatRoomListResponse {
     private String nickname;
     @Schema(title = "상대방 프로필 사진 URL", example = "https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/profiles/noonsong.png")
     private String profileImgUrl;
+    @Schema(title = "상대방 이용 제한 여부", example = "false")
+    private Boolean isRestricted;
 
     // 대여글 정보
     @Schema(title = "대여글 제목", example = "스퀘어 블라우스")
@@ -49,6 +51,7 @@ public class RentalChatRoomListResponse {
         this.userSid = userSid;
         this.nickname = opponent.getNickname();
         this.profileImgUrl = opponent.getProfileUrl();
+        this.isRestricted = opponent.getIsRestricted();
 
         this.title = chatRoom.getRental().getTitle();
         this.rentalImgUrl = rentalImgUrl;

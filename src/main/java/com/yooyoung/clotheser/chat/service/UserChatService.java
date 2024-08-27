@@ -168,7 +168,7 @@ public class UserChatService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new UserChatRoomResponse(chatRoom.getId(), opponentSid, opponent.getNickname(), chatMessageResponseList);
+        return new UserChatRoomResponse(chatRoom.getId(), opponentSid, opponent, chatMessageResponseList);
     }
 
 }

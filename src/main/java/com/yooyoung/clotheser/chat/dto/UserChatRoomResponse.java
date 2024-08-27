@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.chat.dto;
 
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -20,6 +21,9 @@ public class UserChatRoomResponse {
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String opponentNickname;
 
+    @Schema(title = "상대방 이용 제한 여부", example = "false")
+    private Boolean isRestricted;
+
     @Schema(description = "채팅 메시지 목록", type = "array")
     private List<ChatMessageResponse> messages;
 
@@ -31,10 +35,11 @@ public class UserChatRoomResponse {
     }
 
     /* 유저 채팅방 조회 시 사용 */
-    public UserChatRoomResponse(Long id, String opponentSid, String opponentNickname, List<ChatMessageResponse> messages) {
+    public UserChatRoomResponse(Long id, String opponentSid, User opponent, List<ChatMessageResponse> messages) {
         this.id = id;
         this.opponentSid = opponentSid;
-        this.opponentNickname = opponentNickname;
+        this.opponentNickname = opponent.getNickname();
+        this.isRestricted = opponent.getIsRestricted();
         this.messages = messages;
     }
 }
