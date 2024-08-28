@@ -30,4 +30,7 @@ public interface RentalInfoRepository extends JpaRepository<RentalInfo, Long> {
     // 대여 중인지 확인
     boolean existsByRentalIdAndState(Long rentalId, RentalState state);
 
+    // 거래 건수
+    int countByBuyerIdOrLenderId(Long buyer_id, Long lender_id);
+
 }

@@ -12,4 +12,5 @@ public interface ReviewKeywordRepository extends JpaRepository<ReviewKeyword, Lo
     // 키워드 가져오기
     List<ReviewKeyword> findAllByReviewId(Long reviewId);
 
+    int countAllByReviewId(Long reviewId);
 }
