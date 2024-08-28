@@ -7,10 +7,15 @@ import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
+import com.yooyoung.clotheser.admin.dto.response.UserListResponse;
 import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
+import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
+import com.yooyoung.clotheser.review.domain.Review;
+import com.yooyoung.clotheser.review.repository.ReviewKeywordRepository;
+import com.yooyoung.clotheser.review.repository.ReviewRepository;
 import com.yooyoung.clotheser.user.domain.RefreshToken;
 import com.yooyoung.clotheser.user.domain.Role;
 import com.yooyoung.clotheser.user.domain.User;
@@ -34,12 +39,15 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class AdminService {
 
-    private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final ReportRepository reportRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReviewKeywordRepository reviewKeywordRepository;
+    private final RentalInfoRepository rentalInfoRepository;
 
     /* 관리자 로그인 */
     public AdminLoginResponse adminLogin(LoginRequest loginRequest) throws BaseException {
@@ -149,5 +157,38 @@ public class AdminService {
         reportRepository.save(report);
 
         return SUCCESS;
+    }
+
+    /* 회원 목록 조회 */
+    public List<UserListResponse> getUserList(String search) throws BaseException {
+
+        // 유저 목록 불러오기
+        List<User> users;
+        if (search != null && !search.isEmpty()) {
+            // 이름, 닉네임, 이메일 기준으로 대소문자 구분 없이 검색
+            users = userRepository.searchAll(search);
+        }
+        else {
+            users = userRepository.findAllByDeletedAtNullOrderByCreatedAtDesc();
+        }
+
+        List<UserListResponse> responses = new ArrayList<>();
+        for (User user : users) {
+            Long userId = user.getId();
+
+            // 거래 후기 키워드 개수
+            List<Review> reviews = reviewRepository.findByRevieweeIdOrderByCreatedAtDesc(userId);
+            int keywordCount = 0;
+            for (Review review : reviews) {
+                keywordCount += reviewKeywordRepository.countAllByReviewId(review.getId());
+            }
+
+            // 거래 건수
+            int rentalCount = rentalInfoRepository.countByBuyerIdOrLenderId(userId, userId);
+
+            responses.add(new UserListResponse(user, keywordCount, rentalCount));
+        }
+
+        return responses;
     }
 }

@@ -4,6 +4,7 @@ import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
+import com.yooyoung.clotheser.admin.dto.response.UserListResponse;
 import com.yooyoung.clotheser.admin.service.AdminService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
@@ -97,6 +98,19 @@ public class AdminController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(adminService.actionReport(reportId, reportActionRequest)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 회원 목록 조회 */
+    @Operation(summary = "회원 목록 조회", description = "회원 목록을 조회한다.")
+    @Parameter(name = "search", description = "이름, 닉네임, 이메일을 기준으로 대소문자 구분 없이 검색한다.", example = "유진")
+    @GetMapping("/users")
+    public ResponseEntity<BaseResponse<List<UserListResponse>>> getUserList(@RequestParam(required = false) String search) {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(adminService.getUserList(search)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
