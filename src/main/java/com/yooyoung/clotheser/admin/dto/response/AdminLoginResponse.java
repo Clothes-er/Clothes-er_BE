@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Setter(AccessLevel.NONE)
 public class AdminLoginResponse {
 
+    @Schema(title = "이름", example = "김눈송")
+    private String name;
+
     @Schema(title = "이메일", example = "noonsong@sookmyung.ac.kr")
     private String email;
 
@@ -24,6 +27,7 @@ public class AdminLoginResponse {
     private TokenResponse token;
 
     public AdminLoginResponse(User user, TokenResponse token) {
+        this.name = user.getName();
         this.email = user.getEmail();
         this.lastLoginAt = user.getLastLoginAt();
         this.token = token;
