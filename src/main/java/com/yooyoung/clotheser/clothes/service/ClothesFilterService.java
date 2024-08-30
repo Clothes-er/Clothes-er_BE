@@ -34,6 +34,7 @@ public class ClothesFilterService {
         JPAQuery<Clothes> query = queryFactory.selectFrom(qClothes)
                 .leftJoin(qClothes.user, qUser)
                 .where(qClothes.deletedAt.isNull())
+                .where(qClothes.isPublic.isTrue())
                 .where(qUser.isRestricted.isFalse())    // 이용 제한 회원 제외
                 .where(qClothes.user.ne(user));
 
