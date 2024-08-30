@@ -30,8 +30,11 @@ public class UserListResponse {
     @Schema(title = "옷장 점수", example = "10")
     private double closetScore;
 
-    @Schema(title = "거래 후기 키워드 개수", example = "20")
-    private int keywordCount;
+    @Schema(title = "후기 긍정 키워드 개수", example = "8")
+    private int positiveKeywordCount;
+
+    @Schema(title = "후기 부정 키워드 개수", example = "4")
+    private int negativeKeywordCount;
 
     @Schema(title = "거래 건수", example = "4")
     private int rentalCount;
@@ -43,7 +46,7 @@ public class UserListResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
-    public UserListResponse(User user, int keywordCount, int rentalCount) {
+    public UserListResponse(User user, int positiveKeywordCount, int negativeKeywordCount, int rentalCount) {
         this.name = user.getName();
         this.nickname = user.getNickname();
         this.email = user.getEmail();
@@ -58,7 +61,8 @@ public class UserListResponse {
             this.closetScore = bd.doubleValue();
         }
 
-        this.keywordCount = keywordCount;
+        this.positiveKeywordCount = positiveKeywordCount;
+        this.negativeKeywordCount = negativeKeywordCount;
         this.rentalCount = rentalCount;
         this.isRestricted = user.getIsRestricted();
         this.createdAt = user.getCreatedAt();

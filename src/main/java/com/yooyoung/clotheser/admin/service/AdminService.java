@@ -178,15 +178,18 @@ public class AdminService {
 
             // 거래 후기 키워드 개수
             List<Review> reviews = reviewRepository.findByRevieweeIdOrderByCreatedAtDesc(userId);
-            int keywordCount = 0;
+            int positiveKeywordCount = 0;
+            int negativeKeywordCount = 0;
             for (Review review : reviews) {
-                keywordCount += reviewKeywordRepository.countAllByReviewId(review.getId());
+                Long reviewId = review.getId();
+                positiveKeywordCount += reviewKeywordRepository.countPositiveKeywordsByReviewId(reviewId);
+                negativeKeywordCount += reviewKeywordRepository.countNegativeKeywordsByReviewId(reviewId);
             }
 
             // 거래 건수
             int rentalCount = rentalInfoRepository.countByBuyerIdOrLenderId(userId, userId);
 
-            responses.add(new UserListResponse(user, keywordCount, rentalCount));
+            responses.add(new UserListResponse(user, positiveKeywordCount, negativeKeywordCount, rentalCount));
         }
 
         return responses;
