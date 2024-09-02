@@ -83,6 +83,11 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     @Builder.Default
+    private Boolean isSuspended = false;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    @Builder.Default
     private Boolean isRestricted = false;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")

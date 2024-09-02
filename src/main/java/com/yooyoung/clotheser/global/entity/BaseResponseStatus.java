@@ -39,7 +39,7 @@ public enum BaseResponseStatus {
 
     // 로그인
     LOGIN_MISMATCH(false, 2130, "이메일과 비밀번호가 일치하지 않습니다."),
-    LOGIN_RESTRICTED(false, 2131, "서비스 이용이 제한되었습니다."),
+    USE_RESTRICTED(false, 2131, "서비스 이용이 제한되었습니다."),
 
     // 인증
     INVALID_AUTH_CODE(false, 2140, "유효하지 않은 인증 번호입니다."),
