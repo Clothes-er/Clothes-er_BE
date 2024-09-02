@@ -12,6 +12,7 @@ import com.yooyoung.clotheser.admin.repository.ReportRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
+import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.review.domain.Review;
 import com.yooyoung.clotheser.review.repository.ReviewKeywordRepository;
@@ -100,7 +101,14 @@ public class AdminService {
         List<Report> reports = reportRepository.findAllByOrderByIdDesc();
         List<ReportListResponse> responses = new ArrayList<>();
         for (Report report : reports) {
-            responses.add(new ReportListResponse(report));
+
+            Long reporteeId = report.getReportee().getId();
+            // 거래중 여부 확인
+            boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
+                    reporteeId, RentalState.RENTED, reporteeId, RentalState.RENTED
+            );
+
+            responses.add(new ReportListResponse(report, isRented));
         }
 
         return responses;
@@ -112,7 +120,13 @@ public class AdminService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
-        return new ReportResponse(report);
+        Long reporteeId = report.getReportee().getId();
+        // 거래중 여부 확인
+        boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
+                reporteeId, RentalState.RENTED, reporteeId, RentalState.RENTED
+        );
+
+        return new ReportResponse(report, isRented);
     }
 
     /* 신고 처리 */

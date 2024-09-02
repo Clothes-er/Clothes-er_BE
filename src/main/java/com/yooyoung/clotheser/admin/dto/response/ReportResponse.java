@@ -41,6 +41,9 @@ public class ReportResponse {
     @Schema(title = "신고 대상 옷장 점수", example = "10")
     private double closetScore;
 
+    @Schema(title = "거래중 여부", example = "false")
+    private Boolean isRented;
+
     @Schema(title = "처리 상태", example = "PENDING")
     private ReportState state;
 
@@ -51,7 +54,7 @@ public class ReportResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
-    public ReportResponse(Report report) {
+    public ReportResponse(Report report, boolean isRented) {
         this.id = report.getId();
         this.reporteeNickname = report.getReportee().getNickname();
         this.reporteeEmail = report.getReportee().getEmail();
@@ -70,6 +73,7 @@ public class ReportResponse {
             this.closetScore = bd.doubleValue();
         }
 
+        this.isRented = isRented;
         this.state = report.getState();
         this.action = report.getAction();
         this.createdAt = report.getCreatedAt();
