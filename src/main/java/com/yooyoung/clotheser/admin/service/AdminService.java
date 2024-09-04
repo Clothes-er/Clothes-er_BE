@@ -2,7 +2,6 @@ package com.yooyoung.clotheser.admin.service;
 
 import com.yooyoung.clotheser.admin.domain.Report;
 import com.yooyoung.clotheser.admin.domain.ReportAction;
-import com.yooyoung.clotheser.admin.domain.ReportState;
 import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
@@ -222,10 +221,6 @@ public class AdminService {
             // 4. 무시
             case IGNORED -> {}
 
-            // 그 외 입력
-            default -> {
-
-            }
         }
 
         // 신고 조치 내역 변경

@@ -58,7 +58,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    // 회원가입
+    /* 회원가입 */
     public SignUpResponse signUp(SignUpRequest signUpRequest) throws BaseException {
 
         // 중복 확인
@@ -82,7 +82,7 @@ public class UserService {
         return new SignUpResponse(userRepository.save(user));
     }
 
-    // 닉네임 중복 확인
+    /* 닉네임 중복 확인 */
     public BaseResponseStatus checkNickname(String nickname) throws BaseException {
         if (userRepository.existsByNicknameAndDeletedAtNull(nickname)) {
             throw new BaseException(NICKNAME_EXISTS, CONFLICT);
@@ -90,7 +90,7 @@ public class UserService {
         return SUCCESS;
     }
 
-    // 로그인
+    /* 로그인 */
     public LoginResponse login(LoginRequest loginRequest) throws BaseException {
 
         // 먼저 이메일로 회원 존재 확인
@@ -149,7 +149,7 @@ public class UserService {
         return jwtProvider.createToken(userId);
     }*/
 
-    // 최초 로그인
+    /* 최초 로그인 */
     public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest, User user) throws BaseException {
 
         // 최초 로그인이 맞는지 확인
@@ -206,7 +206,7 @@ public class UserService {
 
     // 로그아웃
 
-    // 내 프로필 조회
+    /* 내 프로필 조회 */
     public UserProfileResponse getMyProfile(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -231,7 +231,7 @@ public class UserService {
         return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 
-    // 다른 회원의 프로필 조회
+    /* 다른 회원의 프로필 조회 */
     public UserProfileResponse getProfile(User user, String userSid) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -267,7 +267,7 @@ public class UserService {
         return new UserProfileResponse(owner, bodyShapes, categories, styles);
     }
 
-    // 회원 정보 조회
+    /* 회원 정보 조회 */
     public UserInfoResponse getUserInfo(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -278,7 +278,7 @@ public class UserService {
         return new UserInfoResponse(user);
     }
 
-    // 주소 조회
+    /* 주소 조회 */
     public AddressResponse getAddress(User user) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
@@ -290,12 +290,17 @@ public class UserService {
 
     }
 
-    // 주소 수정
+    /* 주소 수정 */
     public AddressResponse updateAddress(User user, AddressRequest addressRequest) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 수정한 주소로 DB에 저장
@@ -306,12 +311,17 @@ public class UserService {
 
     }
 
-    // 프로필 수정 (프로필 사진 + 닉네임)
+    /* 프로필 수정 (프로필 사진 + 닉네임) */
     public PatchUserProfileReponse updateProfile(User user, MultipartFile profileImage, String nickname) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 1. 프로필 사진 수정
@@ -357,12 +367,17 @@ public class UserService {
         return new PatchUserProfileReponse(updatedUser);
     }
 
-    // 스펙 및 취향 수정
+    /* 스펙 및 취향 수정 */
     public UserProfileResponse updateStyle(User user, UserStyleRequest userStyleRequest) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 새로운 스펙으로 수정
@@ -415,11 +430,17 @@ public class UserService {
         return new UserProfileResponse(user, bodyShapes, categories, styles);
     }
 
+    /* 회원 신고 */
     public BaseResponseStatus reportUser(User user, ReportRequest reportRequest) throws BaseException {
 
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 신고하려는 회원 불러오기 (자신도 가능)

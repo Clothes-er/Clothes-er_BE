@@ -58,6 +58,11 @@ public class ClothesService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 보유 옷 목록 불러오기
         List<Clothes> myClothes = clothesRepository.findAllByUserIdAndRentalIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
         List<NoRentalClothesListResponse> responses = new ArrayList<>();
@@ -78,6 +83,11 @@ public class ClothesService {
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 기존 대여글과 연결할 경우
@@ -165,6 +175,11 @@ public class ClothesService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 보유 옷 불러오기
         Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
@@ -230,6 +245,11 @@ public class ClothesService {
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 보유 옷 불러오기
