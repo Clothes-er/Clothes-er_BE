@@ -103,7 +103,7 @@ public class UserService {
 
         // 이용 제한된 회원 확인
         if (user.getIsRestricted()) {
-            throw new BaseException(LOGIN_RESTRICTED, FORBIDDEN);
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 토큰 생성

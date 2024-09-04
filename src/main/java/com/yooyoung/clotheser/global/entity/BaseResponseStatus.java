@@ -48,6 +48,7 @@ public enum BaseResponseStatus {
 
     // 신고
     REPORT_ACTION_EXISTS(false, 2150, "이미 처리된 신고입니다."),
+    REPORT_USER_RENTAL_EXISTS(false, 2151, "거래 중인 경우 이용 제한을 할 수 없습니다. 유예 상태에서 거래 완료를 유도하세요."),
 
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),

@@ -204,6 +204,12 @@ public class User {
         return this;
     }
 
+    // 유예 설정
+    public User updateIsSuspended() {
+        this.isSuspended = true;
+        return this;
+    }
+
     // 이용 제한 설정
     public User updateIsRestricted() {
         this.isRestricted = true;
