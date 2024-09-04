@@ -17,6 +17,9 @@ public class RentalHistoryResponse {
     @Schema(title = "대여글 id", example = "3")
     private Long id;
 
+    @Schema(title = "채팅방 id", example = "1")
+    private Long roomId;
+
     @Schema(title = "암호화된 회원 id", example = "xfweriok12")
     private String userSid;
 
@@ -44,9 +47,10 @@ public class RentalHistoryResponse {
     @Schema(title = "반납 예정일", example = "2024년 06월 30일")
     private LocalDate endDate;
 
-    public RentalHistoryResponse(Rental rental, String userSid, String imgUrl,
+    public RentalHistoryResponse(Rental rental, Long roomId, String userSid, String imgUrl,
                                  String nickname, int minPrice, RentalInfo rentalInfo) {
         this.id = rental.getId();
+        this.roomId = roomId;
         this.userSid = userSid;
         this.imgUrl = imgUrl;
         this.nickname = nickname;

@@ -40,4 +40,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "c.rental is not null and c.updatedAt is not null and " +
             "ri.state = com.yooyoung.clotheser.rental.domain.RentalState.RENTED order by c.updatedAt desc")
     List<ChatRoom> findRentedChatRoomsByUserId(Long userId);
+
+    // 대여글과 연관된 채팅방 확인
+    Optional<ChatRoom> findOneByBuyerIdAndLenderIdAndRentalId(Long buyerId, Long lenderId, Long rentalId);
 }
