@@ -2,7 +2,6 @@ package com.yooyoung.clotheser.chat.dto;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.global.entity.Time;
-import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
