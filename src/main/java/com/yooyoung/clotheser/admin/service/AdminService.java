@@ -180,11 +180,6 @@ public class AdminService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
-        // 신고 조치는 한 번만 가능
-        if (report.getState() == ReportState.ACTIONED) {
-            throw new BaseException(REPORT_ACTION_EXISTS, CONFLICT);
-        }
-
         // 조치별 이후 로직
         ReportAction action = reportActionRequest.getAction();
         switch (action) {
@@ -226,6 +221,11 @@ public class AdminService {
 
             // 4. 무시
             case IGNORED -> {}
+
+            // 그 외 입력
+            default -> {
+
+            }
         }
 
         // 신고 조치 내역 변경
