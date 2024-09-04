@@ -29,6 +29,8 @@ public class RentalChatRoomResponse {
     private String opponentSid;
     @Schema(title = "상대방 닉네임", example = "황숙명")
     private String opponentNickname;
+    @Schema(title = "상대방 유예 여부", example = "false")
+    private Boolean isSuspended;
     @Schema(title = "상대방 이용 제한 여부", example = "false")
     private Boolean isRestricted;
 
@@ -65,6 +67,7 @@ public class RentalChatRoomResponse {
 
         this.opponentSid = opponentSid;
         this.opponentNickname = opponent.getNickname();
+        this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
 
         this.rentalId = rental.getId();
@@ -83,6 +86,7 @@ public class RentalChatRoomResponse {
 
         this.opponentSid = opponentSid;
         this.opponentNickname = opponent.getNickname();
+        this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
 
         this.rentalId = chatRoom.getRental().getId();

@@ -36,6 +36,12 @@ public class RentalResponse {
     @Schema(title = "작성자 여부", example = "false")
     private Boolean isWriter;
 
+    @Schema(title = "작성자 유예 여부", example = "false")
+    private Boolean isSuspended;
+
+    @Schema(title = "작성자 이용 제한 여부", example = "false")
+    private Boolean isRestricted;
+
     @Schema(title = "대여글 사진 URL 목록", description = "최대 3장", type = "array",
             example = "[\"https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/0fa7d4e0-de3d-4c87-a814-cc0ee8b8a8fe_black_ops%281%29.jpg\"]")
     private List<String> imgUrls;
@@ -77,6 +83,8 @@ public class RentalResponse {
         this.profileUrl = rental.getUser().getProfileUrl();
         this.nickname = rental.getUser().getNickname();
         this.isWriter = rental.getUser().getId().equals(user.getId());
+        this.isSuspended = rental.getUser().getIsSuspended();
+        this.isRestricted = rental.getUser().getIsRestricted();
 
         this.imgUrls = imgUrls;
 
