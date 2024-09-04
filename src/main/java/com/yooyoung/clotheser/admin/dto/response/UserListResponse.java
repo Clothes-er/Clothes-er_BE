@@ -39,6 +39,9 @@ public class UserListResponse {
     @Schema(title = "거래 건수", example = "4")
     private int rentalCount;
 
+    @Schema(title = "유예 여부", example = "false")
+    private Boolean isSuspended;
+
     @Schema(title = "이용 제한 여부", example = "false")
     private Boolean isRestricted;
 
@@ -64,6 +67,7 @@ public class UserListResponse {
         this.positiveKeywordCount = positiveKeywordCount;
         this.negativeKeywordCount = negativeKeywordCount;
         this.rentalCount = rentalCount;
+        this.isSuspended = user.getIsSuspended();
         this.isRestricted = user.getIsRestricted();
         this.createdAt = user.getCreatedAt();
     }

@@ -2,7 +2,6 @@ package com.yooyoung.clotheser.chat.dto;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.global.entity.Time;
-import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,7 +43,7 @@ public class RentalChatRoomListResponse {
     @Schema(title = "마지막으로 메시지 보낸 시간", example = "3시간 전")
     private String recentMessageTime;
 
-    public RentalChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalInfo rentalInfo,
+    public RentalChatRoomListResponse(ChatRoom chatRoom, String userSid, RentalState rentalState,
                                       String recentMessage, String rentalImgUrl, User opponent) {
         this.id = chatRoom.getId();
 
@@ -57,9 +56,7 @@ public class RentalChatRoomListResponse {
         this.rentalImgUrl = rentalImgUrl;
         this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
 
-        if (rentalInfo != null) {
-            this.rentalState = rentalInfo.getState();
-        }
+        this.rentalState = rentalState;
 
         this.recentMessage = recentMessage;
         this.recentMessageTime = Time.calculateTime(chatRoom.getUpdatedAt());

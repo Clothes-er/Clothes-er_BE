@@ -6,6 +6,7 @@ import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportResponse;
 import com.yooyoung.clotheser.admin.dto.response.UserListResponse;
 import com.yooyoung.clotheser.admin.service.AdminService;
+import com.yooyoung.clotheser.chat.dto.RentalChatRoomListResponse;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
@@ -111,6 +112,19 @@ public class AdminController {
     public ResponseEntity<BaseResponse<List<UserListResponse>>> getUserList(@RequestParam(required = false) String search) {
         try {
             return new ResponseEntity<>(new BaseResponse<>(adminService.getUserList(search)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    /* 거래 중인 채팅방 목록 조회 */
+    @Operation(summary = "거래 중인 채팅방 목록 조회", description = "신고 당한 회원의 거래 중인 채팅방 목록을 조회한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @GetMapping("/chats/{userSid}/rented-rooms")
+    public ResponseEntity<BaseResponse<List<RentalChatRoomListResponse>>> getRentedChatRoomList(@PathVariable String userSid) {
+        try {
+            return new ResponseEntity<>(new BaseResponse<>(adminService.getRentedChatRoomList(userSid)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

@@ -17,6 +17,7 @@ import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.review.repository.ReviewRepository;
+import com.yooyoung.clotheser.user.domain.Role;
 import com.yooyoung.clotheser.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
@@ -139,6 +140,10 @@ public class RentalChatService {
                     chatRoom.getBuyer().getId(),
                     chatRoom.getLender().getId(),
                     chatRoom.getRental().getId()).orElse(null);
+            RentalState rentalState = null;
+            if (rentalInfo != null) {
+                rentalState = rentalInfo.getState();
+            }
 
             // 채팅방의 최근 메시지 불러오기
             Optional<ChatMessage> optionalMessage = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
@@ -148,7 +153,7 @@ public class RentalChatService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            chatRoomResponseList.add(new RentalChatRoomListResponse(chatRoom, opponentSid, rentalInfo, recentMessage, imgUrl, opponent));
+            chatRoomResponseList.add(new RentalChatRoomListResponse(chatRoom, opponentSid, rentalState, recentMessage, imgUrl, opponent));
         }
         return chatRoomResponseList;
     }
@@ -165,8 +170,8 @@ public class RentalChatService {
         ChatRoom chatRoom = chatRoomRepository.findOneByIdAndRentalIdNotNull(roomId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_CHAT_ROOM, NOT_FOUND));
 
-        // 채팅방 참여자인지 확인
-        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+        // 채팅방 참여자인지 확인 (관리자는 가능)
+        if (user.getIsAdmin() == Role.USER && checkChatRoomUser(chatRoom, user.getId())) {
             throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
         }
 
@@ -246,7 +251,7 @@ public class RentalChatService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));
 
         // 채팅방 참여자인지 확인
-        if (!chatRoom.getBuyer().getId().equals(user.getId()) && !chatRoom.getLender().getId().equals(user.getId()) ) {
+        if (checkChatRoomUser(chatRoom, user.getId())) {
             throw new BaseException(FORBIDDEN_ENTER_CHAT_ROOM, FORBIDDEN);
         }
 
@@ -255,6 +260,11 @@ public class RentalChatService {
         chatRoomRepository.save(chatRoom.updateRecentMessageTime());
         // 채팅 메시지 저장
         return new ChatMessageResponse(chatMessageRepository.save(chatMessage));
+    }
+
+    // 채팅방 참여자가 아니면 true
+    public boolean checkChatRoomUser(ChatRoom chatRoom, Long userId) {
+        return !chatRoom.getBuyer().getId().equals(userId) && !chatRoom.getLender().getId().equals(userId);
     }
 
 }

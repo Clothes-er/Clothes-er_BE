@@ -83,6 +83,11 @@ public class User {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     @ColumnDefault("false")
     @Builder.Default
+    private Boolean isSuspended = false;
+
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    @Builder.Default
     private Boolean isRestricted = false;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -196,6 +201,12 @@ public class User {
         else if (this.closetScore < 0)
             this.closetScore = 0;
 
+        return this;
+    }
+
+    // 유예 설정
+    public User updateIsSuspended() {
+        this.isSuspended = true;
         return this;
     }
 
