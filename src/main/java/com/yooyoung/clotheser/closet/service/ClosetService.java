@@ -1,5 +1,7 @@
 package com.yooyoung.clotheser.closet.service;
 
+import com.yooyoung.clotheser.chat.domain.ChatRoom;
+import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
@@ -51,6 +53,8 @@ public class ClosetService {
 
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
+
+    private final ChatRoomRepository chatRoomRepository;
 
     /* 나의 전체 보유 옷 목록 조회 */
     public List<UserClothesListResponse> getMyClothes(User user) throws BaseException {
@@ -188,6 +192,17 @@ public class ClosetService {
         for (RentalInfo rentalInfo : rentalInfoList) {
             Rental rental = rentalInfo.getRental();
 
+            // 채팅방 불러오기
+            Long roomId = null;
+            ChatRoom chatRoom = chatRoomRepository.findOneByBuyerIdAndLenderIdAndRentalId(
+                    rentalInfo.getBuyer().getId(),
+                    rentalInfo.getLender().getId(),
+                    rental.getId()
+            ).orElse(null);
+            if (chatRoom != null) {
+                roomId = chatRoom.getId();
+            }
+
             // userId 암호화하기
             String userSid;
             try {
@@ -209,7 +224,7 @@ public class ClosetService {
             int minPrice = optionalPrice.orElse(0);
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, userSid, imgUrl, nickname, minPrice, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, rentalInfo);
             responses.add(response);
         }
 
@@ -230,6 +245,17 @@ public class ClosetService {
 
         for (RentalInfo rentalInfo : rentalInfoList) {
             Rental rental = rentalInfo.getRental();
+
+            // 채팅방 불러오기
+            Long roomId = null;
+            ChatRoom chatRoom = chatRoomRepository.findOneByBuyerIdAndLenderIdAndRentalId(
+                    rentalInfo.getBuyer().getId(),
+                    rentalInfo.getLender().getId(),
+                    rental.getId()
+            ).orElse(null);
+            if (chatRoom != null) {
+                roomId = chatRoom.getId();
+            }
 
             // userId 암호화하기
             String userSid;
@@ -252,7 +278,7 @@ public class ClosetService {
             int minPrice = optionalPrice.orElse(0);
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, userSid, imgUrl, nickname, minPrice, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, rentalInfo);
             responses.add(response);
         }
 

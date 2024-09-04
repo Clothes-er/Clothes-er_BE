@@ -70,6 +70,11 @@ public class RentalService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 대여글 목록 불러오기
         List<Rental> myRentals = rentalRepository.findAllByUserIdAndClothesIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
 
@@ -96,6 +101,11 @@ public class RentalService {
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 보유 옷에서 대여글을 작성하려는 경우
@@ -364,6 +374,11 @@ public class RentalService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 대여글 불러오기
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
@@ -445,6 +460,11 @@ public class RentalService {
         // 최초 로그인이 아닌지 확인
         if (user.getIsFirstLogin()) {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
 
         // 대여글 불러오기

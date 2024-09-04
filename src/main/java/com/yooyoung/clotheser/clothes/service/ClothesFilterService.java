@@ -35,6 +35,7 @@ public class ClothesFilterService {
                 .leftJoin(qClothes.user, qUser)
                 .where(qClothes.deletedAt.isNull())
                 .where(qClothes.isPublic.isTrue())
+                .where(qUser.isSuspended.isFalse())     // 유예된 회원 제외
                 .where(qUser.isRestricted.isFalse())    // 이용 제한 회원 제외
                 .where(qClothes.user.ne(user));
 
@@ -95,10 +96,10 @@ public class ClothesFilterService {
 
         if (comparator != null) {
             // 기본 정렬 후, 동일한 값일 경우 유사도 기준으로 정렬
-            comparator = comparator.thenComparing(c -> calculateSimilarity(c, userFavCategories, userFavStyles), Comparator.reverseOrder());
+            comparator = comparator.thenComparing(c -> calculateSimilarity(user, c, userFavCategories, userFavStyles), Comparator.reverseOrder());
         } else {
             // 정렬 옵션이 없을 경우 유사도 기준으로 정렬
-            comparator = Comparator.comparingDouble((Clothes c) -> calculateSimilarity(c, userFavCategories, userFavStyles)).reversed();
+            comparator = Comparator.comparingDouble((Clothes c) -> calculateSimilarity(user, c, userFavCategories, userFavStyles)).reversed();
         }
 
         // Comparator를 사용하여 정렬 수행
@@ -141,11 +142,11 @@ public class ClothesFilterService {
     }
 
     /* 유사도 계산 */
-    private double calculateSimilarity(Clothes clothes, List<String> userFavCategories, List<String> userFavStyles) {
+    private double calculateSimilarity(User user, Clothes clothes, List<String> userFavCategories, List<String> userFavStyles) {
         int similarityScore = 0;
 
         // 성별 유사도 계산
-        if (clothes.getGender() == clothes.getGender()) {
+        if (user.getGender() == clothes.getGender()) {
             similarityScore += 1;
         }
 

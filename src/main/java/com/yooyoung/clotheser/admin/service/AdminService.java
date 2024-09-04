@@ -2,7 +2,6 @@ package com.yooyoung.clotheser.admin.service;
 
 import com.yooyoung.clotheser.admin.domain.Report;
 import com.yooyoung.clotheser.admin.domain.ReportAction;
-import com.yooyoung.clotheser.admin.domain.ReportState;
 import com.yooyoung.clotheser.admin.dto.request.ReportActionRequest;
 import com.yooyoung.clotheser.admin.dto.response.AdminLoginResponse;
 import com.yooyoung.clotheser.admin.dto.response.ReportListResponse;
@@ -180,11 +179,6 @@ public class AdminService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
-        // 신고 조치는 한 번만 가능
-        if (report.getState() == ReportState.ACTIONED) {
-            throw new BaseException(REPORT_ACTION_EXISTS, CONFLICT);
-        }
-
         // 조치별 이후 로직
         ReportAction action = reportActionRequest.getAction();
         switch (action) {
@@ -226,6 +220,7 @@ public class AdminService {
 
             // 4. 무시
             case IGNORED -> {}
+
         }
 
         // 신고 조치 내역 변경

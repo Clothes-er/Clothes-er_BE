@@ -60,6 +60,11 @@ public class ReviewService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CHAT_ROOM, NOT_FOUND));

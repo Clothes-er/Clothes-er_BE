@@ -49,6 +49,11 @@ public class UserChatService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 문의 대상 회원 불러오기
         Long userId;
         try {

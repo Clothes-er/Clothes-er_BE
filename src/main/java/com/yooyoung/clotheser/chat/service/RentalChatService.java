@@ -62,6 +62,11 @@ public class RentalChatService {
             throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
         }
 
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
         // 대여글 존재 확인
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));

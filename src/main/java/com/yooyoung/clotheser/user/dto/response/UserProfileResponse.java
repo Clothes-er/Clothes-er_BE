@@ -46,6 +46,11 @@ public class UserProfileResponse {
     @Schema(title = "스타일 목록", type = "array", example = "[\"하이틴\", \"캐주얼\", \"키치\"]")
     private List<String> styles;
 
+    @Schema(title = "유예 여부", example = "false")
+    private Boolean isSuspended;
+    @Schema(title = "이용 제한 여부", example = "false")
+    private Boolean isRestricted;
+
     @Schema(title = "회원 정보 수정한 시간", example = "2024년 06월 20일 19:13:36")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
@@ -74,6 +79,9 @@ public class UserProfileResponse {
         this.bodyShapes = bodyShapes;
         this.categories = categories;
         this.styles = styles;
+
+        this.isSuspended = user.getIsSuspended();
+        this.isRestricted = user.getIsRestricted();
 
         this.updatedAt = user.getUpdatedAt();
     }
