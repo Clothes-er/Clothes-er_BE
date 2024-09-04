@@ -20,6 +20,9 @@ public class ReportResponse {
     @Schema(title = "신고 id", example = "1")
     private Long id;
 
+    @Schema(title = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09")
+    private String userSid;
+
     @Schema(title = "신고 대상 닉네임", example = "진도리")
     private String reporteeNickname;
 
@@ -54,8 +57,9 @@ public class ReportResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdAt;
 
-    public ReportResponse(Report report, boolean isRented) {
+    public ReportResponse(Report report, String userSid , boolean isRented) {
         this.id = report.getId();
+        this.userSid = userSid;
         this.reporteeNickname = report.getReportee().getNickname();
         this.reporteeEmail = report.getReportee().getEmail();
         this.reporterNickname = report.getReporter().getNickname();

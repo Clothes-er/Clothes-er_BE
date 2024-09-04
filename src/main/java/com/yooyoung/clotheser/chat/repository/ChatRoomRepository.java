@@ -33,4 +33,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
             "c.rental is null and c.updatedAt is not null order by c.updatedAt desc")
     List<ChatRoom> findUserChatRoomsByUserId(Long userId);
 
+    // 대여 중인 대여글 채팅방 목록 조회
+    @Query("select c from ChatRoom c " +
+            "join RentalInfo ri on c.rental = ri.rental and c.buyer = ri.buyer and c.lender = ri.lender " +
+            "where (c.buyer.id = :userId or c.lender.id = :userId) and " +
+            "c.rental is not null and c.updatedAt is not null and " +
+            "ri.state = com.yooyoung.clotheser.rental.domain.RentalState.RENTED order by c.updatedAt desc")
+    List<ChatRoom> findRentedChatRoomsByUserId(Long userId);
 }
