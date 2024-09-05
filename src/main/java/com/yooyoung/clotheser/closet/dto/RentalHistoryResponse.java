@@ -35,6 +35,9 @@ public class RentalHistoryResponse {
     @Schema(title = "최소 가격", example = "2000")
     private int minPrice;
 
+    @Schema(title = "최소 일수", example = "3")
+    private int minDays;
+
     @Schema(title = "대여글 삭제 여부", example = "false")
     private Boolean isDeleted;
 
@@ -48,7 +51,7 @@ public class RentalHistoryResponse {
     private LocalDate endDate;
 
     public RentalHistoryResponse(Rental rental, Long roomId, String userSid, String imgUrl,
-                                 String nickname, int minPrice, RentalInfo rentalInfo) {
+                                 String nickname, int minPrice, int minDays, RentalInfo rentalInfo) {
         this.id = rental.getId();
         this.roomId = roomId;
         this.userSid = userSid;
@@ -56,6 +59,7 @@ public class RentalHistoryResponse {
         this.nickname = nickname;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
+        this.minDays = minDays;
         this.isDeleted = rental.getDeletedAt() != null;
         this.rentalState = rentalInfo.getState();
         this.startDate = rentalInfo.getStartDate();

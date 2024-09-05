@@ -42,7 +42,9 @@ public class RentalChatRoomResponse {
     @Schema(title = "대여글 제목", example = "스퀘어 블라우스")
     private String title;
     @Schema(title = "대여글 최소 가격", example = "1000")
-    private Integer minPrice;
+    private int minPrice;
+    @Schema(title = "대여글 최소 일수", example = "3")
+    private int minDays;
     @Schema(title = "대여글 삭제 여부", example = "false")
     private Boolean isDeleted;
 
@@ -60,7 +62,7 @@ public class RentalChatRoomResponse {
 
     /* 채팅방 생성 시 쓰는 생성자 */
     public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, User opponent,
-                                  Rental rental, String rentalImgUrl, Integer minPrice) {
+                                  Rental rental, String rentalImgUrl, int minPrice, int minDays) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
@@ -74,12 +76,13 @@ public class RentalChatRoomResponse {
         this.rentalImgUrl = rentalImgUrl;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
+        this.minDays = minDays;
         this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
     }
 
     /* 채팅방 조회 시 쓰는 생성자 */
-    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, User opponent, List<ChatMessageResponse> messages,
-                                  String rentalImgUrl, Integer minPrice, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
+    public RentalChatRoomResponse(ChatRoom chatRoom, String opponentSid, User opponent, List<ChatMessageResponse> messages, String rentalImgUrl,
+                                  int minPrice, int minDays, Boolean isChecked, RentalState rentalState, Boolean isReviewed) {
         this.id = chatRoom.getId();
         this.buyerNickname = chatRoom.getBuyer().getNickname();
         this.lenderNickname = chatRoom.getLender().getNickname();
@@ -93,6 +96,7 @@ public class RentalChatRoomResponse {
         this.rentalImgUrl = rentalImgUrl;
         this.title = chatRoom.getRental().getTitle();
         this.minPrice = minPrice;
+        this.minDays = minDays;
         this.isDeleted = chatRoom.getRental().getDeletedAt() != null;
 
         this.isChecked = isChecked;

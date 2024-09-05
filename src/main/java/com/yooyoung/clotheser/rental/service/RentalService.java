@@ -84,11 +84,16 @@ public class RentalService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 가격 정보 중에 제일 싼 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
-            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice));
+            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice, minDays));
         }
 
         return responses;
@@ -233,11 +238,16 @@ public class RentalService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 가격 정보 중에 제일 싼 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
-            responses.add(new RentalListResponse(rental, userSid, imgUrl, minPrice));
+            responses.add(new RentalListResponse(rental, userSid, imgUrl, minPrice, minDays));
         }
 
         return responses;

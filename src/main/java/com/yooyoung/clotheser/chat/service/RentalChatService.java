@@ -103,10 +103,16 @@ public class RentalChatService {
         Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
         String rentalImgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-        // 가격 정보 중에 제일 싼 가격 불러오기
-        Integer minPrice = rentalPriceRepository.findMinPrice(rental).orElse(null);
+        // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+        int minPrice = 0;
+        int minDays = 0;
+        Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+        if (minRentalPrice.isPresent()) {
+            minPrice = minRentalPrice.get().getPrice();
+            minDays = minRentalPrice.get().getDays();
+        }
 
-        return new RentalChatRoomResponse(chatRoom, lenderSid, chatRoom.getLender(), rental, rentalImgUrl, minPrice);
+        return new RentalChatRoomResponse(chatRoom, lenderSid, chatRoom.getLender(), rental, rentalImgUrl, minPrice, minDays);
 
     }
 
@@ -209,8 +215,14 @@ public class RentalChatService {
         Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());
         String rentalImgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-        // 가격 정보 중에 제일 싼 가격 불러오기
-        Integer minPrice = rentalPriceRepository.findMinPrice(chatRoom.getRental()).orElse(null);
+        // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+        int minPrice = 0;
+        int minDays = 0;
+        Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(chatRoom.getRental());
+        if (minRentalPrice.isPresent()) {
+            minPrice = minRentalPrice.get().getPrice();
+            minDays = minRentalPrice.get().getDays();
+        }
 
         // 옷 상태 체크 여부 불러오기
         boolean isChecked = rentalCheckRepository.existsByRoomId(roomId);
@@ -239,7 +251,7 @@ public class RentalChatService {
         }
 
         return new RentalChatRoomResponse(chatRoom, opponentSid, opponent, chatMessageResponseList,
-                rentalImgUrl, minPrice, isChecked, rentalState, isReviewed);
+                rentalImgUrl, minPrice, minDays, isChecked, rentalState, isReviewed);
 
     }
 

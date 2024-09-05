@@ -23,17 +23,21 @@ public class UserRentalListResponse {
     @Schema(title = "최소 가격", example = "2000")
     private int minPrice;
 
+    @Schema(title = "최소 일수", example = "3")
+    private int minDays;
+
     @Schema(title = "브랜드", example = "에이블리")
     private String brand;
 
     @Schema(title = "대여글 생성 시간", example = "2시간 전")
     private String createdAt;
 
-    public UserRentalListResponse(Rental rental, String imgUrl, int minPrice) {
+    public UserRentalListResponse(Rental rental, String imgUrl, int minPrice, int minDays) {
         this.id = rental.getId();
         this.imgUrl = imgUrl;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
+        this.minDays = minDays;
         this.brand = rental.getBrand();
         this.createdAt = Time.calculateTime(rental.getCreatedAt());
     }

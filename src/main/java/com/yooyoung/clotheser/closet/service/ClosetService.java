@@ -15,6 +15,7 @@ import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
+import com.yooyoung.clotheser.rental.domain.RentalPrice;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
@@ -128,11 +129,16 @@ public class ClosetService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 가격 정보 중에 제일 싼 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
-            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice));
+            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice, minDays));
         }
 
         return responses;
@@ -166,11 +172,16 @@ public class ClosetService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 가격 정보 중에 제일 싼 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
-            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice));
+            responses.add(new UserRentalListResponse(rental, imgUrl, minPrice, minDays));
         }
 
         return responses;
@@ -219,12 +230,17 @@ public class ClosetService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 최소 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, minDays, rentalInfo);
             responses.add(response);
         }
 
@@ -273,12 +289,17 @@ public class ClosetService {
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
 
-            // 최소 가격 불러오기
-            Optional<Integer> optionalPrice = rentalPriceRepository.findMinPrice(rental);
-            int minPrice = optionalPrice.orElse(0);
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, minDays, rentalInfo);
             responses.add(response);
         }
 
