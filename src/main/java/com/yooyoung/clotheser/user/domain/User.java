@@ -90,6 +90,11 @@ public class User {
     @Builder.Default
     private Boolean isRestricted = false;
 
+    @Column(nullable = false, columnDefinition = "TINYINT(1)")
+    @ColumnDefault("false")
+    @Builder.Default
+    private Boolean isWithdrawn = false;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -213,6 +218,13 @@ public class User {
     // 이용 제한 설정
     public User updateIsRestricted() {
         this.isRestricted = true;
+        return this;
+    }
+
+    // 회원 탈퇴
+    public User updateIsWithdrawn() {
+        this.isWithdrawn = true;
+        this.updatedAt = LocalDateTime.now();
         return this;
     }
 }

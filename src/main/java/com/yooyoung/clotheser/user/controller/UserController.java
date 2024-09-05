@@ -359,4 +359,16 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴를 한다.")
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> withdrawUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(userService.withdrawUser(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
 }

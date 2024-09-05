@@ -197,8 +197,6 @@ public class AdminService {
                 // -> 로그인 시도 시 "서비스 이용이 제한되었습니다."
                 // -> 대여글, 보유 옷 숨김 처리 (목록 응답값에서 제외됨)
                 // -> 대여글, 채팅방 목록, 채팅방 조회에서 isRestricted = true
-                // TODO: 대여글 isRestricted 추가
-
                 boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
                         report.getReportee().getId(), RentalState.RENTED, report.getReportee().getId(), RentalState.RENTED
                 );

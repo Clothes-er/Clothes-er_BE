@@ -49,6 +49,9 @@ public enum BaseResponseStatus {
     // 신고
     REPORT_USER_RENTAL_EXISTS(false, 2150, "거래 중인 경우 이용 제한을 할 수 없습니다. 유예 상태에서 거래 완료를 유도하세요."),
 
+    // 회원 탈퇴
+    WITHDRAW_USER_RENTAL_EXISTS(false, 2160, "거래 중인 경우 탈퇴할 수 없습니다."),
+
     // 3. Rental (2200 ~ 2299)
     EMPTY_CLOTHES_ID(false, 2200, "보유 옷 id가 필요합니다."),
     FORBIDDEN_CREATE_RENTAL_INFO(false, 2201, "판매자만 대여 정보를 입력할 수 있습니다."),
