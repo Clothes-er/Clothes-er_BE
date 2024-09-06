@@ -215,4 +215,10 @@ public class User {
         this.isRestricted = true;
         return this;
     }
+
+    // 회원 탈퇴
+    public User delete() {
+        this.deletedAt = LocalDateTime.now();
+        return this;
+    }
 }

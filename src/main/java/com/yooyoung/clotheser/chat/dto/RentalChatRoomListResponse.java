@@ -28,6 +28,8 @@ public class RentalChatRoomListResponse {
     private Boolean isSuspended;
     @Schema(title = "상대방 이용 제한 여부", example = "false")
     private Boolean isRestricted;
+    @Schema(title = "상대방 탈퇴 여부", example = "false")
+    private Boolean isWithdrawn;
 
     // 대여글 정보
     @Schema(title = "대여글 제목", example = "스퀘어 블라우스")
@@ -54,6 +56,7 @@ public class RentalChatRoomListResponse {
         this.profileImgUrl = opponent.getProfileUrl();
         this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
+        this.isWithdrawn = opponent.getDeletedAt() != null;
 
         this.title = chatRoom.getRental().getTitle();
         this.rentalImgUrl = rentalImgUrl;

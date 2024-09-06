@@ -9,6 +9,8 @@ import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
+import com.yooyoung.clotheser.rental.domain.RentalState;
+import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.user.domain.*;
 import com.yooyoung.clotheser.user.dto.request.*;
 import com.yooyoung.clotheser.user.dto.response.*;
@@ -53,6 +55,8 @@ public class UserService {
     private final FavClothesRepository favClothesRepository;
     private final FavStyleRepository favStyleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+
+    private final RentalInfoRepository rentalInfoRepository;
     private final ReportRepository reportRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -460,5 +464,32 @@ public class UserService {
 
         return SUCCESS;
 
+    }
+
+    /* 회원 탈퇴 */
+    public BaseResponseStatus withdrawUser(User user) throws BaseException {
+
+        // 최초 로그인이 아닌지 확인
+        if (user.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+
+        // 유예된 회원 확인
+        if (user.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
+
+        // 거래 중인지 확인
+        boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
+                user.getId(), RentalState.RENTED, user.getId(), RentalState.RENTED
+        );
+        if (isRented) {
+            throw new BaseException(WITHDRAW_USER_RENTAL_EXISTS, FORBIDDEN);
+        }
+
+        user = user.delete();
+        userRepository.save(user);
+
+        return SUCCESS;
     }
 }

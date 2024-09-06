@@ -38,8 +38,9 @@ public class RentalFilterService {
         JPAQuery<Rental> query = queryFactory.selectFrom(qRental)
                 .leftJoin(qRental.user, qUser)
                 .where(qRental.deletedAt.isNull())
-                .where(qUser.isSuspended.isFalse())     // 유예된 회원 제외
-                .where(qUser.isRestricted.isFalse())    // 이용 제한 회원 제외
+                .where(qUser.isSuspended.isFalse())
+                .where(qUser.isRestricted.isFalse())
+                .where(qUser.deletedAt.isNull())
                 .where(distanceWithin(qUser, longitude, latitude));
 
         // 검색
