@@ -33,6 +33,8 @@ public class RentalChatRoomResponse {
     private Boolean isSuspended;
     @Schema(title = "상대방 이용 제한 여부", example = "false")
     private Boolean isRestricted;
+    @Schema(title = "상대방 탈퇴 여부", example = "false")
+    private Boolean isWithdrawn;
 
     // 대여글 정보
     @Schema(title = "대여글 id", example = "1")
@@ -71,6 +73,7 @@ public class RentalChatRoomResponse {
         this.opponentNickname = opponent.getNickname();
         this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
+        this.isWithdrawn = opponent.getDeletedAt() != null;
 
         this.rentalId = rental.getId();
         this.rentalImgUrl = rentalImgUrl;
@@ -91,6 +94,7 @@ public class RentalChatRoomResponse {
         this.opponentNickname = opponent.getNickname();
         this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
+        this.isWithdrawn = opponent.getDeletedAt() != null;
 
         this.rentalId = chatRoom.getRental().getId();
         this.rentalImgUrl = rentalImgUrl;

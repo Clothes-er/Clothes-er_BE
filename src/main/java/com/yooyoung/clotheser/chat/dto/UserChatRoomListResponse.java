@@ -26,6 +26,8 @@ public class UserChatRoomListResponse {
     private Boolean isSuspended;
     @Schema(title = "상대방 이용 제한 여부", example = "false")
     private Boolean isRestricted;
+    @Schema(title = "상대방 탈퇴 여부", example = "false")
+    private Boolean isWithdrawn;
 
     @Schema(title = "최근 메시지", example = "안녕하세요~")
     private String recentMessage;
@@ -39,6 +41,7 @@ public class UserChatRoomListResponse {
         this.profileImgUrl = opponent.getProfileUrl();
         this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
+        this.isWithdrawn = opponent.getDeletedAt() != null;
         this.recentMessage = recentMessage;
         this.recentMessageTime = Time.calculateTime(chatRoom.getUpdatedAt());
     }

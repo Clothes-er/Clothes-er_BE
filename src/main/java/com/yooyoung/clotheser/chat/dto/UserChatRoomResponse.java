@@ -27,6 +27,9 @@ public class UserChatRoomResponse {
     @Schema(title = "상대방 이용 제한 여부", example = "false")
     private Boolean isRestricted;
 
+    @Schema(title = "상대방 탈퇴 여부", example = "false")
+    private Boolean isWithdrawn;
+
     @Schema(description = "채팅 메시지 목록", type = "array")
     private List<ChatMessageResponse> messages;
 
@@ -37,6 +40,7 @@ public class UserChatRoomResponse {
         this.opponentNickname = opponentNickname;
         this.isSuspended = false;
         this.isRestricted = false;
+        this.isWithdrawn = false;
     }
 
     /* 유저 채팅방 조회 시 사용 */
@@ -46,6 +50,7 @@ public class UserChatRoomResponse {
         this.opponentNickname = opponent.getNickname();
         this.isSuspended = opponent.getIsSuspended();
         this.isRestricted = opponent.getIsRestricted();
+        this.isWithdrawn = opponent.getDeletedAt() != null;
         this.messages = messages;
     }
 }
