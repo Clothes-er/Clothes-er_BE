@@ -35,8 +35,8 @@ public class ClothesFilterService {
                 .leftJoin(qClothes.user, qUser)
                 .where(qClothes.deletedAt.isNull())
                 .where(qClothes.isPublic.isTrue())
-                .where(qUser.isSuspended.isFalse())     // 유예된 회원 제외
-                .where(qUser.isRestricted.isFalse())    // 이용 제한 회원 제외
+                .where(qUser.isSuspended.isFalse())
+                .where(qUser.isRestricted.isFalse())
                 .where(qClothes.user.ne(user));
 
         // 검색

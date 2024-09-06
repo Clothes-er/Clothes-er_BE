@@ -487,7 +487,7 @@ public class UserService {
             throw new BaseException(WITHDRAW_USER_RENTAL_EXISTS, FORBIDDEN);
         }
 
-        user = user.updateIsWithdrawn();
+        user = user.delete();
         userRepository.save(user);
 
         return SUCCESS;
