@@ -223,8 +223,8 @@ public class ClosetService {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
             }
 
-            // 대여자 닉네임 구하기
-            String nickname = rentalInfo.getBuyer().getNickname();
+            // 대여자 구하기
+            User buyer = rentalInfo.getBuyer();
 
             // 첫 번째 이미지 URL 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
@@ -240,7 +240,7 @@ public class ClosetService {
             }
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, minDays, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, buyer, minPrice, minDays, rentalInfo);
             responses.add(response);
         }
 
@@ -282,8 +282,8 @@ public class ClosetService {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
             }
 
-            // 작성자 닉네임 구하기
-            String nickname = rental.getUser().getNickname();
+            // 작성자 구하기
+            User writer = rental.getUser();
 
             // 첫 번째 이미지 URL 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
@@ -299,7 +299,7 @@ public class ClosetService {
             }
 
             // RentalHistoryResponse 객체 생성 및 리스트에 추가
-            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, nickname, minPrice, minDays, rentalInfo);
+            RentalHistoryResponse response = new RentalHistoryResponse(rental, roomId, userSid, imgUrl, writer, minPrice, minDays, rentalInfo);
             responses.add(response);
         }
 

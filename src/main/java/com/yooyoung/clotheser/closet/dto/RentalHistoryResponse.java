@@ -3,6 +3,7 @@ package com.yooyoung.clotheser.closet.dto;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalState;
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -29,6 +30,9 @@ public class RentalHistoryResponse {
     @Schema(title = "상대방 닉네임", example = "김눈송")
     private String nickname;
 
+    @Schema(title = "상대방 탈퇴 여부", example = "false")
+    private Boolean isWithdrawn;
+
     @Schema(title = "제목", example = "여름 나시")
     private String title;
 
@@ -51,12 +55,13 @@ public class RentalHistoryResponse {
     private LocalDate endDate;
 
     public RentalHistoryResponse(Rental rental, Long roomId, String userSid, String imgUrl,
-                                 String nickname, int minPrice, int minDays, RentalInfo rentalInfo) {
+                                 User user, int minPrice, int minDays, RentalInfo rentalInfo) {
         this.id = rental.getId();
         this.roomId = roomId;
         this.userSid = userSid;
         this.imgUrl = imgUrl;
-        this.nickname = nickname;
+        this.nickname = user.getNickname();
+        this.isWithdrawn = user.getDeletedAt() != null;
         this.title = rental.getTitle();
         this.minPrice = minPrice;
         this.minDays = minDays;
