@@ -37,6 +37,7 @@ public class ClothesFilterService {
                 .where(qClothes.isPublic.isTrue())
                 .where(qUser.isSuspended.isFalse())
                 .where(qUser.isRestricted.isFalse())
+                .where(qUser.deletedAt.isNull())
                 .where(qClothes.user.ne(user));
 
         // 검색
