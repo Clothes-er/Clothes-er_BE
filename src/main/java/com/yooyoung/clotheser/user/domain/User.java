@@ -207,12 +207,14 @@ public class User {
     // 유예 설정
     public User updateIsSuspended() {
         this.isSuspended = true;
+        this.isRestricted = false;
         return this;
     }
 
     // 이용 제한 설정
     public User updateIsRestricted() {
         this.isRestricted = true;
+        this.isSuspended = false;
         return this;
     }
 

@@ -186,7 +186,7 @@ public class AdminService {
             case SUSPENDED -> {
                 // -> 대여글, 보유 옷 생성/수정/삭제 제한
                 // -> 대여글, 보유 옷 숨김 처리 (목록 응답값에서 제외됨)
-                // -> 대여글, 보유 옷, 채팅방, 프로필 조회에서 isSuspended = true
+                // -> 대여글, 채팅방, 프로필 조회에서 isSuspended = true
                 User reportee = report.getReportee();
                 reportee = reportee.updateIsSuspended();
                 userRepository.save(reportee);
