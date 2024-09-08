@@ -15,6 +15,7 @@ import com.yooyoung.clotheser.user.domain.*;
 import com.yooyoung.clotheser.user.dto.request.*;
 import com.yooyoung.clotheser.user.dto.response.*;
 import com.yooyoung.clotheser.user.repository.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +55,6 @@ public class UserService {
     private final BodyShapeRepository bodyShapeRepository;
     private final FavClothesRepository favClothesRepository;
     private final FavStyleRepository favStyleRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-
     private final RentalInfoRepository rentalInfoRepository;
     private final ReportRepository reportRepository;
 
@@ -113,28 +112,21 @@ public class UserService {
         // 토큰 생성
         TokenResponse tokenResponse = jwtProvider.createToken(user.getId(), user.getIsAdmin().name());
 
-        // DB에 Refresh Token 있는지 확인
-        RefreshToken preRefreshToken = refreshTokenRepository.findByUserId(user.getId());
-
-        // - 있으면 업데이트
-        if (preRefreshToken != null) {
-            refreshTokenRepository.save(preRefreshToken.updateRefreshToken(tokenResponse.getRefreshToken()));
-        }
-        // - 없으면 새로 저장
-        else {
-            RefreshToken newToken = RefreshToken.builder()
-                    .userId(user.getId())
-                    .token(tokenResponse.getRefreshToken())
-                    .build();
-            refreshTokenRepository.save(newToken);
-        }
-
         // 최초 로그인이 아닐 경우, 마지막으로 로그인한 시간 업데이트
         if (!user.getIsFirstLogin()) {
             userRepository.save(user.updateLastLoginAt());
         }
 
         return new LoginResponse(user, tokenResponse);
+    }
+
+    /* 로그아웃 */
+    public BaseResponseStatus logout(User user, LogoutRequest logoutRequest, HttpServletRequest request) throws BaseException {
+
+        String refreshToken = logoutRequest.getRefreshToken();
+        jwtProvider.logout(user.getId(), refreshToken, request);
+
+        return SUCCESS;
     }
 
     // TODO: 액세스 토큰 재발급
@@ -207,8 +199,6 @@ public class UserService {
         return new FirstLoginResponse(updatedUser, bodyShapes, categories, styles);
 
     }
-
-    // 로그아웃
 
     /* 내 프로필 조회 */
     public UserProfileResponse getMyProfile(User user) throws BaseException {

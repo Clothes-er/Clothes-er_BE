@@ -14,6 +14,7 @@ import com.yooyoung.clotheser.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -179,6 +180,28 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "로그아웃", description = "로그아웃을 하여 액세트 토큰을 블랙리스트에 등록한다.")
+    @PostMapping("/logout")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> logout(@Valid @RequestBody LogoutRequest logoutRequest,
+                                                                   BindingResult bindingResult,
+                                                                   HttpServletRequest request,
+                                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+
+            return new ResponseEntity<>(new BaseResponse<>(userService.logout(userDetails.user, logoutRequest, request)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
     // TODO: 액세스 토큰 재발급
     /*@PostMapping("/token/refresh")
     public ResponseEntity<BaseResponse<TokenResponse>> refreshToken(@RequestHeader("Authorization") String refreshToken) {
@@ -213,8 +236,6 @@ public class UserController {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
-
-    // TODO: 로그아웃
 
     @Operation(summary = "내 프로필 조회", description = "나의 프로필을 조회한다.")
     @GetMapping("/profile")

@@ -25,12 +25,10 @@ import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.review.domain.Review;
 import com.yooyoung.clotheser.review.repository.ReviewKeywordRepository;
 import com.yooyoung.clotheser.review.repository.ReviewRepository;
-import com.yooyoung.clotheser.user.domain.RefreshToken;
 import com.yooyoung.clotheser.user.domain.Role;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.dto.request.LoginRequest;
 import com.yooyoung.clotheser.user.dto.response.TokenResponse;
-import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +58,6 @@ public class AdminService {
     private final JwtProvider jwtProvider;
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-
     private final ReportRepository reportRepository;
 
     private final ReviewRepository reviewRepository;
@@ -92,22 +88,6 @@ public class AdminService {
 
         // 토큰 생성
         TokenResponse tokenResponse = jwtProvider.createToken(user.getId(), user.getIsAdmin().name());
-
-        // DB에 Refresh Token 있는지 확인
-        RefreshToken preRefreshToken = refreshTokenRepository.findByUserId(user.getId());
-
-        // - 있으면 업데이트
-        if (preRefreshToken != null) {
-            refreshTokenRepository.save(preRefreshToken.updateRefreshToken(tokenResponse.getRefreshToken()));
-        }
-        // - 없으면 새로 저장
-        else {
-            RefreshToken newToken = RefreshToken.builder()
-                    .userId(user.getId())
-                    .token(tokenResponse.getRefreshToken())
-                    .build();
-            refreshTokenRepository.save(newToken);
-        }
 
         // 마지막으로 로그인한 시간 업데이트
         if (user.getIsFirstLogin()) {

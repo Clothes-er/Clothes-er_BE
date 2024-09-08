@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.jwt.JwtAuthenticationFilter;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
-import com.yooyoung.clotheser.user.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,9 +30,7 @@ import static org.springframework.http.HttpStatus.*;
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final CorsConfig corsConfig;
-
 
     // 특정 HTTP 요청에 대한 웹 기반 보안 구성
     @Bean
@@ -61,7 +58,7 @@ public class SecurityConfig {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // jwt 사용하는 경우 (STATELESS는 인증 정보를 서버에 담지 않음)
                 )
                 // UserNamePasswordAuthenticationFilter 적용하기 전에 JWTTokenFilter를 적용하라는 뜻
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 // 에러 핸들링
                 .exceptionHandling(exception -> exception
                         // 인증 예외 처리 (토큰이 없는 경우)
