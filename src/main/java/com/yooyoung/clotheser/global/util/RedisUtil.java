@@ -26,4 +26,9 @@ public class RedisUtil {
         valueOperations.set(key, value, expireDuration);
     }
 
+    // key에 해당하는 데이터 삭제
+    public void deleteData(String key){
+        redisTemplate.delete(key);
+    }
+
 }

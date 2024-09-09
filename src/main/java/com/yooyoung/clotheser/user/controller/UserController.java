@@ -14,6 +14,7 @@ import com.yooyoung.clotheser.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -179,17 +180,46 @@ public class UserController {
         }
     }
 
-    // TODO: 액세스 토큰 재발급
-    /*@PostMapping("/token/refresh")
-    public ResponseEntity<BaseResponse<TokenResponse>> refreshToken(@RequestHeader("Authorization") String refreshToken) {
+    @Operation(summary = "로그아웃", description = "로그아웃을 하여 액세트 토큰을 블랙리스트에 등록한다.")
+    @PostMapping("/logout")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> logout(@Valid @RequestBody TokenRequest tokenRequest,
+                                                                   BindingResult bindingResult,
+                                                                   HttpServletRequest request,
+                                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
 
-            return new ResponseEntity<>(new BaseResponse<>(userService.refreshToken(refreshToken)), CREATED);
+            return new ResponseEntity<>(new BaseResponse<>(userService.logout(userDetails.user, tokenRequest, request)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
-    }*/
+    }
+
+    @Operation(summary = "토큰 재발급", description = "액세스 토큰이 만료된 경우 새로운 토큰들을 발급한다.")
+    @PostMapping("/reissue-token")
+    public ResponseEntity<BaseResponse<TokenResponse>> reissueToken(@Valid @RequestBody TokenRequest tokenRequest,
+                                                                    BindingResult bindingResult) {
+        try {
+            // 입력 유효성 검사
+            if (bindingResult.hasErrors()) {
+                List<FieldError> list = bindingResult.getFieldErrors();
+                for(FieldError error : list) {
+                    return new ResponseEntity<>(new BaseResponse<>(REQUEST_ERROR, error.getDefaultMessage()), BAD_REQUEST);
+                }
+            }
+            return new ResponseEntity<>(new BaseResponse<>(userService.reissueToken(tokenRequest)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     @Operation(summary = "최초 로그인", description = "최초 로그인을 한다.")
     @PostMapping("/first-login")
@@ -213,8 +243,6 @@ public class UserController {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
-
-    // TODO: 로그아웃
 
     @Operation(summary = "내 프로필 조회", description = "나의 프로필을 조회한다.")
     @GetMapping("/profile")
