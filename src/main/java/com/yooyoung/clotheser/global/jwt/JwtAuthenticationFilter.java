@@ -27,6 +27,8 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             if (accessToken != null && jwtProvider.validateToken(accessToken)) {
                 // 로그아웃한 액세스 토큰인 경우 401 에러
                 jwtProvider.checkLogoutToken(accessToken);
+                // 리프레시 토큰인 경우 로그인 막기 (403)
+                jwtProvider.checkIsRefreshToken(accessToken);
                 Authentication authentication = jwtProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }

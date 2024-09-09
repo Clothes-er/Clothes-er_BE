@@ -121,29 +121,19 @@ public class UserService {
     }
 
     /* 로그아웃 */
-    public BaseResponseStatus logout(User user, LogoutRequest logoutRequest, HttpServletRequest request) throws BaseException {
+    public BaseResponseStatus logout(User user, TokenRequest tokenRequest, HttpServletRequest request) throws BaseException {
 
-        String refreshToken = logoutRequest.getRefreshToken();
+        String refreshToken = tokenRequest.getRefreshToken();
         jwtProvider.logout(user.getId(), refreshToken, request);
 
         return SUCCESS;
     }
 
-    // TODO: 액세스 토큰 재발급
-    /*public TokenResponse refreshToken(String refreshToken) throws BaseException {
-
-        // refresh token이 만료되었거나 없는 경우
-        if (!jwtProvider.validateRefreshToken(refreshToken)) {
-            throw new BaseException(INVALID_JWT_TOKEN, NOT_FOUND);
-        }
-
-        // DB에서 refresh token 가져오기
-        RefreshToken rt = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new BaseException(INVALID_JWT_TOKEN, NOT_FOUND));
-
-        Long userId = rt.getUserId();
-        return jwtProvider.createToken(userId);
-    }*/
+    /* 액세스 토큰 재발급 */
+    public TokenResponse reissueToken(TokenRequest tokenRequest) throws BaseException {
+        String refreshToken = tokenRequest.getRefreshToken();
+        return jwtProvider.reissueToken(refreshToken);
+    }
 
     /* 최초 로그인 */
     public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest, User user) throws BaseException {
@@ -482,4 +472,5 @@ public class UserService {
 
         return SUCCESS;
     }
+
 }

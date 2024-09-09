@@ -21,9 +21,11 @@ public enum BaseResponseStatus {
     LOGOUT_JWT(false, 2003, "로그아웃된 JWT입니다."),
     EXPIRED_JWT(false, 2004, "만료된 JWT입니다."),
     INVALID_JWT(false, 2005, "유효하지 않은 JWT입니다."),
+    FORBIDDEN_LOGIN_REFRESH_TOKEN(false, 2006, "리프레시 토큰으로 로그인 할 수 없습니다."),
     REQUEST_FIRST_LOGIN(false, 2007, "최초 로그인이 필요합니다."),
     FILE_TOO_LARGE(false, 2008, "업로드 할 수 있는 최대 총 파일의 크기는 50MB입니다."),
     FORBIDDEN_USER(false, 2009, "작성자만 접근할 수 있습니다."),
+    EMPTY_JWT_CLAIMS(false, 2010, "잘못된 JWT입니다."),
 
     // 2. User (2100 ~ 2199)
 

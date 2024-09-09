@@ -64,6 +64,9 @@ public class JwtProvider {
                 .compact();
 
         String refreshToken = Jwts.builder()
+                .claims(claims)
+                .claim("role", role)
+                .claim("isRefreshToken", true)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + refreshTokenExp))
                 .signWith(key)
@@ -133,9 +136,9 @@ public class JwtProvider {
         catch (ExpiredJwtException e) {
             throw new BaseException(EXPIRED_JWT, UNAUTHORIZED);
         }
-        // 토큰 유효하지 않은 경우
+        // 토큰이 잘못된 경우
         catch (JwtException | IllegalArgumentException e) {
-            throw new BaseException(INVALID_JWT, BAD_REQUEST);
+            throw new BaseException(EMPTY_JWT_CLAIMS, BAD_REQUEST);
         }
     }
 
@@ -144,6 +147,19 @@ public class JwtProvider {
         String logoutValue = redisUtil.getData(token);
         if (logoutValue != null && logoutValue.equals("logout")) {
             throw new BaseException(LOGOUT_JWT, UNAUTHORIZED);
+        }
+    }
+
+    // 헤더에 있는 게 리프레시 토큰인지 확인
+    public void checkIsRefreshToken(String token) throws BaseException {
+        Boolean isRefreshToken = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("isRefreshToken", Boolean.class);
+        if (isRefreshToken != null && isRefreshToken) {
+            throw new BaseException(FORBIDDEN_LOGIN_REFRESH_TOKEN, FORBIDDEN);
         }
     }
 
@@ -166,7 +182,7 @@ public class JwtProvider {
         validateToken(refreshToken);
 
         // Redis에서 리프레시 토큰 존재 확인
-        if (!redisUtil.getData("userId: "+ userId).equals(refreshToken)) {
+        if (!redisUtil.getData("userId: " + userId).equals(refreshToken)) {
             throw new BaseException(INVALID_JWT, BAD_REQUEST);
         }
 
@@ -175,6 +191,27 @@ public class JwtProvider {
         redisUtil.setDataExpire(accessToken, "logout", getTokenExpirationTime(accessToken) / 1000);
         // Redis에서 리프레시 토큰 삭제
         redisUtil.deleteData("userId: " + userId);
+    }
+
+    // 토큰 재발급
+    public TokenResponse reissueToken(String refreshToken) throws BaseException {
+
+        // 리프레시 토큰의 유효성 확인
+        validateToken(refreshToken);
+
+        // 리프레시 토큰으로 유저 불러오기
+        Long userId = this.getUserId(refreshToken);
+        String role = this.getRole(refreshToken);
+
+        // Redis에서 리프레시 토큰 존재 확인
+        if (!redisUtil.getData("userId: " + userId).equals(refreshToken)) {
+            throw new BaseException(INVALID_JWT, BAD_REQUEST);
+        }
+
+        // Redis에서 리프레시 토큰 삭제
+        redisUtil.deleteData("userId: " + userId);
+
+        return createToken(userId, role);
     }
 
 }

@@ -8,9 +8,9 @@ import lombok.Setter;
 
 @Data
 @Setter(AccessLevel.NONE)
-public class LogoutRequest {
+public class TokenRequest {
 
-    @Schema(title = "리프레시 토큰", example = "eyJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3MjU3ODgyMzUsImV4cCI6MTcyNjk5NzgzNX0.tnKzcNkmC9-tuugoNZ90l2w4vR57RLAh3mPedp8FnwF17CJbARJzbLrAS05FPUcWF4LXsEreZjk3B8MdQLu-Sw")
+    @Schema(title = "리프레시 토큰", example = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1Iiwicm9sZSI6IkFETUlOIiwiaXNSZWZyZXNoVG9rZW4iOnRydWUsImlhdCI6MTcyNTg4OTgxOSwiZXhwIjoxNzI1ODg5OTk5fQ.VvVMwnoePNXXfQdJEz3AzAz_m23mWZt94yW7U_wZ9XqlmKrp3-QmALWqlwSrnc2oZEFPi000R0uKNkdT9MRK5Q")
     @NotBlank(message = "리프레시 토큰을 입력해주세요.")
     private String refreshToken;
 
