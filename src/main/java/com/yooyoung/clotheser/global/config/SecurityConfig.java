@@ -76,7 +76,7 @@ public class SecurityConfig {
                         })
                         // 인가 예외 처리 (권한이 없는 경우)
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            BaseResponse<Object> br = new BaseResponse<>(INVALID_USER_JWT);
+                            BaseResponse<Object> br = new BaseResponse<>(FORBIDDEN_ACCESS_JWT);
                             ObjectMapper objectMapper = new ObjectMapper();
 
                             response.setStatus(FORBIDDEN.value());

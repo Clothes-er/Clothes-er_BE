@@ -129,9 +129,13 @@ public class JwtProvider {
             // 토큰 유효 시 true 반환
             return true;
         }
-        // 토큰 만료 시 예외 처리
+        // 토큰이 만료된 경우
+        catch (ExpiredJwtException e) {
+            throw new BaseException(EXPIRED_JWT, UNAUTHORIZED);
+        }
+        // 토큰 유효하지 않은 경우
         catch (JwtException | IllegalArgumentException e) {
-            throw new BaseException(EXPIRED_JWT, BAD_REQUEST);
+            throw new BaseException(INVALID_JWT, BAD_REQUEST);
         }
     }
 
@@ -158,9 +162,12 @@ public class JwtProvider {
     // 로그아웃
     public void logout(Long userId, String refreshToken, HttpServletRequest request) throws BaseException {
 
+        // 리프레시 토큰의 유효성 확인
+        validateToken(refreshToken);
+
         // Redis에서 리프레시 토큰 존재 확인
         if (!redisUtil.getData("userId: "+ userId).equals(refreshToken)) {
-            throw new BaseException(FORBIDDEN_LOGOUT_JWT, BAD_REQUEST);
+            throw new BaseException(INVALID_JWT, BAD_REQUEST);
         }
 
         // Redis에 액세스 토큰을 블랙 리스트로 저장 (key: 액세스 토큰, value: logout)

@@ -55,7 +55,7 @@ public class StompController {
         try {
             // 헤더에 토큰이 없거나 잘못된 경우
             if (authentication == null) {
-                throw new BaseException(INVALID_USER_JWT, UNAUTHORIZED);
+                throw new BaseException(FORBIDDEN_ACCESS_JWT, UNAUTHORIZED);
             }
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

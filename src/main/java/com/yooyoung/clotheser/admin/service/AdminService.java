@@ -78,7 +78,7 @@ public class AdminService {
 
         // 관리자 확인
         if (user.getIsAdmin() != Role.ADMIN) {
-            throw new BaseException(INVALID_USER_JWT, FORBIDDEN);
+            throw new BaseException(FORBIDDEN_ACCESS_JWT, FORBIDDEN);
         }
 
         // 비밀번호 확인
