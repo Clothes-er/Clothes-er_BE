@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Configuration
@@ -19,7 +20,6 @@ import org.springframework.security.core.Authentication;
 public class StompHandler implements ChannelInterceptor {
 
     private final JwtProvider jwtProvider;
-    private static final String BEARER_PREFIX = "Bearer ";
 
     // WebSocket을 통해 들어온 요청이 처리되기 전에 실행됨
     @Override
@@ -32,9 +32,12 @@ public class StompHandler implements ChannelInterceptor {
             String jwt = accessor.getFirstNativeHeader("Authorization");
 
             try {
+                if (StringUtils.hasText(jwt) && jwt.startsWith("Bearer ")) {
+                    jwt = jwt.substring(7);
+                }
+
                 if (jwtProvider.validateToken(jwt)) {
-                    String token = jwt.substring(BEARER_PREFIX.length());
-                    Authentication authentication = jwtProvider.getAuthentication(token);
+                    Authentication authentication = jwtProvider.getAuthentication(jwt);
                     accessor.setUser(authentication);
                 }
             } catch (BaseException e) {
