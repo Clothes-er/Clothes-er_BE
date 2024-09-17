@@ -37,7 +37,7 @@ public class JwtProvider {
     SecretKey key;
 
     private static final long ACCESS_TOKEN_EXP = 60 * 60 * 1000L;    // 1시간
-    private static final long REFRESH_TOKEN_EXP = 60 * 60 * 24 * 14 * 1000L;  // 2주 (14일)
+    private static final long REFRESH_TOKEN_EXP = 60 * 60 * 24 * 7 * 1000L;  // 1주 (7일)
 
 
     private final RedisUtil redisUtil;
