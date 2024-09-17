@@ -36,6 +36,10 @@ public class JwtProvider {
 
     SecretKey key;
 
+    private static final long ACCESS_TOKEN_EXP = 60 * 1000L;    // 1분
+    private static final long REFRESH_TOKEN_EXP = 60 * 60 * 24 * 14 * 1000L;  // 2주 (14일)
+
+
     private final RedisUtil redisUtil;
 
     private final UserDetailsService userDetailsService;
@@ -51,15 +55,11 @@ public class JwtProvider {
 
         long now = (new Date()).getTime();
 
-        // 토큰 유효 시간
-        long accessTokenExp = 60 * 60 * 24 * 1000L;     // 1일
-        long refreshTokenExp = accessTokenExp * 14;    // 2주 (14일)
-
         String accessToken = Jwts.builder()
                 .claims(claims)
                 .claim("role", role)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + accessTokenExp))
+                .expiration(new Date(now + ACCESS_TOKEN_EXP))
                 .signWith(key)
                 .compact();
 
@@ -68,12 +68,12 @@ public class JwtProvider {
                 .claim("role", role)
                 .claim("isRefreshToken", true)
                 .issuedAt(new Date(now))
-                .expiration(new Date(now + refreshTokenExp))
+                .expiration(new Date(now + REFRESH_TOKEN_EXP))
                 .signWith(key)
                 .compact();
 
         // Redis에 refreshToken 저장 (key: userId, value: 리프레시 토큰)
-        redisUtil.setDataExpire("userId: " + userId, refreshToken, refreshTokenExp);
+        redisUtil.setDataExpire("userId: " + userId, refreshToken, REFRESH_TOKEN_EXP);
 
         return TokenResponse.builder()
                 .grantType("Bearer")

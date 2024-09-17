@@ -21,6 +21,9 @@ public class LoginResponse {
     @Schema(title = "최초 로그인 여부", example = "true")
     private Boolean isFirstLogin;
 
+    @Schema(title = "유예 여부", example = "false")
+    private Boolean isSuspended;
+
     @Schema(title = "마지막으로 로그인한 시간", example = "2024년 06월 20일 19:13:36")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime lastLoginAt;
@@ -30,6 +33,7 @@ public class LoginResponse {
     public LoginResponse(User user, TokenResponse tokenResponse) {
         this.email = user.getEmail();
         this.isFirstLogin = user.getIsFirstLogin();
+        this.isSuspended = user.getIsSuspended();
         this.lastLoginAt = user.getLastLoginAt();
         this.token = tokenResponse;
     }
