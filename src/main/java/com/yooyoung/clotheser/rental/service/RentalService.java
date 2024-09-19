@@ -506,10 +506,13 @@ public class RentalService {
         rentalPriceRepository.deleteAllByIdInBatch(rentalPriceIds);
 
         // 대여글에 연결된 보유 옷에서 rentalId 삭제
-        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(deletedRental.getClothesId())
-                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
-        Clothes updatedClothes = clothes.updateRental(null);
-        clothesRepository.save(updatedClothes);
+        Long clothesId = deletedRental.getClothesId();
+        if (clothesId != null) {
+            Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                    .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
+            Clothes updatedClothes = clothes.updateRental(null);
+            clothesRepository.save(updatedClothes);
+        }
 
         return SUCCESS;
     }
