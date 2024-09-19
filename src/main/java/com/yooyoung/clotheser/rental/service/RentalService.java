@@ -87,7 +87,7 @@ public class RentalService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();
@@ -241,7 +241,7 @@ public class RentalService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findMinPriceAndDays(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();
