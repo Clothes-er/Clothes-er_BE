@@ -99,9 +99,9 @@ public class ClosetService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
         // 남의 전체 보유 옷 목록 불러오기
-        List<Clothes> myClothes = clothesRepository.findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(owner.getId());
+        List<Clothes> userClothes = clothesRepository.findAllByUserIdAndDeletedAtNullAndIsPublicTrueOrderByCreatedAtDesc(owner.getId());
         List<UserClothesListResponse> responses = new ArrayList<>();
-        for (Clothes clothes : myClothes) {
+        for (Clothes clothes : userClothes) {
             // 첫 번째 이미지 불러오기
             Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
             String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
