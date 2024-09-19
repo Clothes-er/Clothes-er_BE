@@ -132,7 +132,7 @@ public class ClosetService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPriceAscDaysAsc(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();
@@ -175,7 +175,7 @@ public class ClosetService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPriceAscDaysAsc(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();
@@ -233,7 +233,7 @@ public class ClosetService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPriceAscDaysAsc(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();
@@ -292,7 +292,7 @@ public class ClosetService {
             // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
             int minPrice = 0;
             int minDays = 0;
-            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPrice(rental);
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPriceAscDaysAsc(rental);
             if (minRentalPrice.isPresent()) {
                 minPrice = minRentalPrice.get().getPrice();
                 minDays = minRentalPrice.get().getDays();

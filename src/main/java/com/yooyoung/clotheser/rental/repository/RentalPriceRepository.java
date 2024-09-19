@@ -15,6 +15,6 @@ public interface RentalPriceRepository extends JpaRepository<RentalPrice, Long> 
     List<RentalPrice> findAllByRentalIdOrderByDays(Long rentalId);
 
     // 최소 가격과 일수 불러오기
-    Optional<RentalPrice> findFirstByRentalOrderByPrice(Rental rental);
+    Optional<RentalPrice> findFirstByRentalOrderByPriceAscDaysAsc(Rental rental);
 
 }
