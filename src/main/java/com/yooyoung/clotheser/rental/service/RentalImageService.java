@@ -54,11 +54,13 @@ public class RentalImageService {
 
                 amazonS3.putObject(bucket, fileName, image.getInputStream(), metadata);
                 String imgUrl = amazonS3.getUrl(bucket, fileName).toString();
-                imgUrls.add(imgUrl);
+                String decodedUrl = URLDecoder.decode(imgUrl, StandardCharsets.UTF_8);  // 한글로 변환
+
+                imgUrls.add(decodedUrl);
 
                 // 데이터베이스에 이미지 URL 저장
                 RentalImg rentalImg = RentalImg.builder()
-                        .imgUrl(imgUrl)
+                        .imgUrl(decodedUrl)
                         .rental(rental)
                         .build();
 
