@@ -19,7 +19,7 @@ public class RentalImg {
     @JoinColumn(nullable = false)
     private Rental rental;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String imgUrl;
 
 }

@@ -19,7 +19,7 @@ public class ClothesImg {
     @JoinColumn(nullable = false)
     private Clothes clothes;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String imgUrl;
 
 }
