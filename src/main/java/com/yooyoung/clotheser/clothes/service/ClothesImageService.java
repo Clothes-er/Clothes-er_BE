@@ -77,8 +77,7 @@ public class ClothesImageService {
         // S3에서 삭제
         for (ClothesImg clothesImg : clothesImgs) {
             String fileName = clothesImg.getImgUrl().substring(clothesImg.getImgUrl().lastIndexOf("/") + 1);
-            String decodedFileName= URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-            amazonS3.deleteObject(bucket, "clothes/" + decodedFileName);
+            amazonS3.deleteObject(bucket, "clothes/" + fileName);
         }
 
         // DB에서 삭제

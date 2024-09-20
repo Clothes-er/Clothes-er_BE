@@ -78,8 +78,7 @@ public class RentalImageService {
         // S3에서 삭제
         for (RentalImg rentalImg : rentalImgs) {
             String fileName = rentalImg.getImgUrl().substring(rentalImg.getImgUrl().lastIndexOf("/") + 1);
-            String decodedFileName= URLDecoder.decode(fileName, StandardCharsets.UTF_8);
-            amazonS3.deleteObject(bucket, "rentals/" + decodedFileName);
+            amazonS3.deleteObject(bucket, "rentals/" + fileName);
         }
 
         // DB에서 삭제
