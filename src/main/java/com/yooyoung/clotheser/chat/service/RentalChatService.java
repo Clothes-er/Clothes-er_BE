@@ -21,7 +21,6 @@ import com.yooyoung.clotheser.user.domain.Role;
 import com.yooyoung.clotheser.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,8 +37,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class RentalChatService {
 
-    @Autowired
-    private AESUtil aesUtil;
+    private final AESUtil aesUtil;
     @Value("${aes.key}")
     private String AES_KEY;
 

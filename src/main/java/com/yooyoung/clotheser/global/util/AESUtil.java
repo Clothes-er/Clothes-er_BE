@@ -5,16 +5,21 @@ import org.springframework.stereotype.Component;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
+import java.security.SecureRandom;
 import java.util.Base64;
 
 @Component
 public class AESUtil {
 
     private static final String ALGORITHM = "AES";
+    private static final String ALGORITHM_MODE_PADDING = ALGORITHM + "/CBC/PKCS5Padding";
     private static final int KEY_SIZE = 128;
+    private static final int IV_SIZE = 16;
 
-    // 키 생성 (한 번 사용함)
+    // 한 번 사용함
     public String generateKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(ALGORITHM);
         keyGenerator.init(KEY_SIZE);
@@ -22,22 +27,55 @@ public class AESUtil {
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
-    // 암호화
     public String encrypt(String plainText, String key) throws Exception {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(key), ALGORITHM);
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
-        return Base64.getEncoder().encodeToString(encryptedBytes);
+        byte[] decodedKey = getBase64Decoded(key);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, ALGORITHM);
+        IvParameterSpec ivParameterSpec = createIv();
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+
+        byte[] encryptedText = cipher.doFinal(plainText.getBytes());
+        byte[] encryptedData = combineIvWithEncryptedText(ivParameterSpec, encryptedText);
+
+        return Base64.getEncoder().encodeToString(encryptedData);
     }
 
-    // 복호화
-    public String decrypt(String encryptedText, String key) throws Exception {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(Base64.getDecoder().decode(key), ALGORITHM);
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
-        return new String(decryptedBytes);
+    private byte[] getBase64Decoded(String data) {
+        return Base64.getDecoder().decode(data);
+    }
+
+    private IvParameterSpec createIv() {
+        byte[] iv = new byte[IV_SIZE];
+        new SecureRandom().nextBytes(iv);
+        return new IvParameterSpec(iv);
+    }
+
+    private byte[] combineIvWithEncryptedText(IvParameterSpec ivParameterSpec, byte[] encryptedText) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(IV_SIZE + encryptedText.length);
+        byteBuffer.put(ivParameterSpec.getIV());
+        byteBuffer.put(encryptedText);
+        return byteBuffer.array();
+    }
+
+    public String decrypt(String encryptedData, String key) throws Exception {
+        byte[] decodedKey = getBase64Decoded(key);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, ALGORITHM);
+
+        byte[] decodedEncryptedData = getBase64Decoded(encryptedData);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(decodedEncryptedData);
+
+        byte[] iv = new byte[IV_SIZE];
+        byteBuffer.get(iv);
+        byte[] encryptedText = new byte[byteBuffer.remaining()];
+        byteBuffer.get(encryptedText);
+
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+
+        Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
+
+        byte[] decryptedText = cipher.doFinal(encryptedText);
+        return new String(decryptedText);
     }
 }
-
