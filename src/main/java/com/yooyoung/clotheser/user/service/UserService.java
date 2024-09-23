@@ -312,17 +312,16 @@ public class UserService {
         // 기존 이미지 S3에서 삭제
         if (user.getProfileUrl() != null) {
             // 객체 key 추출
-            String originalImageKey = user.getProfileUrl().substring(user.getProfileUrl().lastIndexOf("/") + 1);
-            String decodedImageKey = URLDecoder.decode(originalImageKey, StandardCharsets.UTF_8);
-            amazonS3.deleteObject(bucket, "profiles/" + decodedImageKey);
+            String imageKey = user.getProfileUrl().substring(user.getProfileUrl().lastIndexOf("/") + 1);
+            amazonS3.deleteObject(bucket, "profiles/" + imageKey);
         }
 
         // 새로운 이미지 업로드
-        String newProfileImage;
+        String newProfileImgUrl;
 
         // 변경할 이미지가 없는 경우
         if (profileImage == null || profileImage.isEmpty()) {
-            newProfileImage = null;
+            newProfileImgUrl = null;
         }
         // 있으면 S3에 업로드
         else {
@@ -334,7 +333,8 @@ public class UserService {
                 metadata.setContentType(profileImage.getContentType());
 
                 amazonS3.putObject(bucket, fileName, profileImage.getInputStream(), metadata);
-                newProfileImage = amazonS3.getUrl(bucket, fileName).toString();
+                String imgUrl = amazonS3.getUrl(bucket, fileName).toString();
+                newProfileImgUrl = URLDecoder.decode(imgUrl, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
             }
@@ -346,7 +346,7 @@ public class UserService {
         }
 
         // DB에 변경된 정보 저장
-        User updatedUser = user.updateProfile(newProfileImage, nickname);
+        User updatedUser = user.updateProfile(newProfileImgUrl, nickname);
         userRepository.save(updatedUser);
         return new PatchUserProfileReponse(updatedUser);
     }
