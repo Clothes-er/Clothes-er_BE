@@ -20,8 +20,6 @@ import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.Gender;
 import com.yooyoung.clotheser.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,10 +36,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class ClothesService {
 
-    @Autowired
-    private AESUtil aesUtil;
-    @Value("${aes.key}")
-    private String AES_KEY;
+    private final AESUtil aesUtil;
 
     private final ClothesImageService clothesImageService;
     private final ClothesFilterService clothesFilterService;
@@ -128,7 +123,7 @@ public class ClothesService {
         // 본인의 id 암호화하기
         String userSid;
         try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()), AES_KEY);
+            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
             userSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -158,7 +153,7 @@ public class ClothesService {
         // 보유 옷 등록자의 id 암호화하기
         String userSid;
         try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()), AES_KEY);
+            String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
             userSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -229,7 +224,7 @@ public class ClothesService {
         // 본인의 id 암호화하기
         String userSid;
         try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()), AES_KEY);
+            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
             userSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -299,7 +294,7 @@ public class ClothesService {
             // userId 암호화하기
             String userSid;
             try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()), AES_KEY);
+                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
                 userSid = Base64UrlSafeUtil.encode(encodedUserId);
             } catch (Exception e) {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -310,7 +305,6 @@ public class ClothesService {
             String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
 
             responses.add(new ClothesListResponse(clothes, userSid, imgUrl));
-
         }
 
         return responses;

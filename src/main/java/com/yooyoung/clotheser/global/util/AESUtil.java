@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.global.util;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -14,6 +15,9 @@ import java.util.Base64;
 @Component
 public class AESUtil {
 
+    @Value("${aes.key}")
+    private String aesKey;
+
     private static final String ALGORITHM = "AES";
     private static final String ALGORITHM_MODE_PADDING = ALGORITHM + "/CBC/PKCS5Padding";
     private static final int KEY_SIZE = 128;
@@ -27,16 +31,16 @@ public class AESUtil {
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
-    public String encrypt(String plainText, String key) throws Exception {
-        byte[] decodedKey = getBase64Decoded(key);
+    public String encrypt(String plainText) throws Exception {
+        byte[] decodedKey = getBase64Decoded(aesKey);
         SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, ALGORITHM);
         IvParameterSpec ivParameterSpec = createIv();
 
-        Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+            Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
-        byte[] encryptedText = cipher.doFinal(plainText.getBytes());
-        byte[] encryptedData = combineIvWithEncryptedText(ivParameterSpec, encryptedText);
+            byte[] encryptedText = cipher.doFinal(plainText.getBytes());
+            byte[] encryptedData = combineIvWithEncryptedText(ivParameterSpec, encryptedText);
 
         return Base64.getEncoder().encodeToString(encryptedData);
     }
@@ -58,8 +62,8 @@ public class AESUtil {
         return byteBuffer.array();
     }
 
-    public String decrypt(String encryptedData, String key) throws Exception {
-        byte[] decodedKey = getBase64Decoded(key);
+    public String decrypt(String encryptedData) throws Exception {
+        byte[] decodedKey = getBase64Decoded(aesKey);
         SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, ALGORITHM);
 
         byte[] decodedEncryptedData = getBase64Decoded(encryptedData);

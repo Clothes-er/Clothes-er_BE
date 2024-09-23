@@ -14,8 +14,6 @@ import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +29,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class UserChatService {
 
-    @Autowired
-    private AESUtil aesUtil;
-    @Value("${aes.key}")
-    private String AES_KEY;
+    private final AESUtil aesUtil;
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
@@ -58,7 +53,7 @@ public class UserChatService {
         Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
@@ -113,7 +108,7 @@ public class UserChatService {
             // 상대방의 id 암호화하기
             String opponentSid;
             try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()), AES_KEY);
+                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
                 opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
             } catch (Exception e) {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -167,7 +162,7 @@ public class UserChatService {
         // 상대방의 id 암호화하기
         String opponentSid;
         try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()), AES_KEY);
+            String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
             opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);

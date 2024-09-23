@@ -23,8 +23,6 @@ import com.yooyoung.clotheser.rental.repository.RentalRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +38,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class ClosetService {
 
-    @Autowired
-    private AESUtil aesUtil;
-    @Value("${aes.key}")
-    private String AES_KEY;
+    private final AESUtil aesUtil;
 
     private final UserRepository userRepository;
 
@@ -88,10 +83,10 @@ public class ClosetService {
         }
 
         // 조회하려는 회원 불러오기
-        long userId;
+        Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
@@ -153,10 +148,10 @@ public class ClosetService {
         }
 
         // 조회하려는 회원 불러오기
-        long userId;
+        Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
@@ -217,7 +212,7 @@ public class ClosetService {
             // userId 암호화하기
             String userSid;
             try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()), AES_KEY);
+                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
                 userSid = Base64UrlSafeUtil.encode(encodedUserId);
             } catch (Exception e) {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -276,7 +271,7 @@ public class ClosetService {
             // userId 암호화하기
             String userSid;
             try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()), AES_KEY);
+                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
                 userSid = Base64UrlSafeUtil.encode(encodedUserId);
             } catch (Exception e) {
                 throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);

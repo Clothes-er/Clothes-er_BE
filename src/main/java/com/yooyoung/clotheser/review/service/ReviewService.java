@@ -21,8 +21,6 @@ import com.yooyoung.clotheser.review.repository.ReviewRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,10 +39,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class ReviewService {
 
-    @Autowired
-    private AESUtil aesUtil;
-    @Value("${aes.key}")
-    private String AES_KEY;
+    private final AESUtil aesUtil;
 
     private final ChatRoomRepository chatRoomRepository;
     private final RentalInfoRepository rentalInfoRepository;
@@ -151,7 +146,7 @@ public class ReviewService {
                 // 리뷰 작성자 id 암호화하기
                 String userSid;
                 try {
-                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()), AES_KEY);
+                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()));
                     userSid = Base64UrlSafeUtil.encode(encodedUserId);
                 } catch (Exception e) {
                     throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
@@ -191,7 +186,7 @@ public class ReviewService {
         Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
@@ -210,7 +205,7 @@ public class ReviewService {
                 // 리뷰 작성자 id 암호화하기
                 String reviewerSid;
                 try {
-                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()), AES_KEY);
+                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()));
                     reviewerSid = Base64UrlSafeUtil.encode(encodedUserId);
                 } catch (Exception e) {
                     throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);

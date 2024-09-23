@@ -18,7 +18,6 @@ import com.yooyoung.clotheser.user.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -46,10 +45,7 @@ public class UserService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Autowired
-    private AESUtil aesUtil;
-    @Value("${aes.key}")
-    private String AES_KEY;
+    private final AESUtil aesUtil;
 
     private final UserRepository userRepository;
     private final BodyShapeRepository bodyShapeRepository;
@@ -227,7 +223,7 @@ public class UserService {
         Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
@@ -431,7 +427,7 @@ public class UserService {
         Long userId;
         try {
             String base64DecodedUserId = Base64UrlSafeUtil.decode(reportRequest.getUserSid());
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId, AES_KEY));
+            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
         } catch (Exception e) {
             throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
         }
