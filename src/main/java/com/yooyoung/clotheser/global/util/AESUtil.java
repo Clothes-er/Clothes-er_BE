@@ -36,11 +36,11 @@ public class AESUtil {
         SecretKeySpec secretKeySpec = new SecretKeySpec(decodedKey, ALGORITHM);
         IvParameterSpec ivParameterSpec = createIv();
 
-            Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
+        Cipher cipher = Cipher.getInstance(ALGORITHM_MODE_PADDING);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
-            byte[] encryptedText = cipher.doFinal(plainText.getBytes());
-            byte[] encryptedData = combineIvWithEncryptedText(ivParameterSpec, encryptedText);
+        byte[] encryptedText = cipher.doFinal(plainText.getBytes());
+        byte[] encryptedData = combineIvWithEncryptedText(ivParameterSpec, encryptedText);
 
         return Base64.getEncoder().encodeToString(encryptedData);
     }
