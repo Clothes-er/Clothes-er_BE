@@ -45,6 +45,12 @@ public class RentalResponse {
     @Schema(title = "작성자 탈퇴 여부", example = "false")
     private Boolean isWithdrawn;
 
+    @Schema(title = "찜 여부", example = "false")
+    private Boolean isLiked;
+
+    @Schema(title = "찜 개수", example = "5")
+    private int likeCount;
+
     @Schema(title = "대여글 사진 URL 목록", description = "최대 3장", type = "array",
             example = "[\"https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/rentals/0fa7d4e0-de3d-4c87-a814-cc0ee8b8a8fe_black_ops%281%29.jpg\"]")
     private List<String> imgUrls;
@@ -78,7 +84,8 @@ public class RentalResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices) {
+    public RentalResponse(User user, String userSid, Rental rental, List<String> imgUrls, List<RentalPriceDto> prices,
+                          boolean isLiked, int likeCount) {
         this.id = rental.getId();
         this.clothesId = rental.getClothesId();
 
@@ -89,6 +96,9 @@ public class RentalResponse {
         this.isSuspended = rental.getUser().getIsSuspended();
         this.isRestricted = rental.getUser().getIsRestricted();
         this.isWithdrawn = rental.getUser().getDeletedAt() != null;
+
+        this.isLiked = isLiked;
+        this.likeCount = likeCount;
 
         this.imgUrls = imgUrls;
 

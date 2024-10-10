@@ -147,7 +147,10 @@ public class RentalService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new RentalResponse(user, userSid, rental, imgUrls, rentalRequest.getPrices());
+        boolean isLiked = false;
+        int likeCount = 0;
+
+        return new RentalResponse(user, userSid, rental, imgUrls, rentalRequest.getPrices(), isLiked, likeCount);
 
     }
 
@@ -183,7 +186,10 @@ public class RentalService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new RentalResponse(user, userSid, rental, imgUrls, prices);
+        boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rentalId);
+        int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
+
+        return new RentalResponse(user, userSid, rental, imgUrls, prices, isLiked, likeCount);
     }
 
     /* 대여글 목록 조회 */
@@ -410,7 +416,10 @@ public class RentalService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new RentalResponse(user, userSid, updatedRental, imgUrls, rentalRequest.getPrices());
+        boolean isLiked = false;
+        int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
+
+        return new RentalResponse(user, userSid, updatedRental, imgUrls, rentalRequest.getPrices(), isLiked, likeCount);
     }
 
     /* 대여글 삭제 */
@@ -457,6 +466,7 @@ public class RentalService {
         return SUCCESS;
     }
 
+    /* 대여글 찜 생성 */
     public BaseResponseStatus createRentalLike(User user, Long rentalId) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
@@ -483,6 +493,7 @@ public class RentalService {
         return SUCCESS;
     }
 
+    /* 대여글 찜 삭제 */
     public BaseResponseStatus deleteRentalLike(User user, Long rentalId) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
@@ -491,8 +502,8 @@ public class RentalService {
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
         RentalLike rentalLike = rentalLikeRepository.findOneByUserIdAndRentalIdAndDeletedAtNull(
-                    user.getId(), rental.getId()
-                ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_LIKE, NOT_FOUND));
+                user.getId(), rental.getId()
+        ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_LIKE, NOT_FOUND));
 
         rentalLike.delete();
         rentalLikeRepository.save(rentalLike);
@@ -500,7 +511,8 @@ public class RentalService {
         return SUCCESS;
     }
 
-    private static boolean checkUserWritesRental(User user, Rental rental) {
+    /* 본인의 대여글인지 확인  */
+    private boolean checkUserWritesRental(User user, Rental rental) {
         Long rentalUserId = rental.getUser().getId();
         return user.getId().equals(rentalUserId);
     }

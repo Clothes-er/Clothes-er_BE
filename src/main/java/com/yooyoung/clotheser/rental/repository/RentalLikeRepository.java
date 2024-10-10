@@ -11,4 +11,5 @@ public interface RentalLikeRepository extends JpaRepository<RentalLike, Long> {
 
     Optional<RentalLike> findOneByUserIdAndRentalIdAndDeletedAtNull(Long userId, Long rentalId);
 
+    int countByRentalIdAndDeletedAtNull(Long rentalId);
 }
