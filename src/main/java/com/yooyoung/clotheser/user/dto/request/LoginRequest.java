@@ -9,7 +9,7 @@ import lombok.Getter;
 @Builder
 public class LoginRequest {
 
-    @Schema(title = "이메일", description = "255자 이내", example = "noonsong@sookmyung.ac.kr", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(title = "이메일", description = "255자 이내", example = "noonsong@sm.ac.kr", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "이메일을 입력해주세요.")
     private String email;
 
