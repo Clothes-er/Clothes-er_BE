@@ -51,6 +51,7 @@ public class RentalService {
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalImgRepository rentalImgRepository;
     private final RentalInfoRepository rentalInfoRepository;
+    private final RentalLikeRepository rentalLikeRepository;
 
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -59,16 +60,8 @@ public class RentalService {
 
     /* 보유 옷이 없는 나의 대여글 목록 조회 */
     public List<UserRentalListResponse> getMyNoClothesRentals(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 대여글 목록 불러오기
         List<Rental> myRentals = rentalRepository.findAllByUserIdAndClothesIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
@@ -97,16 +90,8 @@ public class RentalService {
 
     /* 대여글 생성 */
     public RentalResponse createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 보유 옷에서 대여글을 작성하려는 경우
         Long clothesId = rentalRequest.getClothesId();
@@ -168,12 +153,8 @@ public class RentalService {
 
     /* 대여글 조회 */
     public RentalResponse getRental(Long rentalId, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
+        user.checkIsFirstLogin();
+        
         // 대여글 존재 확인
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
@@ -206,13 +187,10 @@ public class RentalService {
     }
 
     /* 대여글 목록 조회 */
-    public List<RentalListResponse> getRentalList(User user, String search, String sort, List<Gender> gender, Integer minHeight, Integer maxHeight,
-                                                  List<AgeFilter> age, List<String> category, List<String> style, RentalSituation situation) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+    public List<RentalListResponse> getRentalList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
+                                                  Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style,
+                                                  RentalSituation situation) throws BaseException {
+        user.checkIsFirstLogin();
 
         // 필터링된 대여글 목록 불러오기
         List<Rental> rentalList = rentalFilterService.getFilteredRentals(user, search, sort, gender,
@@ -250,11 +228,7 @@ public class RentalService {
 
     /* 옷 상태 체크하기 */
     public RentalCheckResponse createRentalCheck(RentalCheckRequest rentalCheckRequest, Long roomId, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -286,11 +260,7 @@ public class RentalService {
 
     /* 옷 상태 체크 내역 조회 */
     public RentalCheckResponse getRentalCheck(Long roomId, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -310,11 +280,7 @@ public class RentalService {
 
     /* 대여하기 */
     public RentalInfoResponse createRentalInfo(RentalInfoRequest rentalInfoRequest, Long roomId, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 옷 상태 체크했는지 확인
         if (!rentalCheckRepository.existsByRoomId(roomId)) {
@@ -339,11 +305,7 @@ public class RentalService {
 
     /* 반납하기 */
     public RentalInfoResponse updateRentalInfo(Long roomId, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 채팅방 존재 확인
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
@@ -372,24 +334,16 @@ public class RentalService {
     }
 
     /* 대여글 수정 */
-    public RentalResponse updateRental(RentalRequest rentalRequest, MultipartFile[] images, User user, Long rentalId) throws BaseException {
+    public RentalResponse updateRental(RentalRequest rentalRequest, MultipartFile[] images,
+                                       User user, Long rentalId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
-
-        // 대여글 불러오기
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
-        // 본인의 대여글인지 확인
-        if (!user.getId().equals(rental.getUser().getId())) {
+        boolean isWriter = checkUserWritesRental(user, rental);
+        if (!isWriter) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -461,23 +415,14 @@ public class RentalService {
 
     /* 대여글 삭제 */
     public BaseResponseStatus deleteRental(Long rentalId, User user) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
-
-        // 대여글 불러오기
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
-        // 본인의 대여글인지 확인
-        if (!user.getId().equals(rental.getUser().getId())) {
+        boolean isWriter = checkUserWritesRental(user, rental);
+        if (!isWriter) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -512,4 +457,34 @@ public class RentalService {
         return SUCCESS;
     }
 
+    public BaseResponseStatus createRentalLike(User user, Long rentalId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+        boolean isWriter = checkUserWritesRental(user, rental);
+        if (isWriter) {
+            throw new BaseException(FORBIDDEN_LIKE_MINE, FORBIDDEN);
+        }
+
+        boolean hasLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rentalId);
+        if (hasLiked) {
+            throw new BaseException(LIKE_EXISTS, CONFLICT);
+        }
+
+        RentalLike rentalLike = RentalLike.builder()
+                .user(user)
+                .rental(rental)
+                .build();
+        rentalLikeRepository.save(rentalLike);
+
+        return SUCCESS;
+    }
+
+    private static boolean checkUserWritesRental(User user, Rental rental) {
+        Long rentalUserId = rental.getUser().getId();
+        return user.getId().equals(rentalUserId);
+    }
 }

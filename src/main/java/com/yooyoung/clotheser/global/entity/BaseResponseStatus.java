@@ -80,6 +80,10 @@ public enum BaseResponseStatus {
     FORBIDDEN_UPDATE_CLOTHES(false, 2402, "대여글을 작성한 회원만 해당 보유 옷을 수정할 수 있습니다."),
     RENTAL_HAS_CLOTHES(false, 2403, "해당 대여글은 이미 다른 보유 옷과 연동되어 있습니다."),
 
+    // 6. Like (2500 ~ 2599)
+    FORBIDDEN_LIKE_MINE(false, 2500, "작성자 본인은 찜할 수 없습니다."),
+    LIKE_EXISTS(false, 2501, "이미 찜한 옷입니다."),
+
     /*
         3000 : Response 오류
     */

@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.user.domain;
 
+import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.user.dto.request.FirstLoginRequest;
 import com.yooyoung.clotheser.user.dto.request.UserStyleRequest;
 import jakarta.persistence.*;
@@ -12,6 +13,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @Builder
@@ -223,5 +227,19 @@ public class User {
     public User delete() {
         this.deletedAt = LocalDateTime.now();
         return this;
+    }
+
+    // 최초 로그인 확인
+    public void checkIsFirstLogin() throws BaseException {
+        if (this.getIsFirstLogin()) {
+            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
+        }
+    }
+
+    // 유예 확인
+    public void checkIsSuspended() throws BaseException {
+        if (this.getIsSuspended()) {
+            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
+        }
     }
 }

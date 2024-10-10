@@ -40,7 +40,7 @@ public class RentalController {
     private final RentalService rentalService;
     private final ClothesService clothesService;
 
-    /* 대여글이 없는 나의 보유 옷 목록 조회 (대여글 생성 전 사용) */
+    // 대여글 생성 전 사용
     @Operation(summary = "대여글이 없는 나의 보유 옷 목록 조회", description = "대여글 작성 전에 대여글이 없는 나의 보유 옷 목록을 조회한다.")
     @GetMapping("/my-clothes")
     public ResponseEntity<BaseResponse<List<NoRentalClothesListResponse>>> getMyNoRentalClothes(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -133,7 +133,7 @@ public class RentalController {
         }
     }
 
-    /* 옷 상태 체크하기 (대여자만) */
+    // 대여자만 가능
     @Operation(summary = "옷 상태 체크하기", description = "대여자는 옷 상태를 확인하여 체크리스트를 생성한다.")
     @Parameter(name = "roomId", description = "채팅방 id", example = "1", required = true)
     @PostMapping("/{roomId}/check")
@@ -157,7 +157,6 @@ public class RentalController {
         }
     }
 
-    /* 옷 상태 체크 내역 조회 */
     @Operation(summary = "옷 상태 체크 내역 조회", description = "옷 상태 체크리스트를 조회한다.")
     @Parameter(name = "roomId", description = "채팅방 id", example = "1", required = true)
     @GetMapping("/{roomId}/check")
@@ -172,7 +171,6 @@ public class RentalController {
         }
     }
 
-    /* 대여하기 */
     @Operation(summary = "대여하기", description = "판매자는 대여중 상태로 변경한다.")
     @Parameter(name = "roomId", description = "채팅방 id", example = "1", required = true)
     @PostMapping("/{roomId}/rental")
@@ -196,7 +194,6 @@ public class RentalController {
         }
     }
 
-    /* 반납하기 */
     @Operation(summary = "반납하기", description = "판매자는 대여 완료 상태로 변경한다.")
     @Parameter(name = "roomId", description = "채팅방 id", example = "1", required = true)
     @PatchMapping("/{roomId}/return")
@@ -211,7 +208,6 @@ public class RentalController {
         }
     }
 
-    /* 대여글 수정 */
     @Operation(summary = "대여글 수정", description = "대여글을 수정한다.")
     @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
     @PutMapping(value = "/{rentalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -245,7 +241,6 @@ public class RentalController {
         }
     }
 
-    /* 대여글 삭제 */
     @Operation(summary = "대여글 삭제", description = "대여글을 삭제한다.")
     @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
     @DeleteMapping("/{rentalId}")
@@ -254,6 +249,19 @@ public class RentalController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.deleteRental(rentalId, user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "대여글 찜 생성", description = "대여글을 찜한다.")
+    @PostMapping("/{rentalId}/like")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> createRentalLike(@PathVariable("rentalId") Long rentalId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalLike(user, rentalId)), CREATED);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
