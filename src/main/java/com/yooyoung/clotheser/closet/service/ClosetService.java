@@ -4,6 +4,7 @@ import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
+import com.yooyoung.clotheser.closet.dto.UserLikeRentalListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
@@ -16,10 +17,7 @@ import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalPrice;
-import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
-import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
-import com.yooyoung.clotheser.rental.repository.RentalPriceRepository;
-import com.yooyoung.clotheser.rental.repository.RentalRepository;
+import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,19 +44,16 @@ public class ClosetService {
     private final RentalImgRepository rentalImgRepository;
     private final RentalPriceRepository rentalPriceRepository;
     private final RentalInfoRepository rentalInfoRepository;
+    private final RentalLikeRepository rentalLikeRepository;
 
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
 
     private final ChatRoomRepository chatRoomRepository;
 
-    /* 나의 전체 보유 옷 목록 조회 */
+    /* 나의 보유 옷 목록 조회 */
     public List<UserClothesListResponse> getMyClothes(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 나의 전체 보유 옷 목록 불러오기
         List<Clothes> myClothes = clothesRepository.findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
@@ -74,13 +69,9 @@ public class ClosetService {
         return responses;
     }
 
-    /* 남의 전체 보유 옷 목록 조회 */
+    /* 남의 보유 옷 목록 조회 */
     public List<UserClothesListResponse> getUserClothes(User user, String userSid) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 조회하려는 회원 불러오기
         Long userId;
@@ -107,13 +98,9 @@ public class ClosetService {
         return responses;
     }
 
-    /* 나의 전체 대여글 목록 조회 */
+    /* 나의 대여글 목록 조회 */
     public List<UserRentalListResponse> getMyRentals(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 나의 전체 대여글 목록 불러오기
         List<Rental> myRentals = rentalRepository.findAllByUserIdAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
@@ -141,11 +128,7 @@ public class ClosetService {
 
     /* 남의 대여글 목록 조회 */
     public List<UserRentalListResponse> getUserRentals(User user, String userSid) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 조회하려는 회원 불러오기
         Long userId;
@@ -185,11 +168,7 @@ public class ClosetService {
 
     /* 공유 내역 조회 */
     public List<RentalHistoryResponse> getShareHistory(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 대여 중인 대여글 먼저 조회 후 대여 완료된 대여글 보여주기
         List<RentalInfo> rentalInfoList = rentalInfoRepository.findAllByLenderIdOrderByStateAndRentalDate(user.getId());
@@ -244,11 +223,7 @@ public class ClosetService {
 
     /* 대여 내역 조회 */
     public List<RentalHistoryResponse> getRentalHistory(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 대여 중인 대여글 먼저 조회 후 대여 완료된 대여글 보여주기
         List<RentalInfo> rentalInfoList = rentalInfoRepository.findAllByBuyerIdOrderByStateAndRentalDate(user.getId());
@@ -301,4 +276,32 @@ public class ClosetService {
         return responses;
     }
 
+    /* 나의 대여글 찜 목록 조회*/
+    public List<UserLikeRentalListResponse> getMyLikeRentals(User user) throws BaseException {
+        user.checkIsFirstLogin();
+
+        List<Rental> myLikeRentals = rentalRepository.findLikeRentals(user.getId());
+
+        List<UserLikeRentalListResponse> responses = new ArrayList<>();
+        for (Rental rental : myLikeRentals) {
+            // 첫 번째 이미지 불러오기
+            Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
+            String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
+
+            // 가격 정보 중에 제일 싼 가격 및 일수 불러오기
+            int minPrice = 0;
+            int minDays = 0;
+            Optional<RentalPrice> minRentalPrice = rentalPriceRepository.findFirstByRentalOrderByPriceAscDaysAsc(rental);
+            if (minRentalPrice.isPresent()) {
+                minPrice = minRentalPrice.get().getPrice();
+                minDays = minRentalPrice.get().getDays();
+            }
+
+            UserRentalListResponse userRentalListResponse = new UserRentalListResponse(rental, imgUrl, minPrice, minDays);
+            boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rental.getId());
+            responses.add(new UserLikeRentalListResponse(userRentalListResponse, isLiked));
+        }
+
+        return responses;
+    }
 }
