@@ -97,6 +97,7 @@ public enum BaseResponseStatus {
     // 3. Rental
     NOT_FOUND_RENTAL(false, 3200, "대여글을 찾을 수 없습니다."),
     NOT_FOUND_RENTAL_INFO(false, 3201, "대여 정보를 찾을 수 없습니다."),
+    NOT_FOUND_RENTAL_LIKE(false, 3202, "해당 대여글의 찜을 찾을 수 없습니다."),
 
     // 4. Chat
     NOT_FOUND_CHAT_ROOM(false, 3300, "채팅방을 찾을 수 없습니다."),

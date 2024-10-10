@@ -483,6 +483,23 @@ public class RentalService {
         return SUCCESS;
     }
 
+    public BaseResponseStatus deleteRentalLike(User user, Long rentalId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+        RentalLike rentalLike = rentalLikeRepository.findOneByUserIdAndRentalIdAndDeletedAtNull(
+                    user.getId(), rental.getId()
+                ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_LIKE, NOT_FOUND));
+
+        rentalLike.delete();
+        rentalLikeRepository.save(rentalLike);
+
+        return SUCCESS;
+    }
+
     private static boolean checkUserWritesRental(User user, Rental rental) {
         Long rentalUserId = rental.getUser().getId();
         return user.getId().equals(rentalUserId);

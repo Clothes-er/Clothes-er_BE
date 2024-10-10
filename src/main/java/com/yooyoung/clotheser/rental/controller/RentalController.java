@@ -256,12 +256,27 @@ public class RentalController {
     }
 
     @Operation(summary = "대여글 찜 생성", description = "대여글을 찜한다.")
+    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
     @PostMapping("/{rentalId}/like")
     public ResponseEntity<BaseResponse<BaseResponseStatus>> createRentalLike(@PathVariable("rentalId") Long rentalId,
                                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(rentalService.createRentalLike(user, rentalId)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "대여글 찜 삭제", description = "대여글의 찜을 취소한다.")
+    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
+    @DeleteMapping("/{rentalId}/like")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteRentalLike(@PathVariable("rentalId") Long rentalId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.deleteRentalLike(user, rentalId)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
