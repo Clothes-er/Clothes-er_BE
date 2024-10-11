@@ -4,7 +4,7 @@ import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
-import com.yooyoung.clotheser.closet.dto.UserLikeRentalListResponse;
+import com.yooyoung.clotheser.closet.dto.LikeRentalListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
@@ -17,6 +17,7 @@ import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalPrice;
+import com.yooyoung.clotheser.rental.dto.response.RentalListResponse;
 import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
@@ -277,13 +278,22 @@ public class ClosetService {
     }
 
     /* 나의 대여글 찜 목록 조회*/
-    public List<UserLikeRentalListResponse> getMyLikeRentals(User user) throws BaseException {
+    public List<LikeRentalListResponse> getMyLikeRentals(User user) throws BaseException {
         user.checkIsFirstLogin();
 
         List<Rental> myLikeRentals = rentalRepository.findLikeRentals(user.getId());
 
-        List<UserLikeRentalListResponse> responses = new ArrayList<>();
+        List<LikeRentalListResponse> responses = new ArrayList<>();
         for (Rental rental : myLikeRentals) {
+            // userId 암호화하기
+            String userSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
+                userSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
             // 첫 번째 이미지 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
             String imgUrl = optionalImg.map(RentalImg::getImgUrl).orElse(null);
@@ -297,9 +307,9 @@ public class ClosetService {
                 minDays = minRentalPrice.get().getDays();
             }
 
-            UserRentalListResponse userRentalListResponse = new UserRentalListResponse(rental, imgUrl, minPrice, minDays);
+            RentalListResponse rentalListResponse = new RentalListResponse(rental, userSid, imgUrl, minPrice, minDays);
             boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rental.getId());
-            responses.add(new UserLikeRentalListResponse(userRentalListResponse, isLiked));
+            responses.add(new LikeRentalListResponse(rentalListResponse, isLiked));
         }
 
         return responses;

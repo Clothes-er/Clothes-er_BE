@@ -2,7 +2,7 @@ package com.yooyoung.clotheser.closet.controller;
 
 import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
 import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
-import com.yooyoung.clotheser.closet.dto.UserLikeRentalListResponse;
+import com.yooyoung.clotheser.closet.dto.LikeRentalListResponse;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.closet.service.ClosetService;
 import com.yooyoung.clotheser.global.entity.BaseException;
@@ -108,9 +108,9 @@ public class ClosetController {
         }
     }
 
-    @Operation(summary = "나의 대여글 찜 목록 조회", description = "'찜 - 대여글' 탭에서 내가 찜한 대여글 목록을 조회한다.")
+    @Operation(summary = "나의 대여글 찜 목록 조회", description = "'찜 - 대여' 탭에서 내가 찜한 대여글 목록을 조회한다.")
     @GetMapping("/like-rentals")
-    public ResponseEntity<BaseResponse<List<UserLikeRentalListResponse>>> getMyLikeRentals(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BaseResponse<List<LikeRentalListResponse>>> getMyLikeRentals(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(closetService.getMyLikeRentals(user)), OK);
