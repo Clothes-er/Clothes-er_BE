@@ -348,8 +348,7 @@ public class RentalService {
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
-        boolean isWriter = checkUserWritesRental(user, rental);
-        if (!isWriter) {
+        if (!isWriter(user, rental)) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -430,8 +429,7 @@ public class RentalService {
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
-        boolean isWriter = checkUserWritesRental(user, rental);
-        if (!isWriter) {
+        if (!isWriter(user, rental)) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -474,8 +472,7 @@ public class RentalService {
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
-        boolean isWriter = checkUserWritesRental(user, rental);
-        if (isWriter) {
+        if (isWriter(user, rental)) {
             throw new BaseException(FORBIDDEN_LIKE_MINE, FORBIDDEN);
         }
 
@@ -512,7 +509,7 @@ public class RentalService {
     }
 
     /* 본인의 대여글인지 확인  */
-    private boolean checkUserWritesRental(User user, Rental rental) {
+    private boolean isWriter(User user, Rental rental) {
         Long rentalUserId = rental.getUser().getId();
         return user.getId().equals(rentalUserId);
     }
