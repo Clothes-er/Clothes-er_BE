@@ -2,13 +2,12 @@ package com.yooyoung.clotheser.closet.service;
 
 import com.yooyoung.clotheser.chat.domain.ChatRoom;
 import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
-import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
-import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
-import com.yooyoung.clotheser.closet.dto.LikeRentalListResponse;
-import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
+import com.yooyoung.clotheser.closet.dto.*;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
+import com.yooyoung.clotheser.clothes.dto.ClothesListResponse;
 import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
+import com.yooyoung.clotheser.clothes.repository.ClothesLikeRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.util.AESUtil;
@@ -49,6 +48,7 @@ public class ClosetService {
 
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
+    private final ClothesLikeRepository clothesLikeRepository;
 
     private final ChatRoomRepository chatRoomRepository;
 
@@ -277,12 +277,40 @@ public class ClosetService {
         return responses;
     }
 
+    /* 나의 보유 옷 찜 목록 조회*/
+    public List<LikeClothesListResponse> getMyLikeClothesList(User user) throws BaseException {
+        user.checkIsFirstLogin();
+
+        List<Clothes> myLikeClothes = clothesRepository.findLikeClothes(user.getId());
+        List<LikeClothesListResponse> responses = new ArrayList<>();
+        for (Clothes clothes : myLikeClothes) {
+            // userId 암호화하기
+            String userSid;
+            try {
+                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
+                userSid = Base64UrlSafeUtil.encode(encodedUserId);
+            } catch (Exception e) {
+                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+            }
+
+            // 첫 번째 이미지 불러오기
+            Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
+            String imgUrl = optionalImg.map(ClothesImg::getImgUrl).orElse(null);
+
+            ClothesListResponse clothesListResponse = new ClothesListResponse(clothes, userSid, imgUrl);
+            boolean isLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(user.getId(), clothes.getId());
+
+            responses.add(new LikeClothesListResponse(clothesListResponse, isLiked));
+        }
+
+        return responses;
+    }
+
     /* 나의 대여글 찜 목록 조회*/
     public List<LikeRentalListResponse> getMyLikeRentals(User user) throws BaseException {
         user.checkIsFirstLogin();
 
         List<Rental> myLikeRentals = rentalRepository.findLikeRentals(user.getId());
-
         List<LikeRentalListResponse> responses = new ArrayList<>();
         for (Rental rental : myLikeRentals) {
             // userId 암호화하기

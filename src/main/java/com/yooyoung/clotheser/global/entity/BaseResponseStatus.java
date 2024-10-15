@@ -106,6 +106,7 @@ public enum BaseResponseStatus {
 
     // 5. Clothes
     NOT_FOUND_CLOTHES(false, 3400, "보유 옷을 찾을 수 없습니다."),
+    NOT_FOUND_CLOTHES_LIKE(false, 3401, "해당 보유 옷의 찜을 찾을 수 없습니다."),
 
     // 6. Report
     NOT_FOUND_REPORT(false, 3500, "해당 신고를 찾을 수 없습니다."),

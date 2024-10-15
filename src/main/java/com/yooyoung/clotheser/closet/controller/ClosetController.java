@@ -1,9 +1,6 @@
 package com.yooyoung.clotheser.closet.controller;
 
-import com.yooyoung.clotheser.closet.dto.RentalHistoryResponse;
-import com.yooyoung.clotheser.closet.dto.UserClothesListResponse;
-import com.yooyoung.clotheser.closet.dto.LikeRentalListResponse;
-import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
+import com.yooyoung.clotheser.closet.dto.*;
 import com.yooyoung.clotheser.closet.service.ClosetService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
@@ -102,6 +99,18 @@ public class ClosetController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(closetService.getRentalHistory(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "나의 보유 옷 찜 목록 조회", description = "'찜 - 옷장' 탭에서 내가 찜한 보유 옷 목록을 조회한다.")
+    @GetMapping("/like-clothes")
+    public ResponseEntity<BaseResponse<List<LikeClothesListResponse>>> getMyLikeClotheList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(closetService.getMyLikeClothesList(user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
