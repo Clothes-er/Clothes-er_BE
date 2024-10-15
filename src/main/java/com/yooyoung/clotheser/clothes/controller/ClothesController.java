@@ -198,14 +198,14 @@ public class ClothesController {
         }
     }
 
-    @Operation(summary = "대여글 찜 삭제", description = "대여글의 찜을 취소한다.")
-    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
-    @DeleteMapping("/{rentalId}/like")
-    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteRentalLike(@PathVariable("rentalId") Long rentalId,
+    @Operation(summary = "보유 옷 찜 삭제", description = "보유 옷의 찜을 취소한다.")
+    @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
+    @DeleteMapping("/{clothesId}/like")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteClothesLike(@PathVariable("clothesId") Long clothesId,
                                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
-            return new ResponseEntity<>(new BaseResponse<>(rentalService.deleteRentalLike(user, rentalId)), OK);
+            return new ResponseEntity<>(new BaseResponse<>(clothesService.deleteClothesLike(user, clothesId)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

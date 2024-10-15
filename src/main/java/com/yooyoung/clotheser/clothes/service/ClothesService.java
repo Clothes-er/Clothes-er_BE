@@ -296,22 +296,22 @@ public class ClothesService {
     }
 
     /* 대여글 찜 삭제 */
-    /*public BaseResponseStatus deleteRentalLike(User user, Long rentalId) throws BaseException {
+    public BaseResponseStatus deleteClothesLike(User user, Long clothesId) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
-        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
-                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
-        RentalLike rentalLike = rentalLikeRepository.findOneByUserIdAndRentalIdAndDeletedAtNull(
-                user.getId(), rental.getId()
-        ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_LIKE, NOT_FOUND));
+        ClothesLike clothesLike = clothesLikeRepository.findOneByUserIdAndClothesIdAndDeletedAtNull(
+                user.getId(), clothes.getId()
+        ).orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES_LIKE, NOT_FOUND));
 
-        rentalLike.delete();
-        rentalLikeRepository.save(rentalLike);
+        clothesLike.delete();
+        clothesLikeRepository.save(clothesLike);
 
         return SUCCESS;
-    }*/
+    }
 
     private boolean isWriter(User user, Clothes clothes) {
         Long clothesWriterId = clothes.getUser().getId();
