@@ -184,4 +184,32 @@ public class ClothesController {
         }
     }
 
+    @Operation(summary = "보유 옷 찜 생성", description = "보유 옷을 찜한다.")
+    @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
+    @PostMapping("/{clothesId}/like")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> createClothesLike(@PathVariable("clothesId") Long clothesId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(clothesService.createClothesLike(user, clothesId)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "대여글 찜 삭제", description = "대여글의 찜을 취소한다.")
+    @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
+    @DeleteMapping("/{rentalId}/like")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteRentalLike(@PathVariable("rentalId") Long rentalId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(rentalService.deleteRentalLike(user, rentalId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
 }

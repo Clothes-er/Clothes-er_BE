@@ -2,10 +2,12 @@ package com.yooyoung.clotheser.clothes.service;
 
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.ClothesImg;
+import com.yooyoung.clotheser.clothes.domain.ClothesLike;
 import com.yooyoung.clotheser.clothes.dto.ClothesListResponse;
 import com.yooyoung.clotheser.clothes.dto.ClothesRequest;
 import com.yooyoung.clotheser.clothes.dto.ClothesResponse;
 import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
+import com.yooyoung.clotheser.clothes.repository.ClothesLikeRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 
 import com.yooyoung.clotheser.global.entity.AgeFilter;
@@ -43,20 +45,13 @@ public class ClothesService {
     
     private final ClothesRepository clothesRepository;
     private final ClothesImgRepository clothesImgRepository;
+    private final ClothesLikeRepository clothesLikeRepository;
     private final RentalRepository rentalRepository;
 
     /* 대여글이 없는 나의 보유 옷 목록 조회 */
     public List<NoRentalClothesListResponse> getMyNoRentalClothes(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 보유 옷 목록 불러오기
         List<Clothes> myClothes = clothesRepository.findAllByUserIdAndRentalIdNullAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
@@ -74,16 +69,8 @@ public class ClothesService {
 
     /* 보유 옷 생성 */
     public ClothesResponse createClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 기존 대여글과 연결할 경우
         Long rentalId = clothesRequest.getRentalId();
@@ -134,13 +121,8 @@ public class ClothesService {
 
     /* 보유 옷 조회 */
     public ClothesResponse getClothes(Long clothesId, User user) throws BaseException {
+        user.checkIsFirstLogin();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 보유 옷 불러오기
         Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
@@ -164,23 +146,13 @@ public class ClothesService {
 
     /* 보유 옷 수정 */
     public ClothesResponse updateClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user, Long clothesId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
-
-        // 보유 옷 불러오기
         Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
-        // 본인의 보유 옷인지 확인
-        if (!user.getId().equals(clothes.getUser().getId())) {
+        if (!isWriter(user, clothes)) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -236,23 +208,13 @@ public class ClothesService {
 
     /* 보유 옷 삭제 */
     public BaseResponseStatus deleteClothes(Long clothesId, User user) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
-
-        // 보유 옷 불러오기
         Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
 
-        // 본인의 보유 옷인지 확인
-        if (!user.getId().equals(clothes.getUser().getId())) {
+        if (!isWriter(user, clothes)) {
             throw new BaseException(FORBIDDEN_USER, FORBIDDEN);
         }
 
@@ -279,11 +241,7 @@ public class ClothesService {
     /* 보유 옷 목록 조회 */
     public List<ClothesListResponse> getClothesList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
                                                    Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 필터링된 보유 옷 목록 조회
         List<Clothes> clothesList = clothesFilterService.getFilteredClothesList(user, search, sort, gender,
@@ -311,4 +269,52 @@ public class ClothesService {
 
     }
 
+    /* 보유 옷 찜 생성 */
+    public BaseResponseStatus createClothesLike(User user, Long clothesId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        Clothes clothes = clothesRepository.findByIdAndDeletedAtNull(clothesId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_CLOTHES, NOT_FOUND));
+
+        if (isWriter(user, clothes)) {
+            throw new BaseException(FORBIDDEN_LIKE_MINE, FORBIDDEN);
+        }
+
+        boolean hasLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(user.getId(), clothesId);
+        if (hasLiked) {
+            throw new BaseException(LIKE_EXISTS, CONFLICT);
+        }
+
+        ClothesLike clothesLike = ClothesLike.builder()
+                .user(user)
+                .clothes(clothes)
+                .build();
+        clothesLikeRepository.save(clothesLike);
+
+        return SUCCESS;
+    }
+
+    /* 대여글 찜 삭제 */
+    /*public BaseResponseStatus deleteRentalLike(User user, Long rentalId) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
+
+        RentalLike rentalLike = rentalLikeRepository.findOneByUserIdAndRentalIdAndDeletedAtNull(
+                user.getId(), rental.getId()
+        ).orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL_LIKE, NOT_FOUND));
+
+        rentalLike.delete();
+        rentalLikeRepository.save(rentalLike);
+
+        return SUCCESS;
+    }*/
+
+    private boolean isWriter(User user, Clothes clothes) {
+        Long clothesWriterId = clothes.getUser().getId();
+        return user.getId().equals(clothesWriterId);
+    }
 }
