@@ -36,7 +36,7 @@ public class JwtProvider {
 
     SecretKey key;
 
-    private static final long ACCESS_TOKEN_EXP = 60 * 60 * 1000L;    // 1시간
+    private static final long ACCESS_TOKEN_EXP = 10 * 60 * 1000L;    // 10분 (테스트용)
     private static final long REFRESH_TOKEN_EXP = 60 * 60 * 24 * 7 * 1000L;  // 1주 (7일)
 
 
