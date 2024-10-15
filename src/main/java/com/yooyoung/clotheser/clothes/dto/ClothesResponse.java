@@ -45,6 +45,13 @@ public class ClothesResponse {
     @Schema(title = "작성자 탈퇴 여부", example = "false")
     private Boolean isWithdrawn;
 
+    // 찜
+    @Schema(title = "찜 여부", example = "false")
+    private Boolean isLiked;
+
+    @Schema(title = "찜 개수", example = "5")
+    private int likeCount;
+
     // 보유 옷 정보
     @Schema(title = "보유 옷 사진 URL 목록", description = "최대 3장", type = "array",
             example = "[\"https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/clothess/0fa7d4e0-de3d-4c87-a814-cc0ee8b8a8fe_black_ops%281%29.jpg\"]")
@@ -88,7 +95,8 @@ public class ClothesResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public ClothesResponse(User user, String userSid, Clothes clothes, List<String> imgUrls) {
+    public ClothesResponse(User user, String userSid, Clothes clothes, List<String> imgUrls,
+                           boolean isLiked, int likeCount) {
         this.id = clothes.getId();
         this.rentalId = clothes.getRentalId();
 
@@ -99,6 +107,9 @@ public class ClothesResponse {
         this.isSuspended = clothes.getUser().getIsSuspended();
         this.isRestricted = clothes.getUser().getIsRestricted();
         this.isWithdrawn = clothes.getUser().getDeletedAt() != null;
+
+        this.isLiked = isLiked;
+        this.likeCount = likeCount;
 
         this.imgUrls = imgUrls;
 

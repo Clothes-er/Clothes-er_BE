@@ -116,7 +116,10 @@ public class ClothesService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new ClothesResponse(user, userSid, clothes, imgUrls);
+        boolean isLiked = false;
+        int likeCount = 0;
+
+        return new ClothesResponse(user, userSid, clothes, imgUrls, isLiked, likeCount);
     }
 
     /* 보유 옷 조회 */
@@ -141,7 +144,10 @@ public class ClothesService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new ClothesResponse(user, userSid, clothes, imgUrls);
+        boolean isLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(user.getId(), clothesId);
+        int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
+
+        return new ClothesResponse(user, userSid, clothes, imgUrls, isLiked, likeCount);
     }
 
     /* 보유 옷 수정 */
@@ -202,7 +208,10 @@ public class ClothesService {
             throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
         }
 
-        return new ClothesResponse(user, userSid, updatedClothes, imgUrls);
+        boolean isLiked = false;
+        int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
+
+        return new ClothesResponse(user, userSid, updatedClothes, imgUrls, isLiked, likeCount);
 
     }
 
