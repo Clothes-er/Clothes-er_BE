@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.REQUEST_ERROR;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @Operation(summary = "디바이스 토큰 저장", description = "디바이스 토큰을 저장한다.")
-    @PostMapping("/token")
+    @PatchMapping("/token")
     public ResponseEntity<BaseResponse<BaseResponseStatus>> saveDeviceToken(@Valid @RequestBody DeviceTokenRequest deviceTokenRequest,
                                                                             BindingResult bindingResult,
                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -44,13 +43,17 @@ public class NotificationController {
             }
 
             return new ResponseEntity<>(new BaseResponse<>(notificationService.saveDeviceToken(
-                    userDetails.user, deviceTokenRequest)), CREATED);
+                    userDetails.user, deviceTokenRequest)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
 
-    // TODO: 알림 목록 조회 API
+    // TODO: 홈 화면 알림 확인 여부 조회
+
+    // TODO: 알림 목록 조회
+
+    // TODO: 알림 조회
 
 }
