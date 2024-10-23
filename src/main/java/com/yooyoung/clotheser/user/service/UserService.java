@@ -121,6 +121,9 @@ public class UserService {
 
         String refreshToken = tokenRequest.getRefreshToken();
         jwtProvider.logout(user.getId(), refreshToken, request);
+        // 디바이스 토큰 삭제
+        user.updateDeviceToken(null);
+        userRepository.save(user);
 
         return SUCCESS;
     }
