@@ -71,6 +71,9 @@ dependencies {
     // CoolSMS 문자 인증
     implementation 'net.nurigo:sdk:4.3.0'
 
+    // FCM
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
+
 }
 
 tasks.named('test') {

@@ -10,6 +10,7 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -23,6 +24,7 @@ import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.S3_UPLOAD_
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ClothesImageService {
 

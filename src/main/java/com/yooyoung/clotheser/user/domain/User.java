@@ -74,6 +74,8 @@ public class User {
     @Builder.Default
     private double closetScore = 10;
 
+    private String deviceToken;
+
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     @ColumnDefault("true")      // DB 기본값 설정
     @Builder.Default            // 객체 생성 시 기본값 설정
@@ -241,5 +243,9 @@ public class User {
         if (this.getIsSuspended()) {
             throw new BaseException(USE_RESTRICTED, FORBIDDEN);
         }
+    }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
     }
 }
