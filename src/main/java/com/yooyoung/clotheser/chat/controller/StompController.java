@@ -31,7 +31,6 @@ import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
-@Transactional
 @RestController
 public class StompController {
     private final SimpMessageSendingOperations simpleMessageSendingOperations;
@@ -118,7 +117,8 @@ public class StompController {
         return subProtocolWebSocketHandler.getStats().getWebSocketSessions() == 1;
     }
 
-    private NotificationRequest createNotificationRequest(ChatRoom chatRoom, User user, String message) {
+    @Transactional
+    NotificationRequest createNotificationRequest(ChatRoom chatRoom, User user, String message) {
         User opponent;
         if (chatRoom.getBuyer().getId().equals(user.getId())) {
             opponent = chatRoom.getLender();
