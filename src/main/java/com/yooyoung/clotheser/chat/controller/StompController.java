@@ -130,9 +130,9 @@ public class StompController {
         return NotificationRequest.builder()
                 .user(opponent)
                 .type(chatRoom.getRental() != null ? NotificationType.RENTAL_CHAT : NotificationType.USER_CHAT)
-                .image(opponent.getProfileUrl())
+                .image(user.getProfileUrl())
                 .sourceId(chatRoom.getId())
-                .title(opponent.getNickname())
+                .title(user.getNickname())
                 .content(message)
                 .build();
     }
