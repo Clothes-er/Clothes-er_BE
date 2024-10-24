@@ -19,6 +19,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +32,6 @@ import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
 
 @Slf4j
-@Transactional
 @RestController
 public class StompController {
     private final SimpMessageSendingOperations simpleMessageSendingOperations;
@@ -52,15 +52,12 @@ public class StompController {
         this.chatRoomRepository = chatRoomRepository;
     }
 
-    // 새로운 사용자가 웹 소켓을 연결할 때 실행됨
-    // @EventListener은 한 개의 매개변수만 가질 수 있다.
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         log.info("새로운 웹 소켓이 연결되었습니다.");
 
     }
 
-    // 사용자가 웹 소켓 연결을 끊으면 실행됨
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccesor = StompHeaderAccessor.wrap(event.getMessage());
@@ -70,6 +67,7 @@ public class StompController {
     }
 
     // /pub/chats로 메시지 발행
+    @Transactional
     @MessageMapping("/chats/{roomId}")
     public void sendMessage(@DestinationVariable("roomId") Long roomId,
                             ChatMessageRequest chatMessageRequest,
@@ -96,14 +94,11 @@ public class StompController {
             // 채팅 메시지 DB에 저장
             ChatMessageResponse chatMessageResponse = rentalChatService.createChatMessage(chatMessageRequest, chatRoom, user);
 
-            // /sub/message를 구독 중인 client에 메세지 보내기
-            simpleMessageSendingOperations.convertAndSend("/sub/chats/" + roomId,
-                    new ResponseEntity<>(new BaseResponse<>(chatMessageResponse), CREATED));
+            sendWebSocketMessage(roomId, chatMessageResponse);
 
             // 상대방이 접속해있지 않다면 푸시 알림
             if (isNotConnectedToOther()) {
-                NotificationRequest notificationRequest = createNotificationRequest(chatRoom, user, chatMessageResponse.getMessage());
-                notificationService.sendNotification(notificationRequest);
+                sendFCMNotification(chatRoom, user, chatMessageResponse.getMessage());
             }
         }
         // TODO: 오류 처리 정교화 + 웹소켓 연결 끊기
@@ -114,8 +109,19 @@ public class StompController {
         }
     }
 
+    private void sendWebSocketMessage(Long roomId, ChatMessageResponse chatMessageResponse) {
+        simpleMessageSendingOperations.convertAndSend("/sub/chats/" + roomId,
+                new ResponseEntity<>(new BaseResponse<>(chatMessageResponse), CREATED));
+    }
+
     private boolean isNotConnectedToOther() {
         return subProtocolWebSocketHandler.getStats().getWebSocketSessions() == 1;
+    }
+
+    @Async
+    protected void sendFCMNotification(ChatRoom chatRoom, User user, String message) throws BaseException {
+        NotificationRequest notificationRequest = createNotificationRequest(chatRoom, user, message);
+        notificationService.sendNotification(notificationRequest);
     }
 
     private NotificationRequest createNotificationRequest(ChatRoom chatRoom, User user, String message) {
