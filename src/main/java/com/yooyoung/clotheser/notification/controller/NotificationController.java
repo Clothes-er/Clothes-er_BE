@@ -5,6 +5,7 @@ import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.notification.dto.DeviceTokenRequest;
 import com.yooyoung.clotheser.notification.dto.HomeNotificationResponse;
+import com.yooyoung.clotheser.notification.dto.NotificationListResponse;
 import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
@@ -59,7 +60,17 @@ public class NotificationController {
         return new ResponseEntity<>(new BaseResponse<>(notificationService.getHomeNotification(user)), OK);
     }
 
-    // TODO: 알림 목록 조회
+    @Operation(summary = "알림 목록 조회", description = "알림 목록을 조회한다.")
+    @GetMapping("")
+    public ResponseEntity<BaseResponse<NotificationListResponse>> getNotificationList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(notificationService.getNotificationList(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
     // TODO: 알림 조회
 
