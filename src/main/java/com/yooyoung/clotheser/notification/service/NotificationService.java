@@ -8,6 +8,7 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.notification.domain.NotificationType;
 import com.yooyoung.clotheser.notification.dto.DeviceTokenRequest;
+import com.yooyoung.clotheser.notification.dto.HomeNotificationResponse;
 import com.yooyoung.clotheser.notification.dto.NotificationRequest;
 import com.yooyoung.clotheser.notification.repository.NotificationRepository;
 import com.yooyoung.clotheser.user.domain.User;
@@ -26,6 +27,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    /* 디바이스 토큰 저장 */
     public BaseResponseStatus saveDeviceToken(User user, DeviceTokenRequest deviceTokenRequest) throws BaseException {
         String deviceToken = deviceTokenRequest.getDeviceToken();
         user.updateDeviceToken(deviceToken);
@@ -34,6 +36,7 @@ public class NotificationService {
         return SUCCESS;
     }
 
+    /* Firebase 푸시 알림 요청 */
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
         String token = notificationRequest.getUser().getDeviceToken();
         if (token == null) {
@@ -72,5 +75,11 @@ public class NotificationService {
 
     private void saveNotification(NotificationRequest notificationRequest) {
         notificationRepository.save(notificationRequest.toEntity());
+    }
+
+    /* 홈 알림 확인 여부 조회 */
+    public HomeNotificationResponse getHomeNotification(User user) {
+        boolean isRead = !notificationRepository.existsByUserIdAndIsReadFalse(user.getId());
+        return new HomeNotificationResponse(isRead);
     }
 }

@@ -4,8 +4,10 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.notification.dto.DeviceTokenRequest;
+import com.yooyoung.clotheser.notification.dto.HomeNotificationResponse;
 import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -50,7 +52,12 @@ public class NotificationController {
         }
     }
 
-    // TODO: 홈 화면 알림 확인 여부 조회
+    @Operation(summary = "홈 알림 확인 여부 조회", description = "홈 화면에서 알림 확인 여부를 조회한다.")
+    @GetMapping("/home")
+    public ResponseEntity<BaseResponse<HomeNotificationResponse>> getHomeNotification(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user;
+        return new ResponseEntity<>(new BaseResponse<>(notificationService.getHomeNotification(user)), OK);
+    }
 
     // TODO: 알림 목록 조회
 
