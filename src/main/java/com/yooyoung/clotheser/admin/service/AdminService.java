@@ -18,6 +18,9 @@ import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
+import com.yooyoung.clotheser.notification.domain.NotificationType;
+import com.yooyoung.clotheser.notification.dto.NotificationRequest;
+import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalImgRepository;
@@ -51,6 +54,7 @@ public class AdminService {
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final NotificationService notificationService;
 
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
@@ -66,7 +70,6 @@ public class AdminService {
 
     /* 관리자 로그인 */
     public AdminLoginResponse adminLogin(LoginRequest loginRequest) throws BaseException {
-
         // 이메일로 회원 존재 확인
         User user = userRepository.findByEmailAndDeletedAtNull(loginRequest.getEmail())
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER_BY_EMAIL, NOT_FOUND));
@@ -95,7 +98,6 @@ public class AdminService {
 
     /* 신고 목록 조회 */
     public List<ReportListResponse> getReportList() throws BaseException {
-
         List<Report> reports = reportRepository.findAllByOrderByIdDesc();
         List<ReportListResponse> responses = new ArrayList<>();
         for (Report report : reports) {
@@ -124,7 +126,6 @@ public class AdminService {
 
     /* 신고 조회 */
     public ReportResponse getReport(Long reportId) throws BaseException {
-
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
@@ -149,29 +150,27 @@ public class AdminService {
 
     /* 신고 처리 */
     public BaseResponseStatus actionReport(Long reportId, ReportActionRequest reportActionRequest) throws BaseException {
-
-        // 신고 불러오기
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_REPORT, NOT_FOUND));
 
-        // 조치별 이후 로직
         ReportAction action = reportActionRequest.getAction();
+        User reportee = report.getReportee();
+        User reporter = report.getReporter();
         switch (action) {
-            // 1. 유예
             case SUSPENDED -> {
-                // -> 대여글, 보유 옷 생성/수정/삭제 제한
-                // -> 대여글, 보유 옷 숨김 처리 (목록 응답값에서 제외됨)
-                // -> 대여글, 채팅방, 프로필 조회에서 isSuspended = true
-                User reportee = report.getReportee();
                 reportee = reportee.updateIsSuspended();
                 userRepository.save(reportee);
-            }
 
-            // 2. 이용 제한
+                String message = "신고가 접수되어 유예 상태가 되었습니다.";
+                sendFCMNotification(reportee, message);
+
+                // 신고자에게는 최초 신고 처리만 푸시 알림 전송
+                if (report.getAction() == null) {
+                    message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님이 유예 상태가 되었습니다.";
+                    sendFCMNotification(reporter, message);
+                }
+            }
             case RESTRICTED -> {
-                // -> 로그인 시도 시 "서비스 이용이 제한되었습니다."
-                // -> 대여글, 보유 옷 숨김 처리 (목록 응답값에서 제외됨)
-                // -> 대여글, 채팅방 목록, 채팅방 조회에서 isRestricted = true
                 boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
                         report.getReportee().getId(), RentalState.RENTED, report.getReportee().getId(), RentalState.RENTED
                 );
@@ -179,21 +178,38 @@ public class AdminService {
                     throw new BaseException(REPORT_USER_RENTAL_EXISTS, FORBIDDEN);
                 }
 
-                User reportee = report.getReportee();
                 reportee = reportee.updateIsRestricted();
                 userRepository.save(reportee);
-            }
 
-            // 3. 옷장 점수 차감
+                String message = "신고가 접수되어 이용이 제한되었습니다.";
+                sendFCMNotification(reportee, message);
+
+                // 신고자에게는 최초 신고 처리만 푸시 알림 전송
+                if (report.getAction() == null) {
+                    message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님이 이용 제한되었습니다.";
+                    sendFCMNotification(reporter, message);
+                }
+            }
             case DOCKED -> {
-                User reportee = report.getReportee();
                 reportee = reportee.updateClosetScore(-2);
                 userRepository.save(reportee);
+
+                String message = "신고가 접수되어 옷장 점수가 차감되었습니다.";
+                sendFCMNotification(reportee, message);
+
+                // 신고자에게는 최초 신고 처리만 푸시 알림 전송
+                if (report.getAction() == null) {
+                    message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님의 옷장 점수가 차감되었습니다.";
+                    sendFCMNotification(reporter, message);
+                }
             }
-
-            // 4. 무시
-            case IGNORED -> {}
-
+            case IGNORED -> {
+                // 신고자에게는 최초 신고 처리만 푸시 알림 전송
+                if (report.getAction() == null) {
+                    String message = "신고 내용 검토 결과 신고가 반려되었습니다.";
+                    sendFCMNotification(reporter, message);
+                }
+            }
         }
 
         // 신고 조치 내역 변경
@@ -203,9 +219,18 @@ public class AdminService {
         return SUCCESS;
     }
 
+    private void sendFCMNotification(User user, String message) throws BaseException {
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .user(user)
+                .type(NotificationType.REPORT)
+                .title("신고")
+                .content(message)
+                .build();
+        notificationService.sendNotification(notificationRequest);
+    }
+
     /* 회원 목록 조회 */
     public List<UserListResponse> getUserList (String search) throws BaseException {
-
         // 유저 목록 불러오기
         List<User> users;
         if (search != null && !search.isEmpty()) {
@@ -241,7 +266,6 @@ public class AdminService {
 
     /* 거래 중인 채팅방 목록 조회 */
     public List<RentalChatRoomListResponse> getRentedChatRoomList(String userSid) throws BaseException {
-
         // 조회하려는 회원 불러오기
         Long userId;
         try {
