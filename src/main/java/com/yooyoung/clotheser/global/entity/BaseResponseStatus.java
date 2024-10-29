@@ -111,6 +111,9 @@ public enum BaseResponseStatus {
     // 6. Report
     NOT_FOUND_REPORT(false, 3500, "해당 신고를 찾을 수 없습니다."),
 
+    // 7. Notification
+    NOT_FOUND_NOTIFICATION(false, 3600, "해당 알림을 찾을 수 없습니다."),
+
     /*
         4000 : Database, Server 오류
     */

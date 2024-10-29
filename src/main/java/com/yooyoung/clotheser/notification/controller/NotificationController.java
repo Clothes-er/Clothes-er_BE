@@ -10,6 +10,7 @@ import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
 import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,17 @@ public class NotificationController {
         }
     }
 
-    // TODO: 알림 조회
-
+    @Operation(summary = "알림 읽음 처리", description = "알림을 읽음 처리한다.")
+    @Parameter(name = "notificationId", description = "알림 id", example = "1", required = true)
+    @PatchMapping("/{notificationId}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> readNotification(@PathVariable Long notificationId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(notificationService.readNotification(user, notificationId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 }

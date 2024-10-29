@@ -52,4 +52,8 @@ public class PushNotification {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime updatedAt;
+
+    public void updateIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }

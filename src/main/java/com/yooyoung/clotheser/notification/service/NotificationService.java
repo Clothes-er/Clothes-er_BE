@@ -109,4 +109,17 @@ public class NotificationService {
         }
         return image;
     }
+
+    /* 알림 읽음 처리 */
+    public BaseResponseStatus readNotification(User user, Long notificationId) throws BaseException {
+        PushNotification notification = notificationRepository.findByIdAndUserId(notificationId, user.getId())
+                .orElseThrow(() -> new BaseException(NOT_FOUND_NOTIFICATION, NOT_FOUND));
+
+        if (!notification.getIsRead()) {
+            notification.updateIsRead(true);
+            notificationRepository.save(notification);
+        }
+
+        return SUCCESS;
+    }
 }
