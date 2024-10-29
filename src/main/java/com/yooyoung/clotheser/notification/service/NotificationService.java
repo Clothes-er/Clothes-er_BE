@@ -35,7 +35,12 @@ public class NotificationService {
     }
 
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
-        Message message = createNotification(notificationRequest);
+        String token = notificationRequest.getUser().getDeviceToken();
+        if (token == null) {
+            return;
+        }
+
+        Message message = createNotification(notificationRequest, token);
         try {
             FirebaseMessaging.getInstance().send(message);
             if (isNotChat(notificationRequest.getType())) {
@@ -46,12 +51,7 @@ public class NotificationService {
         }
     }
 
-    private Message createNotification(NotificationRequest notificationRequest) throws BaseException {
-        String token = notificationRequest.getUser().getDeviceToken();
-        if (token == null) {
-            throw new BaseException(NOT_FOUND_DEVICE_TOKEN, NOT_FOUND);
-        }
-
+    private Message createNotification(NotificationRequest notificationRequest, String token) {
         return Message.builder()
                 .setToken(token)
                 .setNotification(
@@ -62,7 +62,7 @@ public class NotificationService {
                                 .build()
                 )
                 .putData("type", notificationRequest.getType().name())
-                .putData("sourceId", notificationRequest.getSourceId().toString())
+                .putData("sourceId", String.valueOf(notificationRequest.getSourceId()))
                 .build();
     }
 
