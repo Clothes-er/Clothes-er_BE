@@ -5,7 +5,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
@@ -39,4 +43,13 @@ public class Notification {
     @ColumnDefault("false")
     @Builder.Default
     private Boolean isRead = false;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @ColumnDefault("null")
+    private LocalDateTime updatedAt;
 }

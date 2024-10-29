@@ -93,7 +93,6 @@ public enum BaseResponseStatus {
     // 2. User
     NOT_FOUND_USER(false, 3100, "회원을 찾을 수 없습니다."),
     NOT_FOUND_USER_BY_EMAIL(false, 3101, "이메일이 잘못되었습니다."),
-    NOT_FOUND_DEVICE_TOKEN(false, 3102, "회원의 디바이스 토큰을 찾을 수 없습니다."),
 
     // 3. Rental
     NOT_FOUND_RENTAL(false, 3200, "대여글을 찾을 수 없습니다."),
