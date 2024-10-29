@@ -19,7 +19,6 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -118,8 +117,7 @@ public class StompController {
         return subProtocolWebSocketHandler.getStats().getWebSocketSessions() == 1;
     }
 
-    @Async
-    protected void sendFCMNotification(ChatRoom chatRoom, User user, String message) throws BaseException {
+    private void sendFCMNotification(ChatRoom chatRoom, User user, String message) throws BaseException {
         NotificationRequest notificationRequest = createNotificationRequest(chatRoom, user, message);
         notificationService.sendNotification(notificationRequest);
     }
