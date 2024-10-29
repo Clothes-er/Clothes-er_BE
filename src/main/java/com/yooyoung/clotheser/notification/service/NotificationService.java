@@ -13,15 +13,12 @@ import com.yooyoung.clotheser.notification.repository.NotificationRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.NOT_FOUND_DEVICE_TOKEN;
-import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.SUCCESS;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
+import static org.springframework.http.HttpStatus.*;
 
-@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -39,22 +36,20 @@ public class NotificationService {
 
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
         Message message = createNotification(notificationRequest);
-
         try {
-            String response = FirebaseMessaging.getInstance().send(message);
-            log.info("FCM send - {}", response);
+            FirebaseMessaging.getInstance().send(message);
             if (isNotChat(notificationRequest.getType())) {
                 saveNotification(notificationRequest);
             }
         } catch (FirebaseMessagingException e) {
-            log.info("FCM except- {}", e.getMessage());
+            throw new BaseException(FCM_ERROR, INTERNAL_SERVER_ERROR);
         }
     }
 
     private Message createNotification(NotificationRequest notificationRequest) throws BaseException {
         String token = notificationRequest.getUser().getDeviceToken();
         if (token == null) {
-            throw new BaseException(NOT_FOUND_DEVICE_TOKEN, HttpStatus.NOT_FOUND);
+            throw new BaseException(NOT_FOUND_DEVICE_TOKEN, NOT_FOUND);
         }
 
         return Message.builder()
