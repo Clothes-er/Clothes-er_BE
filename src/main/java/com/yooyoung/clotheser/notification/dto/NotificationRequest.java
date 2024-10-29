@@ -1,6 +1,6 @@
 package com.yooyoung.clotheser.notification.dto;
 
-import com.yooyoung.clotheser.notification.domain.Notification;
+import com.yooyoung.clotheser.notification.domain.PushNotification;
 import com.yooyoung.clotheser.notification.domain.NotificationType;
 import com.yooyoung.clotheser.user.domain.User;
 import lombok.AccessLevel;
@@ -19,8 +19,8 @@ public class NotificationRequest {
     private String title;
     private String content;
 
-    public Notification toEntity() {
-        return Notification.builder()
+    public PushNotification toEntity() {
+        return PushNotification.builder()
                 .user(user)
                 .type(type)
                 .sourceId(sourceId)
