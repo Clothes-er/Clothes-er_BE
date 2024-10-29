@@ -4,9 +4,13 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.notification.dto.DeviceTokenRequest;
+import com.yooyoung.clotheser.notification.dto.HomeNotificationResponse;
+import com.yooyoung.clotheser.notification.dto.NotificationListResponse;
 import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.user.domain.CustomUserDetails;
+import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,10 +54,36 @@ public class NotificationController {
         }
     }
 
-    // TODO: 홈 화면 알림 확인 여부 조회
+    @Operation(summary = "홈 알림 확인 여부 조회", description = "홈 화면에서 알림 확인 여부를 조회한다.")
+    @GetMapping("/home")
+    public ResponseEntity<BaseResponse<HomeNotificationResponse>> getHomeNotification(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.user;
+        return new ResponseEntity<>(new BaseResponse<>(notificationService.getHomeNotification(user)), OK);
+    }
 
-    // TODO: 알림 목록 조회
+    @Operation(summary = "알림 목록 조회", description = "알림 목록을 조회한다.")
+    @GetMapping("")
+    public ResponseEntity<BaseResponse<NotificationListResponse>> getNotificationList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(notificationService.getNotificationList(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 
-    // TODO: 알림 조회
-
+    @Operation(summary = "알림 읽음 처리", description = "알림을 읽음 처리한다.")
+    @Parameter(name = "notificationId", description = "알림 id", example = "1", required = true)
+    @PatchMapping("/{notificationId}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> readNotification(@PathVariable Long notificationId,
+                                                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(notificationService.readNotification(user, notificationId)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 }

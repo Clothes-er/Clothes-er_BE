@@ -7,14 +7,17 @@ import com.google.firebase.messaging.Notification;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.notification.domain.NotificationType;
-import com.yooyoung.clotheser.notification.dto.DeviceTokenRequest;
-import com.yooyoung.clotheser.notification.dto.NotificationRequest;
+import com.yooyoung.clotheser.notification.domain.PushNotification;
+import com.yooyoung.clotheser.notification.dto.*;
 import com.yooyoung.clotheser.notification.repository.NotificationRepository;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -26,6 +29,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    /* 디바이스 토큰 저장 */
     public BaseResponseStatus saveDeviceToken(User user, DeviceTokenRequest deviceTokenRequest) throws BaseException {
         String deviceToken = deviceTokenRequest.getDeviceToken();
         user.updateDeviceToken(deviceToken);
@@ -34,6 +38,7 @@ public class NotificationService {
         return SUCCESS;
     }
 
+    /* Firebase 푸시 알림 요청 */
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
         String token = notificationRequest.getUser().getDeviceToken();
         if (token == null) {
@@ -72,5 +77,49 @@ public class NotificationService {
 
     private void saveNotification(NotificationRequest notificationRequest) {
         notificationRepository.save(notificationRequest.toEntity());
+    }
+
+    /* 홈 알림 확인 여부 조회 */
+    public HomeNotificationResponse getHomeNotification(User user) {
+        boolean isRead = !notificationRepository.existsByUserIdAndIsReadFalse(user.getId());
+        return new HomeNotificationResponse(isRead);
+    }
+
+    /* 알림 목록 조회 */
+    public NotificationListResponse getNotificationList(User user) throws BaseException {
+        int countOfNotReadNotification = notificationRepository.countByUserIdAndIsReadFalse(user.getId());
+
+        List<PushNotification> notifications = notificationRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
+        List<NotificationResponse> notificationResponseList = new ArrayList<>();
+        for (PushNotification notification : notifications) {
+            String image = getNotificationImage(notification);
+            NotificationResponse response = new NotificationResponse(notification, image);
+            notificationResponseList.add(response);
+        }
+
+        return new NotificationListResponse(countOfNotReadNotification, notificationResponseList);
+    }
+
+    private String getNotificationImage(PushNotification notification) throws BaseException {
+        String image = null;
+        if (notification.getType() == NotificationType.FOLLOW) {
+            User opponent = userRepository.findByIdAndDeletedAtNull(notification.getSourceId())
+                    .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
+            image = opponent.getProfileUrl();
+        }
+        return image;
+    }
+
+    /* 알림 읽음 처리 */
+    public BaseResponseStatus readNotification(User user, Long notificationId) throws BaseException {
+        PushNotification notification = notificationRepository.findByIdAndUserId(notificationId, user.getId())
+                .orElseThrow(() -> new BaseException(NOT_FOUND_NOTIFICATION, NOT_FOUND));
+
+        if (!notification.getIsRead()) {
+            notification.updateIsRead(true);
+            notificationRepository.save(notification);
+        }
+
+        return SUCCESS;
     }
 }

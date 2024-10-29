@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class Notification {
+public class PushNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
@@ -52,4 +52,8 @@ public class Notification {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
     private LocalDateTime updatedAt;
+
+    public void updateIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }
