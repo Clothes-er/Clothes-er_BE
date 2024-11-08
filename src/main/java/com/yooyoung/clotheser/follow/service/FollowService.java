@@ -100,10 +100,36 @@ public class FollowService {
         for (Follow follow : followerList) {
             User follower = follow.getFollower();
             String userSid = aesUtil.encryptUserId(follower.getId());
+            boolean isFollowing = followRepository.existsByFollowerIdAndFolloweeIdAndDeletedAtNull(
+                 user.getId(), follower.getId()
+            );
             FollowListResponse response = FollowListResponse.builder()
                     .userSid(userSid)
                     .nickname(follower.getNickname())
                     .profileUrl(follower.getProfileUrl())
+                    .isFollowing(isFollowing)
+                    .build();
+            responseList.add(response);
+        }
+
+        return responseList;
+    }
+
+    /* 나의 팔로잉 목록 조회 */
+    public List<FollowListResponse> getMyFollowings(User user) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        List<Follow> followerList = followRepository.findAllByFollowerIdAndDeletedAtNull(user.getId());
+        List<FollowListResponse> responseList = new ArrayList<>();
+
+        for (Follow follow : followerList) {
+            User followee = follow.getFollowee();
+            String userSid = aesUtil.encryptUserId(followee.getId());
+            FollowListResponse response = FollowListResponse.builder()
+                    .userSid(userSid)
+                    .nickname(followee.getNickname())
+                    .profileUrl(followee.getProfileUrl())
                     .isFollowing(true)
                     .build();
             responseList.add(response);

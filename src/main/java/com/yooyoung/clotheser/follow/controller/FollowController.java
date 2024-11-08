@@ -65,4 +65,16 @@ public class FollowController {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
         }
     }
+
+    @Operation(summary = "나의 팔로잉 목록 조회", description = "나의 팔로잉 목록을 조회한다.")
+    @GetMapping("/followings")
+    public ResponseEntity<BaseResponse<List<FollowListResponse>>> getMyFollowings(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(followService.getMyFollowings(user)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
 }
