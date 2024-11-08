@@ -162,12 +162,12 @@ public class AdminService {
                 userRepository.save(reportee);
 
                 String message = "신고가 접수되어 유예 상태가 되었습니다.";
-                sendFCMNotification(reportee, message);
+                sendFCMNotification(reportee, message, NotificationType.REPORT);
 
                 // 신고자에게는 최초 신고 처리만 푸시 알림 전송
                 if (report.getAction() == null) {
                     message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님이 유예 상태가 되었습니다.";
-                    sendFCMNotification(reporter, message);
+                    sendFCMNotification(reporter, message, NotificationType.REPORT);
                 }
             }
             case RESTRICTED -> {
@@ -182,12 +182,13 @@ public class AdminService {
                 userRepository.save(reportee);
 
                 String message = "신고가 접수되어 이용이 제한되었습니다.";
-                sendFCMNotification(reportee, message);
+                sendFCMNotification(reportee, message, NotificationType.REPORT_NO_URL);
+                // TODO: 신고 당한 유저에게 이메일 발송
 
                 // 신고자에게는 최초 신고 처리만 푸시 알림 전송
                 if (report.getAction() == null) {
                     message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님이 이용 제한되었습니다.";
-                    sendFCMNotification(reporter, message);
+                    sendFCMNotification(reporter, message, NotificationType.REPORT);
                 }
             }
             case DOCKED -> {
@@ -195,19 +196,19 @@ public class AdminService {
                 userRepository.save(reportee);
 
                 String message = "신고가 접수되어 옷장 점수가 차감되었습니다.";
-                sendFCMNotification(reportee, message);
+                sendFCMNotification(reportee, message, NotificationType.REPORT);
 
                 // 신고자에게는 최초 신고 처리만 푸시 알림 전송
                 if (report.getAction() == null) {
                     message = "신고 내용 검토 결과 " + reportee.getNickname() + " 님의 옷장 점수가 차감되었습니다.";
-                    sendFCMNotification(reporter, message);
+                    sendFCMNotification(reporter, message, NotificationType.REPORT);
                 }
             }
             case IGNORED -> {
                 // 신고자에게는 최초 신고 처리만 푸시 알림 전송
                 if (report.getAction() == null) {
                     String message = "신고 내용 검토 결과 신고가 반려되었습니다.";
-                    sendFCMNotification(reporter, message);
+                    sendFCMNotification(reporter, message, NotificationType.REPORT);
                 }
             }
         }
@@ -219,10 +220,10 @@ public class AdminService {
         return SUCCESS;
     }
 
-    private void sendFCMNotification(User user, String message) throws BaseException {
+    private void sendFCMNotification(User user, String message, NotificationType type) throws BaseException {
         NotificationRequest notificationRequest = NotificationRequest.builder()
                 .user(user)
-                .type(NotificationType.REPORT)
+                .type(type)
                 .image("https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/%EB%A1%9C%EA%B3%A0+256x256.png")
                 .title("신고")
                 .content(message)
