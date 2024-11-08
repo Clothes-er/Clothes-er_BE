@@ -8,7 +8,6 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
 import com.yooyoung.clotheser.user.domain.*;
@@ -223,13 +222,7 @@ public class UserService {
         }
 
         // 조회하려는 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
         User owner = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
@@ -427,13 +420,7 @@ public class UserService {
         }
 
         // 신고하려는 회원 불러오기 (자신도 가능)
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(reportRequest.getUserSid());
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(reportRequest.getUserSid());
         User reportee = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 

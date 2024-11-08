@@ -50,13 +50,7 @@ public class UserChatService {
         }
 
         // 문의 대상 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
 
         // 본인인 경우 채팅방 생성 X
         if (user.getId().equals(userId)) {

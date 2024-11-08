@@ -269,13 +269,7 @@ public class AdminService {
     /* 거래 중인 채팅방 목록 조회 */
     public List<RentalChatRoomListResponse> getRentedChatRoomList(String userSid) throws BaseException {
         // 조회하려는 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
         User reportee = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
