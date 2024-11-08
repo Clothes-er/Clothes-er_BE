@@ -1,6 +1,7 @@
 package com.yooyoung.clotheser.follow.service;
 
 import com.yooyoung.clotheser.follow.domain.Follow;
+import com.yooyoung.clotheser.follow.dto.FollowListResponse;
 import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
@@ -13,6 +14,9 @@ import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.*;
 import static org.springframework.http.HttpStatus.*;
@@ -83,5 +87,28 @@ public class FollowService {
         followRepository.save(follow);
 
         return SUCCESS;
+    }
+
+    /* 나의 팔로워 목록 조회 */
+    public List<FollowListResponse> getMyFollowers(User user) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
+
+        List<Follow> followerList = followRepository.findAllByFolloweeIdAndDeletedAtNull(user.getId());
+        List<FollowListResponse> responseList = new ArrayList<>();
+
+        for (Follow follow : followerList) {
+            User follower = follow.getFollower();
+            String userSid = aesUtil.encryptUserId(follower.getId());
+            FollowListResponse response = FollowListResponse.builder()
+                    .userSid(userSid)
+                    .nickname(follower.getNickname())
+                    .profileUrl(follower.getProfileUrl())
+                    .isFollowing(true)
+                    .build();
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 }

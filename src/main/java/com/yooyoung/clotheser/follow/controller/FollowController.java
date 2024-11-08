@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.follow.controller;
 
+import com.yooyoung.clotheser.follow.dto.FollowListResponse;
 import com.yooyoung.clotheser.follow.service.FollowService;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponse;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -45,6 +48,18 @@ public class FollowController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(followService.deleteFollowing(user, userSid)), OK);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "나의 팔로워 목록 조회", description = "나의 팔로워 목록을 조회한다.")
+    @GetMapping("/followers")
+    public ResponseEntity<BaseResponse<List<FollowListResponse>>> getMyFollowers(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(followService.getMyFollowers(user)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
