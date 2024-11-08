@@ -17,7 +17,6 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.notification.domain.NotificationType;
 import com.yooyoung.clotheser.notification.dto.NotificationRequest;
 import com.yooyoung.clotheser.notification.service.NotificationService;
@@ -101,17 +100,8 @@ public class AdminService {
         List<Report> reports = reportRepository.findAllByOrderByIdDesc();
         List<ReportListResponse> responses = new ArrayList<>();
         for (Report report : reports) {
-
             Long reporteeId = report.getReportee().getId();
-
-            // 유저 id 암호화
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(reporteeId));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(reporteeId);
 
             // 거래중 여부 확인
             boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
@@ -132,13 +122,7 @@ public class AdminService {
         Long reporteeId = report.getReportee().getId();
 
         // 유저 id 암호화
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(reporteeId));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(reporteeId);
 
         // 거래중 여부 확인
         boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
@@ -287,13 +271,7 @@ public class AdminService {
             }
 
             // 상대방의 id 암호화하기
-            String opponentSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
-                opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String opponentSid = aesUtil.encryptUserId(opponent.getId());
 
             // 채팅방의 최근 메시지 불러오기
             Optional<ChatMessage> optionalMessage = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());

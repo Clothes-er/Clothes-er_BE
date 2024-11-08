@@ -8,7 +8,6 @@ import com.yooyoung.clotheser.review.dto.TextReviewResponse;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
 import com.yooyoung.clotheser.rental.domain.RentalState;
 import com.yooyoung.clotheser.rental.repository.RentalInfoRepository;
@@ -142,16 +141,7 @@ public class ReviewService {
         for (Review review : reviews) {
             // 받은 텍스트 후기
             if (review.getContent() != null && !review.getContent().isBlank()) {
-
-                // 리뷰 작성자 id 암호화하기
-                String userSid;
-                try {
-                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()));
-                    userSid = Base64UrlSafeUtil.encode(encodedUserId);
-                } catch (Exception e) {
-                    throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-                }
-
+                String userSid = aesUtil.encryptUserId(review.getReviewer().getId());
                 TextReviewResponse textReviewResponse = new TextReviewResponse(userSid, review);
                 textReviews.add(textReviewResponse);
             }
@@ -195,16 +185,7 @@ public class ReviewService {
         for (Review review : reviews) {
             // 받은 텍스트 후기
             if (review.getContent() != null && !review.getContent().isBlank()) {
-
-                // 리뷰 작성자 id 암호화하기
-                String reviewerSid;
-                try {
-                    String encodedUserId = aesUtil.encrypt(String.valueOf(review.getReviewer().getId()));
-                    reviewerSid = Base64UrlSafeUtil.encode(encodedUserId);
-                } catch (Exception e) {
-                    throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-                }
-
+                String reviewerSid = aesUtil.encryptUserId(review.getReviewer().getId());
                 TextReviewResponse textReviewResponse = new TextReviewResponse(reviewerSid, review);
                 textReviews.add(textReviewResponse);
             }
