@@ -5,6 +5,9 @@ import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
+import com.yooyoung.clotheser.notification.domain.NotificationType;
+import com.yooyoung.clotheser.notification.dto.NotificationRequest;
+import com.yooyoung.clotheser.notification.service.NotificationService;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import static org.springframework.http.HttpStatus.*;
 @RequiredArgsConstructor
 public class FollowService {
     private final AESUtil aesUtil;
+    private final NotificationService notificationService;
     private final FollowRepository followRepository;
     private final UserRepository userRepository;
 
@@ -48,7 +52,22 @@ public class FollowService {
                 .build();
         followRepository.save(follow);
 
+        sendFCMNotification(follower, followee);
+
         return SUCCESS;
+    }
+
+    private void sendFCMNotification(User follower, User followee) throws BaseException {
+        String message = follower.getNickname() + " 님이 회원 님을 팔로우하였습니다.";
+        NotificationRequest notificationRequest = NotificationRequest.builder()
+                .user(followee)
+                .type(NotificationType.FOLLOW)
+                .image(follower.getProfileUrl())
+                .sourceId(follower.getId())
+                .title("팔로우")
+                .content(message)
+                .build();
+        notificationService.sendNotification(notificationRequest);
     }
 
     /* 팔로우 삭제 */

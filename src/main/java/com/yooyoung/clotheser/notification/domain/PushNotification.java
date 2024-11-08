@@ -55,5 +55,6 @@ public class PushNotification {
 
     public void updateIsRead(boolean isRead) {
         this.isRead = isRead;
+        this.updatedAt = LocalDateTime.now();
     }
 }
