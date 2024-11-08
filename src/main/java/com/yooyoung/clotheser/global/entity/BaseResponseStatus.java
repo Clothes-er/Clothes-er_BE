@@ -84,6 +84,10 @@ public enum BaseResponseStatus {
     FORBIDDEN_LIKE_MINE(false, 2500, "작성자 본인은 찜할 수 없습니다."),
     LIKE_EXISTS(false, 2501, "이미 찜한 옷입니다."),
 
+    // 7. Follow (2600 ~ 2699)
+    FORBIDDEN_FOLLOW_MYSELF(false, 2600, "자기 자신은 팔로우할 수 없습니다."),
+    FOLLOW_EXISTS(false, 2601, "이미 팔로우하고 있는 회원입니다."),
+
     /*
         3000 : Response 오류
     */
