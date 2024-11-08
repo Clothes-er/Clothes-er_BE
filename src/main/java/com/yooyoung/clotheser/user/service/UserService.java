@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.yooyoung.clotheser.admin.domain.Report;
 import com.yooyoung.clotheser.admin.repository.ReportRepository;
+import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.jwt.JwtProvider;
@@ -52,6 +53,7 @@ public class UserService {
     private final FavStyleRepository favStyleRepository;
     private final RentalInfoRepository rentalInfoRepository;
     private final ReportRepository reportRepository;
+    private final FollowRepository followRepository;
 
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
@@ -135,11 +137,7 @@ public class UserService {
 
     /* 최초 로그인 */
     public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest, User user) throws BaseException {
-
-        // 최초 로그인이 맞는지 확인
-        if (!user.getIsFirstLogin()) {
-            throw new BaseException(IS_NOT_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 주소, 성별, 키, 몸무게, 발 사이즈 추가
         User updatedUser = user.firstLogin(firstLoginRequest);
@@ -189,12 +187,8 @@ public class UserService {
     }
 
     /* 내 프로필 조회 */
-    public UserProfileResponse getMyProfile(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+    public ProfileResponse getMyProfile(User user) throws BaseException {
+        user.checkIsFirstLogin();
 
         // 체형, 카테고리, 스타일 추가
         List<String> bodyShapes = bodyShapeRepository.findAllByUserId(user.getId())
@@ -210,16 +204,12 @@ public class UserService {
                 .map(FavStyle::getStyle)
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        return new UserProfileResponse(user, bodyShapes, categories, styles);
+        return new ProfileResponse(user, bodyShapes, categories, styles);
     }
 
     /* 다른 회원의 프로필 조회 */
     public UserProfileResponse getProfile(User user, String userSid) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
 
         // 조회하려는 회원 불러오기
         Long userId = aesUtil.decryptUserSid(userSid);
@@ -240,65 +230,42 @@ public class UserService {
                 .map(FavStyle::getStyle)
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        return new UserProfileResponse(owner, bodyShapes, categories, styles);
+        ProfileResponse profile = new ProfileResponse(owner, bodyShapes, categories, styles);
+        boolean isFollowing = followRepository.existsByFollowerIdAndFolloweeIdAndDeletedAtNull(
+                user.getId(), owner.getId()
+        );
+
+        return new UserProfileResponse(profile, isFollowing);
     }
 
     /* 회원 정보 조회 */
     public UserInfoResponse getUserInfo(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
+        user.checkIsFirstLogin();
         return new UserInfoResponse(user);
     }
 
     /* 주소 조회 */
     public AddressResponse getAddress(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
+        user.checkIsFirstLogin();
         return new AddressResponse(user);
 
     }
 
     /* 주소 수정 */
     public AddressResponse updateAddress(User user, AddressRequest addressRequest) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
-
-        // 수정한 주소로 DB에 저장
         User updatedUser = user.updateAddress(addressRequest.getLatitude(), addressRequest.getLongitude());
         userRepository.save(updatedUser);
 
         return new AddressResponse(updatedUser);
-
     }
 
     /* 프로필 수정 (프로필 사진 + 닉네임) */
     public PatchUserProfileReponse updateProfile(User user, MultipartFile profileImage, String nickname) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 1. 프로필 사진 수정
         // 기존 이미지 S3에서 삭제
@@ -344,17 +311,9 @@ public class UserService {
     }
 
     /* 스펙 및 취향 수정 */
-    public UserProfileResponse updateStyle(User user, UserStyleRequest userStyleRequest) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+    public ProfileResponse updateStyle(User user, UserStyleRequest userStyleRequest) throws BaseException {
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 새로운 스펙으로 수정
         User updatedUser = user.updateSpec(userStyleRequest);
@@ -403,21 +362,13 @@ public class UserService {
             }
         }
 
-        return new UserProfileResponse(user, bodyShapes, categories, styles);
+        return new ProfileResponse(user, bodyShapes, categories, styles);
     }
 
     /* 회원 신고 */
     public BaseResponseStatus reportUser(User user, ReportRequest reportRequest) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 신고하려는 회원 불러오기 (자신도 가능)
         Long userId = aesUtil.decryptUserSid(reportRequest.getUserSid());
@@ -434,16 +385,8 @@ public class UserService {
 
     /* 회원 탈퇴 */
     public BaseResponseStatus withdrawUser(User user) throws BaseException {
-
-        // 최초 로그인이 아닌지 확인
-        if (user.getIsFirstLogin()) {
-            throw new BaseException(REQUEST_FIRST_LOGIN, FORBIDDEN);
-        }
-
-        // 유예된 회원 확인
-        if (user.getIsSuspended()) {
-            throw new BaseException(USE_RESTRICTED, FORBIDDEN);
-        }
+        user.checkIsFirstLogin();
+        user.checkIsSuspended();
 
         // 거래 중인지 확인
         boolean isRented = rentalInfoRepository.existsByBuyerIdAndStateOrLenderIdAndState(
