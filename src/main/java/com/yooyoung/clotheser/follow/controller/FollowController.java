@@ -12,17 +12,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/follows")
-@Tag(name = "Follows", description = "팔로우 API")
+@Tag(name = "Follow", description = "팔로우 API")
 public class FollowController {
     private final FollowService followService;
 
@@ -34,6 +31,20 @@ public class FollowController {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(followService.createFollowing(user, userSid)), CREATED);
+        }
+        catch (BaseException exception) {
+            return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());
+        }
+    }
+
+    @Operation(summary = "팔로우 삭제", description = "특정 유저 팔로우를 취소한다.")
+    @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
+    @DeleteMapping("/{userSid}")
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> deleteFollowing(@PathVariable("userSid") String userSid,
+                                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.user;
+            return new ResponseEntity<>(new BaseResponse<>(followService.deleteFollowing(user, userSid)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

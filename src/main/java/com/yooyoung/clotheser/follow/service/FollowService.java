@@ -5,7 +5,6 @@ import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +27,7 @@ public class FollowService {
         follower.checkIsFirstLogin();
         follower.checkIsSuspended();
 
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
-
+        Long userId = aesUtil.decryptUserSid(userSid);
         User followee = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
@@ -54,6 +46,21 @@ public class FollowService {
                 .follower(follower)
                 .followee(followee)
                 .build();
+        followRepository.save(follow);
+
+        return SUCCESS;
+    }
+
+    /* 팔로우 삭제 */
+    public BaseResponseStatus deleteFollowing(User follower, String userSid) throws BaseException {
+        follower.checkIsFirstLogin();
+        follower.checkIsSuspended();
+
+        Long followeeId = aesUtil.decryptUserSid(userSid);
+        Follow follow = followRepository.findOneByFollowerIdAndFolloweeIdAndDeletedAtNull(follower.getId(), followeeId)
+                .orElseThrow(() -> new BaseException(NOT_FOUND_FOLLOW, NOT_FOUND));
+
+        follow.delete();
         followRepository.save(follow);
 
         return SUCCESS;

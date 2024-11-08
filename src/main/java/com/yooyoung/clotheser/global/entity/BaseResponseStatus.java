@@ -118,6 +118,9 @@ public enum BaseResponseStatus {
     // 7. Notification
     NOT_FOUND_NOTIFICATION(false, 3600, "해당 알림을 찾을 수 없습니다."),
 
+    // 8. Follow
+    NOT_FOUND_FOLLOW(false, 3700, "팔로우를 찾을 수 없습니다."),
+
     /*
         4000 : Database, Server 오류
     */
