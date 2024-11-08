@@ -1,4 +1,4 @@
-package com.yooyoung.clotheser.notification.domain;
+package com.yooyoung.clotheser.follow.domain;
 
 import com.yooyoung.clotheser.user.domain.User;
 import jakarta.persistence.*;
@@ -11,14 +11,14 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Builder
+@Getter
 @DynamicUpdate
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class PushNotification {
+public class Follow {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
@@ -26,23 +26,11 @@ public class PushNotification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
-    private User user;
+    private User follower;
 
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    private NotificationType type;
-
-    private Long sourceId;
-
-    @Column(nullable = false, length = 20)
-    private String title;
-
-    @Column(nullable = false)
-    private String content;
-
-    @Column(nullable = false, columnDefinition = "TINYINT(1)")
-    @ColumnDefault("false")
-    @Builder.Default
-    private Boolean isRead = false;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private User followee;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @CreatedDate
@@ -51,10 +39,10 @@ public class PushNotification {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @ColumnDefault("null")
-    private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 
-    public void updateIsRead(boolean isRead) {
-        this.isRead = isRead;
-        this.updatedAt = LocalDateTime.now();
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
     }
+
 }

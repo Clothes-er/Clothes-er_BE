@@ -10,7 +10,6 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.ChatRoomException;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.user.domain.User;
 import com.yooyoung.clotheser.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +49,7 @@ public class UserChatService {
         }
 
         // 문의 대상 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.valueOf(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
 
         // 본인인 경우 채팅방 생성 X
         if (user.getId().equals(userId)) {
@@ -106,13 +99,7 @@ public class UserChatService {
             }
 
             // 상대방의 id 암호화하기
-            String opponentSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
-                opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String opponentSid = aesUtil.encryptUserId(opponent.getId());
 
             // 채팅방의 최근 메시지 불러오기
             Optional<ChatMessage> optionalMessage = chatMessageRepository.findFirstByRoomIdOrderByCreatedAtDesc(chatRoom.getId());
@@ -160,13 +147,7 @@ public class UserChatService {
         }
 
         // 상대방의 id 암호화하기
-        String opponentSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
-            opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String opponentSid = aesUtil.encryptUserId(opponent.getId());
 
         return new UserChatRoomResponse(chatRoom.getId(), opponentSid, opponent, chatMessageResponseList);
     }

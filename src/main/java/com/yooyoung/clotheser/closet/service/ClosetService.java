@@ -11,7 +11,6 @@ import com.yooyoung.clotheser.clothes.repository.ClothesLikeRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.domain.RentalImg;
 import com.yooyoung.clotheser.rental.domain.RentalInfo;
@@ -75,13 +74,7 @@ public class ClosetService {
         user.checkIsFirstLogin();
 
         // 조회하려는 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
         User owner = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
@@ -132,13 +125,7 @@ public class ClosetService {
         user.checkIsFirstLogin();
 
         // 조회하려는 회원 불러오기
-        Long userId;
-        try {
-            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
-            userId = Long.parseLong(aesUtil.decrypt(base64DecodedUserId));
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
-        }
+        Long userId = aesUtil.decryptUserSid(userSid);
         User owner = userRepository.findByIdAndDeletedAtNull(userId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
 
@@ -190,13 +177,7 @@ public class ClosetService {
             }
 
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(rental.getUser().getId());
 
             // 대여자 구하기
             User buyer = rentalInfo.getBuyer();
@@ -245,13 +226,7 @@ public class ClosetService {
             }
 
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(rental.getUser().getId());
 
             // 작성자 구하기
             User writer = rental.getUser();
@@ -285,13 +260,7 @@ public class ClosetService {
         List<LikeClothesListResponse> responses = new ArrayList<>();
         for (Clothes clothes : myLikeClothes) {
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(clothes.getUser().getId());
 
             // 첫 번째 이미지 불러오기
             Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());
@@ -314,13 +283,7 @@ public class ClosetService {
         List<LikeRentalListResponse> responses = new ArrayList<>();
         for (Rental rental : myLikeRentals) {
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(rental.getUser().getId());
 
             // 첫 번째 이미지 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());

@@ -9,7 +9,6 @@ import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.dto.*;
 import com.yooyoung.clotheser.rental.dto.request.RentalCheckRequest;
@@ -139,13 +138,7 @@ public class RentalService {
         }
 
         // 본인의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(user.getId());
 
         boolean isLiked = false;
         int likeCount = 0;
@@ -178,13 +171,7 @@ public class RentalService {
         }
 
         // 대여글 작성자의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(rental.getUser().getId());
 
         boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rentalId);
         int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
@@ -205,13 +192,7 @@ public class RentalService {
         List<RentalListResponse> responses = new ArrayList<>();
         for (Rental rental : rentalList) {
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(rental.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(rental.getUser().getId());
 
             // 첫 번째 이미지 불러오기
             Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
@@ -407,13 +388,7 @@ public class RentalService {
         }
 
         // 본인의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(user.getId());
 
         boolean isLiked = false;
         int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);

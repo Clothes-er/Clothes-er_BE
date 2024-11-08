@@ -1,5 +1,6 @@
 package com.yooyoung.clotheser.global.util;
 
+import com.yooyoung.clotheser.global.entity.BaseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,10 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Base64;
+
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.FAIL_TO_DECRYPT;
+import static com.yooyoung.clotheser.global.entity.BaseResponseStatus.FAIL_TO_ENCRYPT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Component
 public class AESUtil {
@@ -81,5 +86,27 @@ public class AESUtil {
 
         byte[] decryptedText = cipher.doFinal(encryptedText);
         return new String(decryptedText);
+    }
+
+    /* 회원 id 암호화 */
+    public String encryptUserId(Long userId) throws BaseException {
+        try {
+            String encodedUserId = encrypt(String.valueOf(userId));
+            return Base64UrlSafeUtil.encode(encodedUserId);
+        }
+        catch (Exception e) {
+            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /* 암호화된 회원 id 복호화 */
+    public Long decryptUserSid(String userSid) throws BaseException {
+        try {
+            String base64DecodedUserId = Base64UrlSafeUtil.decode(userSid);
+            return Long.parseLong(decrypt(base64DecodedUserId));
+        }
+        catch (Exception e) {
+            throw new BaseException(FAIL_TO_DECRYPT, INTERNAL_SERVER_ERROR);
+        }
     }
 }

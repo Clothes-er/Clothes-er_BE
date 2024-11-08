@@ -13,7 +13,6 @@ import com.yooyoung.clotheser.global.entity.BaseException;
 
 import com.yooyoung.clotheser.global.entity.ChatRoomException;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 import com.yooyoung.clotheser.rental.domain.*;
 import com.yooyoung.clotheser.rental.repository.*;
 import com.yooyoung.clotheser.review.repository.ReviewRepository;
@@ -86,13 +85,7 @@ public class RentalChatService {
         chatRoomRepository.save(chatRoom);
 
         // 판매자의 id 암호화하기
-        String lenderSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(chatRoom.getLender().getId()));
-            lenderSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String lenderSid = aesUtil.encryptUserId(chatRoom.getLender().getId());
 
         // 첫 번째 이미지 불러오기
         Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(rental.getId());
@@ -133,13 +126,7 @@ public class RentalChatService {
             }
 
             // 상대방의 id 암호화하기
-            String opponentSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
-                opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String opponentSid = aesUtil.encryptUserId(opponent.getId());
 
             // 대여 상태 불러오기
             RentalInfo rentalInfo = rentalInfoRepository.findFirstByBuyerIdAndLenderIdAndRentalIdOrderByRentalTimeDesc(
@@ -198,13 +185,7 @@ public class RentalChatService {
         }
 
         // 상대방의 id 암호화하기
-        String opponentSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(opponent.getId()));
-            opponentSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String opponentSid = aesUtil.encryptUserId(opponent.getId());
 
         // 첫 번째 이미지 불러오기
         Optional<RentalImg> optionalImg = rentalImgRepository.findFirstByRentalId(chatRoom.getRental().getId());

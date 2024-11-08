@@ -14,7 +14,6 @@ import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
 import com.yooyoung.clotheser.global.util.AESUtil;
-import com.yooyoung.clotheser.global.util.Base64UrlSafeUtil;
 
 import com.yooyoung.clotheser.rental.domain.Rental;
 import com.yooyoung.clotheser.rental.dto.response.NoRentalClothesListResponse;
@@ -108,13 +107,7 @@ public class ClothesService {
         List<String> imgUrls = clothesImageService.uploadClothesImages(images, clothes);
 
         // 본인의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(user.getId());
 
         boolean isLiked = false;
         int likeCount = 0;
@@ -136,13 +129,7 @@ public class ClothesService {
                 .toList();
 
         // 보유 옷 등록자의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(clothes.getUser().getId());
 
         boolean isLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(user.getId(), clothesId);
         int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
@@ -200,13 +187,7 @@ public class ClothesService {
         clothesRepository.save(updatedClothes);
 
         // 본인의 id 암호화하기
-        String userSid;
-        try {
-            String encodedUserId = aesUtil.encrypt(String.valueOf(user.getId()));
-            userSid = Base64UrlSafeUtil.encode(encodedUserId);
-        } catch (Exception e) {
-            throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-        }
+        String userSid = aesUtil.encryptUserId(user.getId());
 
         boolean isLiked = false;
         int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
@@ -259,13 +240,7 @@ public class ClothesService {
         List<ClothesListResponse> responses = new ArrayList<>();
         for (Clothes clothes : clothesList) {
             // userId 암호화하기
-            String userSid;
-            try {
-                String encodedUserId = aesUtil.encrypt(String.valueOf(clothes.getUser().getId()));
-                userSid = Base64UrlSafeUtil.encode(encodedUserId);
-            } catch (Exception e) {
-                throw new BaseException(FAIL_TO_ENCRYPT, INTERNAL_SERVER_ERROR);
-            }
+            String userSid = aesUtil.encryptUserId(clothes.getUser().getId());
 
             // 첫 번째 이미지 불러오기
             Optional<ClothesImg> optionalImg = clothesImgRepository.findFirstByClothesId(clothes.getId());

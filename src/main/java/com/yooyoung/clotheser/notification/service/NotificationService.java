@@ -40,17 +40,21 @@ public class NotificationService {
 
     /* Firebase 푸시 알림 요청 */
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
+        // 알림 목록에 저장
+        if (isNotChat(notificationRequest.getType())) {
+            saveNotification(notificationRequest);
+        }
+
+        // 디바이스 토큰이 없으면 알림만 저장
         String token = notificationRequest.getUser().getDeviceToken();
         if (token == null) {
             return;
         }
 
+        // 푸시 알림 전송
         Message message = createNotification(notificationRequest, token);
         try {
             FirebaseMessaging.getInstance().send(message);
-            if (isNotChat(notificationRequest.getType())) {
-                saveNotification(notificationRequest);
-            }
         } catch (FirebaseMessagingException e) {
             throw new BaseException(FCM_ERROR, INTERNAL_SERVER_ERROR);
         }
