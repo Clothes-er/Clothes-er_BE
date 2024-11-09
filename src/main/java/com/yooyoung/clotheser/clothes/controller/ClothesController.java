@@ -41,7 +41,7 @@ public class ClothesController {
     private final ClothesService clothesService;
     private final RentalService rentalService;
 
-    /* 보유 옷이 없는 나의 대여글 목록 조회 (보유 옷 생성 전 사용) */
+    // 보유 옷 생성 전 사용
     @Operation(summary = "보유 옷이 없는 나의 대여글 목록 조회", description = "보유 옷 등록 전에 보유 옷이 없는 나의 대여글 목록을 조회한다.")
     @GetMapping("/my-rentals")
     public ResponseEntity<BaseResponse<List<UserRentalListResponse>>> getMyNoClothesRentals(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -54,7 +54,6 @@ public class ClothesController {
         }
     }
 
-    /* 보유 옷 생성 */
     @Operation(summary = "보유 옷 생성", description = "보유 옷을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<BaseResponse<BaseResponseStatus>> createClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
@@ -86,7 +85,6 @@ public class ClothesController {
         }
     }
 
-    /* 보유 옷 조회 */
     @Operation(summary = "보유 옷 조회", description = "보유 옷의 상세 정보를 조회한다.")
     @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
     @GetMapping("/{clothesId}")
@@ -101,7 +99,6 @@ public class ClothesController {
         }
     }
 
-    /* 보유 옷 수정 */
     @Operation(summary = "보유 옷 수정", description = "보유 옷을 수정한다.")
     @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
     @PutMapping(value = "/{clothesId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -135,7 +132,6 @@ public class ClothesController {
         }
     }
 
-    /* 보유 옷 삭제 */
     @Operation(summary = "보유 옷 삭제", description = "보유 옷을 삭제한다.")
     @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
     @DeleteMapping("/{clothesId}")
@@ -150,7 +146,6 @@ public class ClothesController {
         }
     }
 
-    /* 보유 옷 목록 조회 */
     @Operation(summary = "보유 옷 목록 조회", description = "회원의 성별, 카테고리, 스타일 유사도 기준으로 보유 옷 목록을 조회한다.")
     @Parameters({
             @Parameter(name = "search", description = "상품명을 기준으로 대소문자 구분 없이 검색한다.", example = "블라우스"),
@@ -160,10 +155,11 @@ public class ClothesController {
             @Parameter(name = "maxHeight", description = "최대 키를 기준으로 필터링한다.", example = "165"),
             @Parameter(name = "age", description = "나이대를 기준으로 필터링한다. (중복 가능)"),
             @Parameter(name = "category", description = "카테고리를 기준으로 필터링한다. (중복 가능)", example = "[\"셔츠\"]"),
-            @Parameter(name = "style", description = "스타일을 기준으로 필터링한다. (중복 가능)", example = "[\"러블리\"]")
+            @Parameter(name = "style", description = "스타일을 기준으로 필터링한다. (중복 가능)", example = "[\"러블리\"]"),
+            @Parameter(name = "isFollowing", description = "팔로잉 여부", required = true, example = "false")
     })
     @GetMapping("")
-    public ResponseEntity<BaseResponse<List<ClothesListResponse>>> getClothes(
+    public ResponseEntity<BaseResponse<List<ClothesListResponse>>> getClothesList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sort,
@@ -172,12 +168,13 @@ public class ClothesController {
             @RequestParam(required = false) Integer maxHeight,
             @RequestParam(required = false) List<AgeFilter> age,
             @RequestParam(required = false) List<String> category,
-            @RequestParam(required = false) List<String> style
+            @RequestParam(required = false) List<String> style,
+            @RequestParam boolean isFollowing
     ) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(clothesService.getClothesList(user, search, sort, gender,
-                    minHeight, maxHeight, age, category, style)), OK);
+                    minHeight, maxHeight, age, category, style, isFollowing)), OK);
         }
         catch (BaseException exception) {
             return new ResponseEntity<>(new BaseResponse<>(exception.getStatus()), exception.getHttpStatus());

@@ -222,15 +222,16 @@ public class ClothesService {
         return SUCCESS;
     }
 
-    /* 보유 옷 목록 조회 */
-    public List<ClothesListResponse> getClothesList(User user, String search, String sort, List<Gender> gender,
-                                                    Integer minHeight, Integer maxHeight, List<AgeFilter> age,
-                                                    List<String> category, List<String> style) throws BaseException {
+    /* 보유 옷 목록 조회 (전체 또는 팔로잉) */
+    public List<ClothesListResponse> getClothesList(User user, String search, String sort,
+                                                    List<Gender> gender, Integer minHeight, Integer maxHeight,
+                                                    List<AgeFilter> age, List<String> category, List<String> style,
+                                                    boolean isFollowing) throws BaseException {
         user.checkIsFirstLogin();
 
         // 필터링된 보유 옷 목록 조회
         List<Clothes> clothesList = clothesFilterService.getFilteredClothesList(user, search, sort, gender,
-                minHeight, maxHeight, age, category, style);
+                minHeight, maxHeight, age, category, style, isFollowing);
 
         List<ClothesListResponse> responses = new ArrayList<>();
         for (Clothes clothes : clothesList) {
@@ -245,7 +246,6 @@ public class ClothesService {
         }
 
         return responses;
-
     }
 
     /* 보유 옷 찜 생성 */
