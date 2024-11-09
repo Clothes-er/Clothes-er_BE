@@ -168,7 +168,7 @@ public class RentalService {
         String userSid = aesUtil.encryptUserId(writerId);
         int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
         boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(userId, rentalId);
-        boolean isWriter = rental.getUser().getId().equals(userId);
+        boolean isWriter = writerId.equals(userId);
         boolean isFollowing = !isWriter && followRepository.existsByFollowerIdAndFolloweeIdAndDeletedAtNull(
                 userId, writerId
         );

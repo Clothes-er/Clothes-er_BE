@@ -57,7 +57,7 @@ public class ClothesController {
     /* 보유 옷 생성 */
     @Operation(summary = "보유 옷 생성", description = "보유 옷을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<ClothesResponse>> createClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> createClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
                                                                        BindingResult bindingResult,
                                                                        @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -105,7 +105,7 @@ public class ClothesController {
     @Operation(summary = "보유 옷 수정", description = "보유 옷을 수정한다.")
     @Parameter(name = "clothesId", description = "보유 옷 id", example = "1", required = true)
     @PutMapping(value = "/{clothesId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<ClothesResponse>> updateClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> updateClothes(@Valid @RequestPart("clothes") ClothesRequest clothesRequest,
                                                                      BindingResult bindingResult,
                                                                      @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                      @PathVariable Long clothesId,

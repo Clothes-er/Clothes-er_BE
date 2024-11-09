@@ -3,7 +3,6 @@ package com.yooyoung.clotheser.clothes.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.user.domain.Gender;
-import com.yooyoung.clotheser.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import lombok.AccessLevel;
@@ -35,6 +34,9 @@ public class ClothesResponse {
 
     @Schema(title = "작성자 여부", example = "false")
     private Boolean isWriter;
+
+    @Schema(title = "팔로잉 여부", example = "false")
+    private Boolean isFollowing;
 
     @Schema(title = "작성자 유예 여부", example = "false")
     private Boolean isSuspended;
@@ -95,15 +97,16 @@ public class ClothesResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime updatedAt;
 
-    public ClothesResponse(User user, String userSid, Clothes clothes, List<String> imgUrls,
-                           boolean isLiked, int likeCount) {
+    public ClothesResponse(String userSid, boolean isWriter, Clothes clothes, List<String> imgUrls,
+                           boolean isLiked, int likeCount, boolean isFollowing) {
         this.id = clothes.getId();
         this.rentalId = clothes.getRentalId();
 
         this.userSid = userSid;
         this.profileUrl = clothes.getUser().getProfileUrl();
         this.nickname = clothes.getUser().getNickname();
-        this.isWriter = clothes.getUser().getId().equals(user.getId());
+        this.isWriter = isWriter;
+        this.isFollowing = isFollowing;
         this.isSuspended = clothes.getUser().getIsSuspended();
         this.isRestricted = clothes.getUser().getIsRestricted();
         this.isWithdrawn = clothes.getUser().getDeletedAt() != null;
@@ -129,6 +132,4 @@ public class ClothesResponse {
         this.createdAt = clothes.getCreatedAt();
         this.updatedAt = clothes.getUpdatedAt();
     }
-    
-    
 }
