@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface FollowRepository extends JpaRepository<Follow, Long> {
     boolean existsByFollowerIdAndFolloweeIdAndDeletedAtNull(Long followerId, Long followeeId);
     Optional<Follow> findOneByFollowerIdAndFolloweeIdAndDeletedAtNull(Long followerId, Long followeeId);
-    List<Follow> findAllByFolloweeIdAndDeletedAtNull(Long followeeId);
-    List<Follow> findAllByFollowerIdAndDeletedAtNull(Long followerId);
+    List<Follow> findAllByFolloweeIdAndDeletedAtNullOrderByCreatedAtDesc(Long followeeId);
+    List<Follow> findAllByFollowerIdAndDeletedAtNullOrderByCreatedAtDesc(Long followerId);
 }

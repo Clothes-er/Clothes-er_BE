@@ -55,7 +55,7 @@ public class RentalController {
 
     @Operation(summary = "대여글 생성", description = "대여글을 생성한다.")
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<RentalResponse>> createRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> createRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                      BindingResult bindingResult,
                                                                      @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                      @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -211,7 +211,7 @@ public class RentalController {
     @Operation(summary = "대여글 수정", description = "대여글을 수정한다.")
     @Parameter(name = "rentalId", description = "대여글 id", example = "1", required = true)
     @PutMapping(value = "/{rentalId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<BaseResponse<RentalResponse>> updateRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
+    public ResponseEntity<BaseResponse<BaseResponseStatus>> updateRental(@Valid @RequestPart("post") RentalRequest rentalRequest,
                                                                          BindingResult bindingResult,
                                                                          @RequestPart(value = "images", required = false) MultipartFile[] images,
                                                                          @PathVariable Long rentalId,

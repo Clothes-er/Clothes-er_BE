@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.domain.QClothes;
+import com.yooyoung.clotheser.follow.domain.QFollow;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.user.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +25,13 @@ public class ClothesFilterService {
     private final JPAQueryFactory queryFactory;
 
     /* 보유 옷 목록 필터링 */
-    public List<Clothes> getFilteredClothesList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
-                                                Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) {
+    public List<Clothes> getFilteredClothesList(User user, String search, String sort, List<Gender> gender,
+                                                Integer minHeight, Integer maxHeight, List<AgeFilter> age,
+                                                List<String> category, List<String> style, boolean isFollowing) {
 
         QClothes qClothes = QClothes.clothes;
         QUser qUser = QUser.user;
+        QFollow qFollow = QFollow.follow;
 
         // 기본적인 쿼리
         JPAQuery<Clothes> query = queryFactory.selectFrom(qClothes)
@@ -39,6 +42,14 @@ public class ClothesFilterService {
                 .where(qUser.isRestricted.isFalse())
                 .where(qUser.deletedAt.isNull())
                 .where(qClothes.user.ne(user));
+
+        // 팔로잉하는 옷장 여부
+        if (isFollowing) {
+            query.leftJoin(qFollow).on(
+                        qFollow.followee.eq(qUser).and(qFollow.follower.eq(user))
+                    )
+                    .where(qFollow.follower.eq(user));
+        }
 
         // 검색
         if (search != null && !search.isEmpty()) {

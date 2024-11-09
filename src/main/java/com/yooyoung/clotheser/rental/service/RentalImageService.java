@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,12 +36,10 @@ public class RentalImageService {
     private final RentalImgRepository rentalImgRepository;
 
     /* 대여글 이미지 저장 */
-    public List<String> uploadImages(MultipartFile[] images, Rental rental) throws BaseException {
-        List<String> imgUrls = new ArrayList<>();
-
+    public void uploadImages(MultipartFile[] images, Rental rental) throws BaseException {
         // 대여글 이미지 없는 경우 (1: Swaager, 2: Postman)
         if (images.length == 0 || images[0].isEmpty()) {
-            return null;
+            return;
         }
 
         try {
@@ -58,8 +55,6 @@ public class RentalImageService {
                 String imgUrl = amazonS3.getUrl(bucket, fileName).toString();
                 String decodedUrl = URLDecoder.decode(imgUrl, StandardCharsets.UTF_8);  // 한글로 변환
 
-                imgUrls.add(decodedUrl);
-
                 // 데이터베이스에 이미지 URL 저장
                 RentalImg rentalImg = RentalImg.builder()
                         .imgUrl(decodedUrl)
@@ -71,8 +66,6 @@ public class RentalImageService {
         } catch (IOException e) {
             throw new BaseException(S3_UPLOAD_ERROR, INTERNAL_SERVER_ERROR);
         }
-
-        return imgUrls;
     }
 
     /* 대여글 이미지 삭제 */

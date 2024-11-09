@@ -244,7 +244,7 @@ public class UserController {
 
     @Operation(summary = "내 프로필 조회", description = "나의 프로필을 조회한다.")
     @GetMapping("/profile")
-    public ResponseEntity<BaseResponse<UserProfileResponse>> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<BaseResponse<ProfileResponse>> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(userService.getMyProfile(user)), OK);
@@ -258,7 +258,7 @@ public class UserController {
     @Parameter(name = "userSid", description = "암호화된 회원 id", example = "M0h1QXdzUlVzNkRwckdUeUEvbjVQZz09", required = true)
     @GetMapping("/profile/{userSid}")
     public ResponseEntity<BaseResponse<UserProfileResponse>> getProfile(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                        @PathVariable String userSid) {
+                                                                    @PathVariable String userSid) {
         try {
             User user = userDetails.user;
             return new ResponseEntity<>(new BaseResponse<>(userService.getProfile(user, userSid)), OK);
@@ -341,9 +341,9 @@ public class UserController {
 
     @Operation(summary = "스펙 및 취향 수정", description = "회원의 스펙과 취향을 수정한다.")
     @PatchMapping("/style")
-    public ResponseEntity<BaseResponse<UserProfileResponse>> updateStyle(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                         @Valid @RequestBody UserStyleRequest userStyleRequest,
-                                                                         BindingResult bindingResult) {
+    public ResponseEntity<BaseResponse<ProfileResponse>> updateStyle(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                     @Valid @RequestBody UserStyleRequest userStyleRequest,
+                                                                     BindingResult bindingResult) {
         try {
             User user = userDetails.user;
 

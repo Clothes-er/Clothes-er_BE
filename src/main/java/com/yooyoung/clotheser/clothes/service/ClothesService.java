@@ -10,6 +10,7 @@ import com.yooyoung.clotheser.clothes.repository.ClothesImgRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesLikeRepository;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
 
+import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
@@ -46,6 +47,7 @@ public class ClothesService {
     private final ClothesImgRepository clothesImgRepository;
     private final ClothesLikeRepository clothesLikeRepository;
     private final RentalRepository rentalRepository;
+    private final FollowRepository followRepository;
 
     /* 대여글이 없는 나의 보유 옷 목록 조회 */
     public List<NoRentalClothesListResponse> getMyNoRentalClothes(User user) throws BaseException {
@@ -67,7 +69,8 @@ public class ClothesService {
     }
 
     /* 보유 옷 생성 */
-    public ClothesResponse createClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user) throws BaseException {
+    public BaseResponseStatus createClothes(ClothesRequest clothesRequest,
+                                            MultipartFile[] images, User user) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
@@ -103,16 +106,9 @@ public class ClothesService {
             rentalRepository.save(updatedRental);
         }
 
-        // 보유 옷 이미지 저장
-        List<String> imgUrls = clothesImageService.uploadClothesImages(images, clothes);
+        clothesImageService.uploadClothesImages(images, clothes);
 
-        // 본인의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(user.getId());
-
-        boolean isLiked = false;
-        int likeCount = 0;
-
-        return new ClothesResponse(user, userSid, clothes, imgUrls, isLiked, likeCount);
+        return SUCCESS;
     }
 
     /* 보유 옷 조회 */
@@ -128,17 +124,23 @@ public class ClothesService {
                 .map(ClothesImg::getImgUrl)
                 .toList();
 
-        // 보유 옷 등록자의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(clothes.getUser().getId());
+        Long userId = user.getId();
+        Long writerId = clothes.getUser().getId();
 
-        boolean isLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(user.getId(), clothesId);
+        String userSid = aesUtil.encryptUserId(writerId);
         int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
+        boolean isLiked = clothesLikeRepository.existsByUserIdAndClothesIdAndDeletedAtNull(userId, clothesId);
+        boolean isWriter = writerId.equals(userId);
+        boolean isFollowing = !isWriter && followRepository.existsByFollowerIdAndFolloweeIdAndDeletedAtNull(
+                userId, writerId
+        );
 
-        return new ClothesResponse(user, userSid, clothes, imgUrls, isLiked, likeCount);
+        return new ClothesResponse(userSid, isWriter, clothes, imgUrls, isLiked, likeCount, isFollowing);
     }
 
     /* 보유 옷 수정 */
-    public ClothesResponse updateClothes(ClothesRequest clothesRequest, MultipartFile[] images, User user, Long clothesId) throws BaseException {
+    public BaseResponseStatus updateClothes(ClothesRequest clothesRequest,
+                                            MultipartFile[] images, User user, Long clothesId) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
@@ -156,7 +158,6 @@ public class ClothesService {
         Long newRentalId = clothesRequest.getRentalId();
         Rental newRental = null;
         if (newRentalId != null && newRentalId > 0) {
-            // 대여글 존재 확인
             newRental = rentalRepository.findByIdAndDeletedAtNull(newRentalId)
                     .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
@@ -180,20 +181,13 @@ public class ClothesService {
         // 보유 옷 이미지 변경
         List<ClothesImg> clothesImgs = clothesImgRepository.findAllByClothesId(clothesId);
         clothesImageService.deleteClothesImages(clothesImgs);
-        List<String> imgUrls = clothesImageService.uploadClothesImages(images, clothes);
+        clothesImageService.uploadClothesImages(images, clothes);
 
         // 보유 옷 수정
         Clothes updatedClothes = clothes.updateClothes(clothesRequest, user);
         clothesRepository.save(updatedClothes);
 
-        // 본인의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(user.getId());
-
-        boolean isLiked = false;
-        int likeCount = clothesLikeRepository.countByClothesIdAndDeletedAtNull(clothesId);
-
-        return new ClothesResponse(user, userSid, updatedClothes, imgUrls, isLiked, likeCount);
-
+        return SUCCESS;
     }
 
     /* 보유 옷 삭제 */
@@ -228,14 +222,16 @@ public class ClothesService {
         return SUCCESS;
     }
 
-    /* 보유 옷 목록 조회 */
-    public List<ClothesListResponse> getClothesList(User user, String search, String sort, List<Gender> gender, Integer minHeight,
-                                                   Integer maxHeight, List<AgeFilter> age, List<String> category, List<String> style) throws BaseException {
+    /* 보유 옷 목록 조회 (전체 또는 팔로잉) */
+    public List<ClothesListResponse> getClothesList(User user, String search, String sort,
+                                                    List<Gender> gender, Integer minHeight, Integer maxHeight,
+                                                    List<AgeFilter> age, List<String> category, List<String> style,
+                                                    boolean isFollowing) throws BaseException {
         user.checkIsFirstLogin();
 
         // 필터링된 보유 옷 목록 조회
         List<Clothes> clothesList = clothesFilterService.getFilteredClothesList(user, search, sort, gender,
-                minHeight, maxHeight, age, category, style);
+                minHeight, maxHeight, age, category, style, isFollowing);
 
         List<ClothesListResponse> responses = new ArrayList<>();
         for (Clothes clothes : clothesList) {
@@ -250,7 +246,6 @@ public class ClothesService {
         }
 
         return responses;
-
     }
 
     /* 보유 옷 찜 생성 */

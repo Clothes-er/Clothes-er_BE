@@ -94,7 +94,7 @@ public class FollowService {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
-        List<Follow> followerList = followRepository.findAllByFolloweeIdAndDeletedAtNull(user.getId());
+        List<Follow> followerList = followRepository.findAllByFolloweeIdAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
         List<FollowListResponse> responseList = new ArrayList<>();
 
         for (Follow follow : followerList) {
@@ -120,7 +120,7 @@ public class FollowService {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
-        List<Follow> followerList = followRepository.findAllByFollowerIdAndDeletedAtNull(user.getId());
+        List<Follow> followerList = followRepository.findAllByFollowerIdAndDeletedAtNullOrderByCreatedAtDesc(user.getId());
         List<FollowListResponse> responseList = new ArrayList<>();
 
         for (Follow follow : followerList) {

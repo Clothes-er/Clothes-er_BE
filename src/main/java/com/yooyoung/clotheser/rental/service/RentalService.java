@@ -5,6 +5,7 @@ import com.yooyoung.clotheser.chat.repository.ChatRoomRepository;
 import com.yooyoung.clotheser.closet.dto.UserRentalListResponse;
 import com.yooyoung.clotheser.clothes.domain.Clothes;
 import com.yooyoung.clotheser.clothes.repository.ClothesRepository;
+import com.yooyoung.clotheser.follow.repository.FollowRepository;
 import com.yooyoung.clotheser.global.entity.AgeFilter;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
@@ -56,6 +57,7 @@ public class RentalService {
     private final UserRepository userRepository;
     private final RentalCheckRepository rentalCheckRepository;
     private final ClothesRepository clothesRepository;
+    private final FollowRepository followRepository;
 
     /* 보유 옷이 없는 나의 대여글 목록 조회 */
     public List<UserRentalListResponse> getMyNoClothesRentals(User user) throws BaseException {
@@ -88,7 +90,7 @@ public class RentalService {
     }
 
     /* 대여글 생성 */
-    public RentalResponse createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
+    public BaseResponseStatus createRental(RentalRequest rentalRequest, MultipartFile[] images, User user) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
 
@@ -125,7 +127,7 @@ public class RentalService {
         }
 
         // 대여글 이미지들 저장
-        List<String> imgUrls = rentalImageService.uploadImages(images, rental);
+        rentalImageService.uploadImages(images, rental);
 
         // 대여글 가격표 생성
         for (int i = 0; i < rentalRequest.getPrices().size(); i++) {
@@ -137,46 +139,41 @@ public class RentalService {
             rentalPriceRepository.save(rentalPrice);
         }
 
-        // 본인의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(user.getId());
-
-        boolean isLiked = false;
-        int likeCount = 0;
-
-        return new RentalResponse(user, userSid, rental, imgUrls, rentalRequest.getPrices(), isLiked, likeCount);
-
+        return SUCCESS;
     }
 
     /* 대여글 조회 */
     public RentalResponse getRental(Long rentalId, User user) throws BaseException {
         user.checkIsFirstLogin();
-        
-        // 대여글 존재 확인
+
         Rental rental = rentalRepository.findByIdAndDeletedAtNull(rentalId)
                 .orElseThrow(() -> new BaseException(NOT_FOUND_RENTAL, NOT_FOUND));
 
         // 대여글 이미지들 url 불러오기
-        List<String> imgUrls = new ArrayList<>();
-        List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
-
-        for (RentalImg rentalImg : rentalImgs) {
-            imgUrls.add(rentalImg.getImgUrl());
-        }
+        List<RentalImg> rentalImgList = rentalImgRepository.findByRentalId(rentalId);
+        List<String> imgUrls = rentalImgList.stream()
+                .map(RentalImg::getImgUrl)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         // 기간이 적은 순으로 가격 정보 불러오기
-        List<RentalPriceDto> prices = new ArrayList<>();
         List<RentalPrice> rentalPrices = rentalPriceRepository.findAllByRentalIdOrderByDays(rentalId);
+        List<RentalPriceDto> prices = new ArrayList<>();
         for (RentalPrice rentalPrice : rentalPrices) {
             prices.add(new RentalPriceDto(rentalPrice.getDays(), rentalPrice.getPrice()));
         }
 
-        // 대여글 작성자의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(rental.getUser().getId());
+        Long userId = user.getId();
+        Long writerId = rental.getUser().getId();
 
-        boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(user.getId(), rentalId);
+        String userSid = aesUtil.encryptUserId(writerId);
         int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
+        boolean isLiked = rentalLikeRepository.existsByUserIdAndRentalIdAndDeletedAtNull(userId, rentalId);
+        boolean isWriter = writerId.equals(userId);
+        boolean isFollowing = !isWriter && followRepository.existsByFollowerIdAndFolloweeIdAndDeletedAtNull(
+                userId, writerId
+        );
 
-        return new RentalResponse(user, userSid, rental, imgUrls, prices, isLiked, likeCount);
+        return new RentalResponse(userSid, isWriter, rental, imgUrls, prices, isLiked, likeCount, isFollowing);
     }
 
     /* 대여글 목록 조회 */
@@ -321,7 +318,7 @@ public class RentalService {
     }
 
     /* 대여글 수정 */
-    public RentalResponse updateRental(RentalRequest rentalRequest, MultipartFile[] images,
+    public BaseResponseStatus updateRental(RentalRequest rentalRequest, MultipartFile[] images,
                                        User user, Long rentalId) throws BaseException {
         user.checkIsFirstLogin();
         user.checkIsSuspended();
@@ -369,7 +366,7 @@ public class RentalService {
         // 대여글 이미지들 삭제 후 저장
         List<RentalImg> rentalImgs = rentalImgRepository.findByRentalId(rentalId);
         rentalImageService.deleteImages(rentalImgs);
-        List<String> imgUrls = rentalImageService.uploadImages(images, updatedRental);
+        rentalImageService.uploadImages(images, updatedRental);
 
         // 대여글 가격 삭제
         List<Long> rentalPriceIds = rentalPriceRepository.findAllByRentalIdOrderByDays(rentalId).stream()
@@ -387,13 +384,7 @@ public class RentalService {
             rentalPriceRepository.save(rentalPrice);
         }
 
-        // 본인의 id 암호화하기
-        String userSid = aesUtil.encryptUserId(user.getId());
-
-        boolean isLiked = false;
-        int likeCount = rentalLikeRepository.countByRentalIdAndDeletedAtNull(rentalId);
-
-        return new RentalResponse(user, userSid, updatedRental, imgUrls, rentalRequest.getPrices(), isLiked, likeCount);
+        return SUCCESS;
     }
 
     /* 대여글 삭제 */
