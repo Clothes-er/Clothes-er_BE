@@ -210,13 +210,14 @@ public class AdminService {
                 .type(type)
                 .image("https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/%EB%A1%9C%EA%B3%A0+256x256.png")
                 .title("신고")
+                .sourceId("")
                 .content(message)
                 .build();
         notificationService.sendNotification(notificationRequest);
     }
 
     /* 회원 목록 조회 */
-    public List<UserListResponse> getUserList (String search) throws BaseException {
+    public List<UserListResponse> getUserList(String search) throws BaseException {
         // 유저 목록 불러오기
         List<User> users;
         if (search != null && !search.isEmpty()) {
