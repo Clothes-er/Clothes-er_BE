@@ -25,8 +25,8 @@ public class NotificationResponse {
     @Schema(title = "알림 종류")
     private NotificationType type;
 
-    @Schema(title = "알림 출처 id", example = "1", description = "null / 팔로워 id")
-    private Long sourceId;
+    @Schema(title = "알림 출처 id", example = "1", description = "null / 암호화된 팔로워 id")
+    private String sourceId;
 
     @Schema(title = "알림 확인 여부", example = "false")
     private Boolean isRead;

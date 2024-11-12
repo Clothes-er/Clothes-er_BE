@@ -31,7 +31,7 @@ public class PushNotification {
     @Column(nullable = false, columnDefinition = "TINYINT(1)")
     private NotificationType type;
 
-    private Long sourceId;
+    private String sourceId;
 
     @Column(nullable = false, length = 20)
     private String title;

@@ -216,7 +216,7 @@ public class AdminService {
     }
 
     /* 회원 목록 조회 */
-    public List<UserListResponse> getUserList (String search) throws BaseException {
+    public List<UserListResponse> getUserList(String search) throws BaseException {
         // 유저 목록 불러오기
         List<User> users;
         if (search != null && !search.isEmpty()) {
