@@ -48,7 +48,8 @@ public class ClothesFilterService {
             query.leftJoin(qFollow).on(
                         qFollow.followee.eq(qUser).and(qFollow.follower.eq(user))
                     )
-                    .where(qFollow.follower.eq(user));
+                    .where(qFollow.follower.eq(user))
+                    .where(qFollow.deletedAt.isNull());
         }
 
         // 검색
