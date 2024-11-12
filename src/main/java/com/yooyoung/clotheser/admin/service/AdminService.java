@@ -210,7 +210,6 @@ public class AdminService {
                 .type(type)
                 .image("https://clotheser-s3-bucket.s3.ap-northeast-2.amazonaws.com/%EB%A1%9C%EA%B3%A0+256x256.png")
                 .title("신고")
-                .sourceId("")
                 .content(message)
                 .build();
         notificationService.sendNotification(notificationRequest);

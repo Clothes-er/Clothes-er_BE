@@ -73,7 +73,7 @@ public class NotificationService {
                                 .build()
                 )
                 .putData("type", notificationRequest.getType().name())
-                .putData("sourceId", notificationRequest.getSourceId())
+                .putData("sourceId", String.valueOf(notificationRequest.getSourceId())) // null은 감싸서 전달 필요
                 .build();
     }
 
