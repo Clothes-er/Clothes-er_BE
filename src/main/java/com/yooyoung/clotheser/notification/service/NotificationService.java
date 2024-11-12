@@ -6,6 +6,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import com.yooyoung.clotheser.global.entity.BaseException;
 import com.yooyoung.clotheser.global.entity.BaseResponseStatus;
+import com.yooyoung.clotheser.global.util.AESUtil;
 import com.yooyoung.clotheser.notification.domain.NotificationType;
 import com.yooyoung.clotheser.notification.domain.PushNotification;
 import com.yooyoung.clotheser.notification.dto.*;
@@ -26,6 +27,7 @@ import static org.springframework.http.HttpStatus.*;
 @Transactional
 @RequiredArgsConstructor
 public class NotificationService {
+    private final AESUtil aesUtil;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
@@ -71,7 +73,7 @@ public class NotificationService {
                                 .build()
                 )
                 .putData("type", notificationRequest.getType().name())
-                .putData("sourceId", String.valueOf(notificationRequest.getSourceId()))
+                .putData("sourceId", notificationRequest.getSourceId())
                 .build();
     }
 
@@ -107,7 +109,8 @@ public class NotificationService {
     private String getNotificationImage(PushNotification notification) throws BaseException {
         String image = null;
         if (notification.getType() == NotificationType.FOLLOW) {
-            User opponent = userRepository.findByIdAndDeletedAtNull(notification.getSourceId())
+            Long userId = aesUtil.decryptUserSid(notification.getSourceId());
+            User opponent = userRepository.findByIdAndDeletedAtNull(userId)
                     .orElseThrow(() -> new BaseException(NOT_FOUND_USER, NOT_FOUND));
             image = opponent.getProfileUrl();
         }

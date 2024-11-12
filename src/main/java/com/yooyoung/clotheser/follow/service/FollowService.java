@@ -63,11 +63,12 @@ public class FollowService {
 
     private void sendFCMNotification(User follower, User followee) throws BaseException {
         String message = follower.getNickname() + " 님이 회원 님을 팔로우하였습니다.";
+        String userSid = aesUtil.encryptUserId(follower.getId());
         NotificationRequest notificationRequest = NotificationRequest.builder()
                 .user(followee)
                 .type(NotificationType.FOLLOW)
                 .image(follower.getProfileUrl())
-                .sourceId(follower.getId())
+                .sourceId(userSid)
                 .title("팔로우")
                 .content(message)
                 .build();

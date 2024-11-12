@@ -15,7 +15,7 @@ public class NotificationRequest {
     private User user;
     private NotificationType type;
     private String image;
-    private Long sourceId;
+    private String sourceId;
     private String title;
     private String content;
 
