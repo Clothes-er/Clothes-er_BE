@@ -43,8 +43,9 @@ public class NotificationService {
     /* Firebase 푸시 알림 요청 */
     public void sendNotification(NotificationRequest notificationRequest) throws BaseException {
         // 알림 목록에 저장
+        Long notificationId = null;
         if (isNotChat(notificationRequest.getType())) {
-            saveNotification(notificationRequest);
+            notificationId = saveNotification(notificationRequest);
         }
 
         // 디바이스 토큰이 없으면 알림만 저장
@@ -54,7 +55,7 @@ public class NotificationService {
         }
 
         // 푸시 알림 전송
-        Message message = createNotification(notificationRequest, token);
+        Message message = createNotification(notificationRequest, token, notificationId);
         try {
             FirebaseMessaging.getInstance().send(message);
         } catch (FirebaseMessagingException e) {
@@ -62,7 +63,7 @@ public class NotificationService {
         }
     }
 
-    private Message createNotification(NotificationRequest notificationRequest, String token) {
+    private Message createNotification(NotificationRequest notificationRequest, String token, Long notificationId) {
         return Message.builder()
                 .setToken(token)
                 .setNotification(
@@ -74,6 +75,7 @@ public class NotificationService {
                 )
                 .putData("type", notificationRequest.getType().name())
                 .putData("sourceId", String.valueOf(notificationRequest.getSourceId())) // null은 감싸서 전달 필요
+                .putData("notificationId", String.valueOf(notificationId))
                 .build();
     }
 
@@ -81,8 +83,9 @@ public class NotificationService {
         return type != NotificationType.RENTAL_CHAT && type != NotificationType.USER_CHAT;
     }
 
-    private void saveNotification(NotificationRequest notificationRequest) {
-        notificationRepository.save(notificationRequest.toEntity());
+    private Long saveNotification(NotificationRequest notificationRequest) {
+        PushNotification pushNotification = notificationRepository.save(notificationRequest.toEntity());
+        return pushNotification.getId();
     }
 
     /* 홈 알림 확인 여부 조회 */
