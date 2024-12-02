@@ -137,7 +137,10 @@ public class UserService {
 
     /* 최초 로그인 */
     public FirstLoginResponse firstLogin(FirstLoginRequest firstLoginRequest, User user) throws BaseException {
-        user.checkIsFirstLogin();
+        // 최초 로그인이 맞는지 확인
+        if (!user.getIsFirstLogin()) {
+            throw new BaseException(IS_NOT_FIRST_LOGIN, FORBIDDEN);
+        }
 
         // 주소, 성별, 키, 몸무게, 발 사이즈 추가
         User updatedUser = user.firstLogin(firstLoginRequest);
