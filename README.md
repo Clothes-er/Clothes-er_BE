@@ -54,6 +54,16 @@
 
 ## 💜 기능별 기술적 구현
 
+### 📍 회원가입 및 로그인
+- **유효성 검사**를 진행하여 유저가 바로 수정할 수 있게 함
+- 거래 신뢰를 위한 **이메일 인증** 및 **휴대폰 인증**
+- **최초 로그인 시** 사용자의 정보를 선택적으로 입력받아 서비스 이용을 위한 기본 설정을 세팅
+
+<img src="https://github.com/user-attachments/assets/72ddbda6-da3b-4212-9826-2da5ed863b72" width="30%" />
+<img src="https://github.com/user-attachments/assets/653616c1-9f2e-40dc-933c-2118419aaf8a" width="30%" />
+
+<br/><br/>
+
 ### 📍 공유 옷장 (홈 화면)
 
 - **Kakao 주소 API**를 활용하여 사용자의 위치 기반으로 반경 2km 이내 의류 대여글 제공
@@ -61,7 +71,11 @@
 - **대여글 작성 및 채팅 이동**
 - **신고 기능 구현**: 부적절한 게시글 작성 유저 신고 가능, 관리자가 검토 후 조치
 
-<br/>
+<img src="https://github.com/user-attachments/assets/b9ce9665-acc8-4a3d-b132-24bb850f2092" width="30%" />
+<img src="https://github.com/user-attachments/assets/0331b4d8-4384-488b-9007-da2b9e8352f1" width="29%" />
+<img src="https://github.com/user-attachments/assets/8aa25a67-47b6-42f3-9014-d07678af7c44" width="29%" />
+
+<br/><br/>
 
 ### 📍 채팅 기능
 
@@ -72,14 +86,18 @@
 - **거래 상태 변경 가능**: 대여자가 체크리스트를 작성하면 판매자가 거래 상태 변경 가능 (대여중 또는 대여 완료)
 - **거래 후기 작성 기능**: 신뢰도 확보를 위한 거래 평가 시스템 구축
 
-<br/>
+<img src="https://github.com/user-attachments/assets/bed58db0-fabb-4baa-941c-f4003bdb1aac" width="60%" />
+<img src="https://github.com/user-attachments/assets/a51c42f7-6a0b-4877-9246-679046213595" width="29%" />
+<br/><br/>
 
 ### 📍 옷장 구경
 
 - **사용자가 입력한 신체, 취향 정보를 기반으로 유사도를 매겨 다른 사람의 보유 옷 노출**
 - **팔로우 기능 및 팔로잉하는 유저의 게시글 모아보기 기능 구현**
 
-<br/>
+<img src="https://github.com/user-attachments/assets/44fcd3a7-dbd5-48d3-a5a9-aab943487406" width="30%" />
+
+<br/><br/>
 
 ### 📍 나의 옷장
 
@@ -90,19 +108,30 @@
 - **대여글 및 보유 옷 찜 조회**
 - 의류 대여 횟수에 따른 서비스 레벨 제공
 
-<br/>
+<img src="https://github.com/user-attachments/assets/30b536e8-dbbd-4ffe-a271-91e77ef306eb" width="30%" />
+<img src="https://github.com/user-attachments/assets/73a9a1ff-6bb1-45c0-8c8b-3cddf7461bae" width="30%" />
+<img src="https://github.com/user-attachments/assets/f7981f41-2f75-469f-8782-9a94cab492a6" width="30%" />
+
+<br/><br/>
 
 ### 📍 푸시 알림
 
 - **FCM 연동**하여 **채팅, 팔로우, 신고 등** 관련 알림 시스템 구축
 
-<br/>
+<img src="https://github.com/user-attachments/assets/310480a3-6700-4817-be8a-25d244923dae" width="30.7%" />
+<img src="https://github.com/user-attachments/assets/2dc38bad-1b69-4f98-9e5d-59925fe1cda1" width="31%" />
+<img src="https://github.com/user-attachments/assets/cd47ee05-400a-4ef5-9171-58f385760164" width="31%" />
+
+<br/><br/>
 
 ### 📍 관리자 페이지
 
 - **대여글, 보유 옷, 채팅에서 들어온 신고 내역 처리** (유예, 이용 제한, 점수 삭감, 무시)
 - **전체 회원의 정보를 열람하고, 사용자 검토 후 조치 가능**
 - 사용자 거래 내역 및 채팅 확인 가능
+
+<img src="https://github.com/user-attachments/assets/3eeeebe4-fb04-4edc-858e-e582d9b4acc4" width="90%" /><br/>
+<img src="https://github.com/user-attachments/assets/e7545cfe-a249-48e6-94ea-ec5e4075a168" width="90%" />
 
 <br/><br/>
 
@@ -122,6 +151,6 @@
 
 👨‍💻 **백엔드 (Spring Boot 🌱) : 조세영**
 
-| [![](https://github.com//yyypearl.png?width=200px)](https://github.com/yyypearl) | [![](https://github.com///ilu25.png?width=200px)](https://github.com//ilu25)|
+| <img src="https://github.com//yyypearl.png" width=200px alt="유진주"/> | <img src="https://github.com//ilu25.png" width=200px alt="조세영"/> |
 |:---:|:---:|
 | 유진주(FE) | 조세영(BE) |
